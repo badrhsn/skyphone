@@ -23,11 +23,19 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
-    } else if (status === "authenticated") {
-      // Redirect to dialer as the main page
-      router.push("/dashboard/dialer");
+    } else if (status === "authenticated" && session?.user) {
+      // Check if user is admin first
+      const isAdmin = session.user.isAdmin || session.user.email === 'admin@yadaphone.com';
+      
+      if (isAdmin) {
+        // Redirect admin users to admin panel
+        router.push("/admin");
+      } else {
+        // Redirect regular users to dialer
+        router.push("/dashboard/dialer");
+      }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   const fetchUserData = async () => {
     try {

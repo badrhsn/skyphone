@@ -144,9 +144,18 @@ export default function RatesPage() {
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Calculate Your Call Cost
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 mb-4">
             Check our competitive international calling rates
           </p>
+          <div className="flex justify-center">
+            <Link 
+              href="/rates/all"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm font-medium"
+            >
+              <Globe className="h-4 w-4" />
+              <span>View All {rates.length}+ Countries & Rates</span>
+            </Link>
+          </div>
         </div>
 
         {/* Enterprise Banner */}

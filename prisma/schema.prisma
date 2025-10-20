@@ -85,6 +85,7 @@ model CallRate {
   id          String  @id @default(cuid())
   country     String
   countryCode String
+  flag        String? // Country flag emoji
   rate        Float   // per minute
   currency    String  @default("USD")
   isActive    Boolean @default(true)
@@ -118,9 +119,42 @@ enum CallStatus {
   CANCELLED
 }
 
+model CallAnalytics {
+  id            String   @id @default(cuid())
+  phoneNumber   String
+  countryCode   String?
+  provider      String   // twilio, telnyx, vonage
+  status        CallAnalyticsStatus
+  callSid       String?
+  failureReason String?
+  responseTime  Int?     // milliseconds
+  createdAt     DateTime @default(now())
+
+  @@index([provider])
+  @@index([countryCode])
+  @@index([createdAt])
+}
+
+model ProviderStatus {
+  id              String   @id @default(cuid())
+  provider        String   @unique
+  isActive        Boolean  @default(true)
+  successRate     Float    @default(100.0) // percentage
+  avgResponseTime Int      @default(0) // milliseconds
+  lastChecked     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
   CANCELLED
+}
+
+enum CallAnalyticsStatus {
+  SUCCESS
+  FAILOVER_SUCCESS  
+  FAILOVER_FAILED
+  FAILED
 }

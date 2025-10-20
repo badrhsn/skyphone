@@ -21,18 +21,21 @@ interface Rate {
 // Dialer Component
 function PhoneDialer() {
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("United States");
-  const [countryCode, setCountryCode] = useState("+1");
+  const [selectedCountry, setSelectedCountry] = useState({ name: "United States", flag: "🇺🇸", code: "+1" });
   const [isDialing, setIsDialing] = useState(false);
   const [callStatus, setCallStatus] = useState<"idle" | "dialing" | "connected" | "ended">("idle");
   const [userBalance, setUserBalance] = useState<number>(0);
-  const { data: session } = useSession();
+  const [countrySearch, setCountrySearch] = useState("");
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countries, setCountries] = useState<{ name: string; flag: string; code: string }[]>([]);
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (session) {
+    if (session && status === "authenticated") {
       fetchUserBalance();
     }
-  }, [session]);
+  }, [session, status]);
 
   const fetchUserBalance = async () => {
     try {
@@ -46,16 +49,62 @@ function PhoneDialer() {
     }
   };
 
-  const countries = [
-    { name: "United States", code: "+1", flag: "🇺🇸" },
-    { name: "United Kingdom", code: "+44", flag: "🇬🇧" },
-    { name: "Germany", code: "+49", flag: "🇩🇪" },
-    { name: "France", code: "+33", flag: "🇫🇷" },
-    { name: "Canada", code: "+1", flag: "🇨🇦" },
-    { name: "Australia", code: "+61", flag: "🇦🇺" },
-    { name: "Japan", code: "+81", flag: "🇯🇵" },
-    { name: "India", code: "+91", flag: "🇮🇳" },
-  ];
+  // Fetch countries from API
+  useEffect(() => {
+    fetchCountries();
+  }, []);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Check if click is outside the country dropdown
+      if (showCountryDropdown && !target.closest('[data-country-dropdown]')) {
+        setShowCountryDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCountryDropdown]);
+
+  const fetchCountries = async () => {
+    setIsLoadingCountries(true);
+    try {
+      const response = await fetch("/api/rates");
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Create countries from rates using flags from database
+        const uniqueCountries = new Map<string, { name: string; flag: string; code: string }>();
+        data.forEach((rate: any) => {
+          if (!uniqueCountries.has(rate.country)) {
+            const flag = rate.flag || "�"; // Use flag from database, fallback to earth emoji
+            uniqueCountries.set(rate.country, {
+              name: rate.country,
+              flag: flag,
+              code: rate.countryCode
+            });
+          }
+        });
+        
+        const countriesArray = Array.from(uniqueCountries.values()).sort((a, b) => 
+          a.name.localeCompare(b.name)
+        );
+        
+        if (countriesArray.length > 0) {
+          setCountries(countriesArray);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    } finally {
+      setIsLoadingCountries(false);
+    }
+  };
 
   const dialerButtons = [
     { number: "1", letters: "" },
@@ -91,8 +140,9 @@ function PhoneDialer() {
   };
 
   const handleCountryChange = (country: typeof countries[0]) => {
-    setSelectedCountry(country.name);
-    setCountryCode(country.code);
+    setSelectedCountry(country);
+    setShowCountryDropdown(false);
+    setCountrySearch('');
   };
 
   const startCall = async () => {
@@ -108,7 +158,7 @@ function PhoneDialer() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: `${countryCode}${phoneNumber}`,
+          to: `${selectedCountry.code}${phoneNumber}`,
           from: "+1234567890", // Default caller ID
         }),
       });
@@ -145,8 +195,6 @@ function PhoneDialer() {
     }, 1000);
   };
 
-  const selectedCountryData = countries.find(c => c.name === selectedCountry) || countries[0];
-
   return (
     <div className="bg-blue-50 rounded-3xl p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md shadow-2xl border border-blue-200 backdrop-blur-lg">
       {/* Balance */}
@@ -164,29 +212,26 @@ function PhoneDialer() {
         </div>
       </div>
 
-      {/* Country Selector and Phone Input */}
-      <div className="mb-3 sm:mb-4">
-        <div className="flex items-center space-x-2 mb-2 sm:mb-3">
-          <select 
-            value={selectedCountry}
-            onChange={(e) => {
-              const country = countries.find(c => c.name === e.target.value);
-              if (country) handleCountryChange(country);
-            }}
-            className="flex-1 border-0 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none bg-white/80 backdrop-blur-sm shadow-lg font-medium"
+      {/* Integrated Country Selector and Phone Input */}
+      <div className="mb-3 sm:mb-4 relative">
+        <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden">
+          {/* Country Selector Button */}
+          <button
+            type="button"
+            onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+            className="flex items-center space-x-2 px-3 sm:px-4 py-3 sm:py-4 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-gray-200"
             disabled={callStatus !== "idle"}
+            data-country-dropdown="button"
           >
-            {countries.map((country) => (
-              <option key={country.name} value={country.name}>
-                {country.flag} {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="flex items-center space-x-2 sm:space-x-3 bg-white/80 backdrop-blur-sm rounded-2xl px-3 sm:px-4 py-3 sm:py-4 shadow-lg">
-          <span className="text-xl sm:text-2xl">{selectedCountryData.flag}</span>
-          <span className="text-sm sm:text-lg text-gray-600 font-bold">{countryCode}</span>
+            <span className="text-xl sm:text-2xl">{selectedCountry.flag}</span>
+            <span className="text-sm sm:text-base font-bold text-gray-700">{selectedCountry.code}</span>
+            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showCountryDropdown ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Separator */}
+          <div className="w-px h-6 bg-gray-300 mx-2"></div>
+
+          {/* Phone Number Input */}
           <input 
             type="tel" 
             value={phoneNumber}
@@ -195,16 +240,77 @@ function PhoneDialer() {
             className="flex-1 border-0 outline-none bg-transparent text-lg sm:text-xl font-mono text-gray-800 placeholder-gray-400"
             disabled={callStatus !== "idle"}
           />
+
+          {/* Clear Button */}
           {phoneNumber && (
-            <button 
-              onClick={deleteLastDigit}
-              className="text-gray-400 hover:text-gray-600 p-1.5 sm:p-2 rounded-full hover:bg-gray-100 transition-all duration-200"
+            <button
+              type="button"
+              onClick={() => setPhoneNumber("")}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
               disabled={callStatus !== "idle"}
             >
-              <X className="h-4 w-4 sm:h-5 sm:w-5" />
+              <X className="w-5 h-5 text-gray-400" />
             </button>
           )}
         </div>
+
+        {/* Country Dropdown */}
+        {showCountryDropdown && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-72 overflow-hidden z-50" data-country-dropdown="menu">
+            {/* Search Input */}
+            <div className="p-3 border-b border-gray-100">
+              <input
+                type="text"
+                placeholder="Search countries..."
+                value={countrySearch}
+                onChange={(e) => setCountrySearch(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+              />
+            </div>
+            
+            {/* Countries List */}
+            <div className="max-h-48 overflow-y-auto">
+              {isLoadingCountries ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-sm text-gray-600">Loading countries...</span>
+                </div>
+              ) : countries.length === 0 ? (
+                <div className="px-3 py-4 text-gray-500 text-sm text-center">
+                  No countries available
+                </div>
+              ) : (
+                countries
+                  .filter(country => 
+                    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+                    country.code.toLowerCase().includes(countrySearch.toLowerCase())
+                  )
+                  .map((country) => (
+                    <button
+                      key={country.code + country.name}
+                      onClick={() => handleCountryChange(country)}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left ${
+                        selectedCountry.code === country.code ? "bg-blue-100 text-blue-700" : "text-gray-700"
+                      }`}
+                    >
+                      <span className="text-xl">{country.flag}</span>
+                      <span className="font-medium flex-1">{country.name}</span>
+                      <span className="text-blue-600 font-bold">{country.code}</span>
+                    </button>
+                  ))
+              )}
+              {!isLoadingCountries && countries.filter(country => 
+                country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+                country.code.toLowerCase().includes(countrySearch.toLowerCase())
+              ).length === 0 && countrySearch && (
+                <div className="px-3 py-4 text-gray-500 text-sm text-center">
+                  No countries found for "{countrySearch}"
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Add Contact Button */}
@@ -231,7 +337,7 @@ function PhoneDialer() {
           </div>
           {callStatus === "connected" && (
             <div className="text-sm text-gray-600 mt-1">
-              {countryCode} {phoneNumber}
+              {selectedCountry.code} {phoneNumber}
             </div>
           )}
         </div>
@@ -260,7 +366,7 @@ function PhoneDialer() {
           <>
             <div className="text-center flex-1">
               <span className="text-sm sm:text-lg text-gray-700 font-mono">
-                {phoneNumber ? `${countryCode} ${phoneNumber}` : "Enter number"}
+                {phoneNumber ? `${selectedCountry.code} ${phoneNumber}` : "Enter number"}
               </span>
             </div>
             <button 
@@ -628,14 +734,9 @@ export default function Home() {
       {/* Hero Section with Dialer */}
       <div className="bg-blue-50 min-h-screen">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="flex flex-col items-center justify-center text-center space-y-12">
-            {/* Dialer */}
-            <div className="flex justify-center">
-              <PhoneDialer />
-            </div>
-            
-            {/* Content Below Dialer */}
-            <div className="text-center max-w-2xl">
+          <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between lg:items-start gap-8 lg:gap-12">
+            {/* Content Section - Left on desktop, below dialer on mobile */}
+            <div className="text-center lg:text-left max-w-2xl lg:flex-1 order-2 lg:order-1">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                 <span className="text-blue-600">Cheap</span><br />
                 <span className="text-blue-600">International</span><br />
@@ -643,7 +744,7 @@ export default function Home() {
                 <span className="text-blue-600">Browser</span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto">
+              <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-lg lg:max-w-none mx-auto lg:mx-0">
                 Call clients, banks, government offices, or any number worldwide. Pay only for what you use. No contracts or hidden fees.
               </p>
               
@@ -659,12 +760,17 @@ export default function Home() {
                 <div className="space-y-2 text-sm text-gray-600">
                   <p>From only 0.02 USD per minute!</p>
                   <p>First call is <span className="font-semibold">FREE</span></p>
-                  <div className="flex items-center justify-center space-x-2 text-blue-600">
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-600">
                     <span className="bg-blue-100 px-2 py-1 rounded text-xs">💡</span>
                     <span>50% cheaper than your carrier</span>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Dialer Section - Right on desktop, top on mobile */}
+            <div className="flex justify-center lg:justify-end lg:flex-1 order-1 lg:order-2">
+              <PhoneDialer />
             </div>
           </div>
         </div>

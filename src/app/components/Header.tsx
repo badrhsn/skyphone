@@ -7,10 +7,38 @@ import { useState } from "react";
 import { Phone, MessageCircle, HelpCircle, Download, Menu, X, ChevronDown, DollarSign, Globe, Settings, Sun, Moon, User } from "lucide-react";
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Handle loading state to prevent hydration mismatch
+  if (status === "loading") {
+    return (
+      <nav className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs sm:text-sm">ya</span>
+              </div>
+              <span className="text-lg sm:text-xl font-semibold text-gray-900">Yadaphone</span>
+            </Link>
+            
+            {/* Loading skeleton */}
+            <div className="flex items-center space-x-4">
+              <div className="hidden md:flex space-x-4">
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="h-8 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">

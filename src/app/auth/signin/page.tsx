@@ -18,23 +18,33 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError("Invalid credentials");
-      } else {
-        router.push("/dashboard");
+        setError('Invalid credentials');
+        setIsLoading(false);
+      } else if (result?.ok) {
+        // Get fresh session to check user role
+        const session = await fetch('/api/auth/session').then(res => res.json());
+        
+        // Check if user is admin by email or role
+        const isAdmin = session?.user?.role === 'admin' || session?.user?.email === 'admin@yadaphone.com';
+        
+        if (isAdmin) {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
-    } finally {
+      setError('An error occurred during sign in');
       setIsLoading(false);
     }
   };
@@ -42,19 +52,13 @@ export default function SignIn() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
+      // Use the standard NextAuth Google OAuth flow with explicit callback
       const result = await signIn("google", { 
-        callbackUrl: "/dashboard",
-        redirect: false 
+        callbackUrl: "/dashboard"
       });
-      
-      if (result?.error) {
-        setError("Google sign-in failed. Please try again.");
-      } else if (result?.url) {
-        window.location.href = result.url;
-      }
+      // signIn with Google will redirect automatically, so we don't need to handle the result here
     } catch (error) {
-      setError("Google sign-in is not configured. Please use email/password.");
-    } finally {
+      setError("Google sign-in failed. Please try again.");
       setIsLoading(false);
     }
   };

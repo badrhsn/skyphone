@@ -56,27 +56,9 @@ export default function Dialer() {
   const [showCountryOptions, setShowCountryOptions] = useState(false);
   const [availableNumbers, setAvailableNumbers] = useState<any[]>([]);
   const [selectedCallerId, setSelectedCallerId] = useState<string>("");
-
-  // Common countries with flags and codes
-  const countries = [
-    { name: "United States", flag: "🇺🇸", code: "+1" },
-    { name: "Canada", flag: "🇨🇦", code: "+1" },
-    { name: "United Kingdom", flag: "🇬🇧", code: "+44" },
-    { name: "France", flag: "🇫🇷", code: "+33" },
-    { name: "Germany", flag: "🇩🇪", code: "+49" },
-    { name: "Spain", flag: "🇪🇸", code: "+34" },
-    { name: "Italy", flag: "🇮🇹", code: "+39" },
-    { name: "Netherlands", flag: "🇳🇱", code: "+31" },
-    { name: "Australia", flag: "🇦🇺", code: "+61" },
-    { name: "Japan", flag: "🇯🇵", code: "+81" },
-    { name: "South Korea", flag: "🇰🇷", code: "+82" },
-    { name: "China", flag: "🇨🇳", code: "+86" },
-    { name: "India", flag: "🇮🇳", code: "+91" },
-    { name: "Brazil", flag: "🇧🇷", code: "+55" },
-    { name: "Mexico", flag: "🇲🇽", code: "+52" },
-    { name: "Morocco", flag: "🇲🇦", code: "+212" },
-  ];
-
+  const [countrySearch, setCountrySearch] = useState("");
+  const [countries, setCountries] = useState<{ name: string; flag: string; code: string }[]>([]);
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true);
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
@@ -84,6 +66,7 @@ export default function Dialer() {
       fetchRates();
       fetchUserData();
       fetchAvailableNumbers();
+      fetchCountries();
     }
   }, [status, router]);
 
@@ -101,11 +84,16 @@ export default function Dialer() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showCallerOptions) {
-        setShowCallerOptions(false);
-      }
-      if (showCountryOptions) {
+      const target = event.target as HTMLElement;
+      
+      // Check if click is outside the country dropdown
+      if (showCountryOptions && !target.closest('[data-country-dropdown]')) {
         setShowCountryOptions(false);
+      }
+      
+      // Check if click is outside the caller options dropdown  
+      if (showCallerOptions && !target.closest('[data-caller-dropdown]')) {
+        setShowCallerOptions(false);
       }
     };
 
@@ -167,6 +155,62 @@ export default function Dialer() {
     }
   };
 
+  const fetchCountries = async () => {
+    setIsLoadingCountries(true);
+    try {
+      const response = await fetch("/api/rates");
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Create countries from rates using flags from database
+        const uniqueCountries = new Map<string, { name: string; flag: string; code: string }>();
+        data.forEach((rate: any) => {
+          if (!uniqueCountries.has(rate.country)) {
+            const flag = rate.flag || "🌍"; // Use flag from database, fallback to earth emoji
+            uniqueCountries.set(rate.country, {
+              name: rate.country,
+              flag: flag,
+              code: rate.countryCode
+            });
+          }
+        });
+        
+        const countriesArray = Array.from(uniqueCountries.values()).sort((a, b) => 
+          a.name.localeCompare(b.name)
+        );
+        
+        if (countriesArray.length > 0) {
+          setCountries(countriesArray);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    } finally {
+      setIsLoadingCountries(false);
+    }
+  };
+
+  // Filter countries based on search
+  const filteredCountries = countries.filter(country =>
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.code.includes(countrySearch)
+  );
+
+  // Handle country selection
+  const handleCountrySelect = (country: { name: string; flag: string; code: string }) => {
+    setSelectedCountry(country);
+    setShowCountryOptions(false);
+    setCountrySearch("");
+    
+    // If phone number exists and doesn't start with +, prepend the new country code
+    if (phoneNumber && !phoneNumber.startsWith("+")) {
+      const newNumber = country.code + phoneNumber;
+      setPhoneNumber(newNumber);
+      const rate = detectCountry(newNumber);
+      setSelectedRate(rate);
+    }
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -195,23 +239,6 @@ export default function Dialer() {
     return null;
   };
 
-  const handleNumberInput = (digit: string) => {
-    if (isCalling) return;
-    setPhoneNumber(prev => {
-      let newNumber = prev + digit;
-      
-      // Auto-format number based on selected country
-      if (prev === "" && selectedCountry && !newNumber.startsWith("+")) {
-        // Add country code if starting fresh
-        newNumber = selectedCountry.code + newNumber;
-      }
-      
-      const rate = detectCountry(newNumber);
-      setSelectedRate(rate);
-      return newNumber;
-    });
-  };
-
   const handleNumberChange = (value: string) => {
     if (isCalling) return;
     setPhoneNumber(value);
@@ -219,10 +246,14 @@ export default function Dialer() {
     setSelectedRate(rate);
   };
 
-  const clearNumber = () => {
+  const handleNumberInput = (digit: string) => {
     if (isCalling) return;
-    setPhoneNumber("");
-    setSelectedRate(null);
+    setPhoneNumber(prev => {
+      const newNumber = prev + digit;
+      const rate = detectCountry(newNumber);
+      setSelectedRate(rate);
+      return newNumber;
+    });
   };
 
   const deleteLastDigit = () => {
@@ -235,7 +266,7 @@ export default function Dialer() {
     });
   };
 
-  const clearAllDigits = () => {
+  const clearNumber = () => {
     if (isCalling) return;
     setPhoneNumber("");
     setSelectedRate(null);
@@ -331,22 +362,6 @@ export default function Dialer() {
   const toggleSpeaker = () => {
     setIsSpeakerOn(!isSpeakerOn);
   };
-
-  // iPhone-style keypad
-  const keypadButtons = [
-    { digit: "1", letters: "" },
-    { digit: "2", letters: "ABC" },
-    { digit: "3", letters: "DEF" },
-    { digit: "4", letters: "GHI" },
-    { digit: "5", letters: "JKL" },
-    { digit: "6", letters: "MNO" },
-    { digit: "7", letters: "PQRS" },
-    { digit: "8", letters: "TUV" },
-    { digit: "9", letters: "WXYZ" },
-    { digit: "*", letters: "" },
-    { digit: "0", letters: "+" },
-    { digit: "#", letters: "" },
-  ];
 
   if (status === "loading") {
     return (
@@ -458,92 +473,110 @@ export default function Dialer() {
             </div>
           </div>
 
-          {/* Compact Phone Number Input */}
-          <div className="px-4 sm:px-6 mb-3 sm:mb-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-400 overflow-hidden">
-              {/* Main Input Row */}
-              <div className="flex items-stretch">
-                {/* Country Code Selector */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowCountryOptions(!showCountryOptions)}
-                    className="h-14 flex items-center space-x-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 border-r border-blue-400"
-                  >
-                    <span className="text-base">{selectedCountry.flag}</span>
-                    <span className="text-sm font-bold">{selectedCountry.code}</span>
-                    <svg className={`h-3 w-3 transition-transform ${showCountryOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+          {/* Clean Phone Input Design (matching home page) */}
+          <div className="px-4 sm:px-6 mb-6 relative">
+            <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden">
+              {/* Country Selector Button */}
+              <button
+                type="button"
+                onClick={() => setShowCountryOptions(!showCountryOptions)}
+                className="flex items-center space-x-2 px-3 sm:px-4 py-3 sm:py-4 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-gray-200"
+                disabled={isCalling}
+                data-country-dropdown="button"
+              >
+                <span className="text-xl sm:text-2xl">{selectedCountry.flag}</span>
+                <span className="text-sm sm:text-base font-bold text-gray-700">{selectedCountry.code}</span>
+                <svg className={`w-4 h-4 text-gray-500 transition-transform ${showCountryOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-                  {/* Compact Country Dropdown */}
-                  {showCountryOptions && (
-                    <div className="absolute top-full left-0 mt-1 w-60 bg-white rounded-xl shadow-2xl border border-blue-200 py-1 z-50 max-h-48 overflow-y-auto">
-                      {countries.map((country) => (
-                        <button
-                          key={country.code + country.name}
-                          onClick={() => {
-                            setSelectedCountry(country);
-                            setShowCountryOptions(false);
-                          }}
-                          className={`w-full flex items-center space-x-2 px-3 py-2 hover:bg-blue-50 transition-colors text-sm ${
-                            selectedCountry.code === country.code ? "bg-blue-100 text-blue-700" : "text-gray-700"
-                          }`}
-                        >
-                          <span className="text-base">{country.flag}</span>
-                          <span className="font-medium truncate">{country.name}</span>
-                          <span className="text-blue-600 font-bold ml-auto">{country.code}</span>
-                        </button>
-                      ))}
+              {/* Separator */}
+              <div className="w-px h-6 bg-gray-300 mx-2"></div>
+
+              {/* Phone Number Input */}
+              <input 
+                type="tel" 
+                value={phoneNumber}
+                onChange={(e) => handleNumberChange(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="Enter phone number"
+                className="flex-1 border-0 outline-none bg-transparent text-lg sm:text-xl font-mono text-gray-800 placeholder-gray-400"
+                disabled={isCalling}
+              />
+
+              {/* Clear Button */}
+              {phoneNumber && (
+                <button
+                  type="button"
+                  onClick={clearNumber}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  disabled={isCalling}
+                >
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Country Dropdown */}
+            {showCountryOptions && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-72 overflow-hidden z-50" data-country-dropdown="menu">
+                {/* Search Input */}
+                <div className="p-3 border-b border-gray-100">
+                  <input
+                    type="text"
+                    placeholder="Search countries..."
+                    value={countrySearch}
+                    onChange={(e) => setCountrySearch(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
+                
+                {/* Countries List */}
+                <div className="max-h-48 overflow-y-auto">
+                  {isLoadingCountries ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-sm text-gray-600">Loading countries...</span>
+                    </div>
+                  ) : countries.length === 0 ? (
+                    <div className="px-3 py-4 text-gray-500 text-sm text-center">
+                      No countries available
+                    </div>
+                  ) : (
+                    filteredCountries.map((country) => (
+                      <button
+                        key={country.code + country.name}
+                        onClick={() => handleCountrySelect(country)}
+                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left ${
+                          selectedCountry.code === country.code ? "bg-blue-100 text-blue-700" : "text-gray-700"
+                        }`}
+                      >
+                        <span className="text-xl">{country.flag}</span>
+                        <span className="font-medium flex-1">{country.name}</span>
+                        <span className="text-blue-600 font-bold">{country.code}</span>
+                      </button>
+                    ))
+                  )}
+                  {!isLoadingCountries && filteredCountries.length === 0 && countrySearch && (
+                    <div className="px-3 py-4 text-gray-500 text-sm text-center">
+                      No countries found for "{countrySearch}"
                     </div>
                   )}
                 </div>
+              </div>
+            )}
 
-                {/* Phone Number Input */}
-                <div className="flex-1 px-4">
-                  <input
-                    type="text"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="Phone number"
-                    className="w-full h-14 text-xl font-medium border-none outline-none bg-transparent text-gray-800 placeholder-gray-500"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex">
-                  <button
-                    onClick={deleteLastDigit}
-                    disabled={!phoneNumber || isCalling}
-                    className="h-14 w-12 flex items-center justify-center disabled:opacity-30 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 transition-all border-l border-blue-200"
-                    title="Delete"
-                  >
-                    <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={clearAllDigits}
-                    disabled={!phoneNumber || isCalling}
-                    className="h-14 w-12 flex items-center justify-center disabled:opacity-30 bg-red-50 hover:bg-red-100 active:bg-red-200 transition-all border-l border-red-200"
-                    title="Clear"
-                  >
-                    <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+            {/* Optional: Number formatting hint */}
+            {phoneNumber && (
+              <div className="px-4 pb-2">
+                <div className="text-xs text-blue-600 font-medium">
+                  {selectedCountry.code} {phoneNumber}
                 </div>
               </div>
-
-              {/* Optional: Number formatting hint */}
-              {phoneNumber && (
-                <div className="px-4 pb-2">
-                  <div className="text-xs text-blue-600 font-medium">
-                    {selectedCountry.code} {phoneNumber}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Call From Options */}
@@ -554,6 +587,7 @@ export default function Dialer() {
                 <button 
                   onClick={() => setShowCallerOptions(!showCallerOptions)}
                   className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-4 py-2 text-sm shadow-xl hover:shadow-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                  data-caller-dropdown="button"
                 >
                   <Globe className="h-4 w-4 text-white" />
                   <span className="font-bold">
@@ -568,7 +602,7 @@ export default function Dialer() {
                 
                 {/* Dynamic Dropdown Menu */}
                 {showCallerOptions && (
-                  <div className="absolute right-0 mt-2 w-72 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl border border-blue-200 py-2 z-50 animate-in slide-in-from-top-2 max-h-96 overflow-y-auto">
+                  <div className="absolute right-0 mt-2 w-72 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl border border-blue-200 py-2 z-50 animate-in slide-in-from-top-2 max-h-96 overflow-y-auto" data-caller-dropdown="menu">
                     
                     {/* Public Numbers Section */}
                     <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100">
@@ -703,136 +737,113 @@ export default function Dialer() {
             </div>
           )}
 
-          {/* iPhone-style Keypad with Skype green accents */}
-          <div className="flex-1 px-6">
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              {keypadButtons.map((button) => (
-                <button
-                  key={button.digit}
-                  onClick={() => handleNumberInput(button.digit)}
-                  className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 active:from-blue-200 active:to-blue-300 active:scale-95 transition-all duration-200 flex flex-col items-center justify-center shadow-2xl hover:shadow-blue-500/25 border-2 border-blue-300 hover:border-blue-400"
-                  disabled={isCalling}
-                >
-                  <span className="text-3xl font-light text-blue-800">{button.digit}</span>
-                  {button.letters && (
-                    <span className="text-xs text-blue-600 -mt-1 font-bold">{button.letters}</span>
-                  )}
-                </button>
-              ))}
+          {/* Simple Number Keypad */}
+          <div className="px-6 mb-6">
+            <div className="grid grid-cols-3 gap-4">
+              {/* Row 1: 1, 2, 3 */}
+              <button
+                onClick={() => handleNumberInput("1")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">1</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("2")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">2</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("3")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">3</span>
+              </button>
+
+              {/* Row 2: 4, 5, 6 */}
+              <button
+                onClick={() => handleNumberInput("4")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">4</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("5")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">5</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("6")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">6</span>
+              </button>
+
+              {/* Row 3: 7, 8, 9 */}
+              <button
+                onClick={() => handleNumberInput("7")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">7</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("8")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">8</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("9")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">9</span>
+              </button>
+
+              {/* Row 4: *, 0, # */}
+              <button
+                onClick={() => handleNumberInput("*")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">*</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("0")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">0</span>
+              </button>
+              <button
+                onClick={() => handleNumberInput("#")}
+                disabled={isCalling}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+              >
+                <span className="text-2xl font-light text-gray-800">#</span>
+              </button>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="px-6 pb-8">
-            <div className="flex items-center justify-center space-x-8 mb-6">
-              {/* Contacts Button */}
-              <button
-                onClick={() => router.push("/dashboard/contacts")}
-                className="w-16 h-16 flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-200 rounded-full shadow-xl hover:shadow-2xl transition-all hover:from-blue-200 hover:to-blue-300 active:scale-95 border-2 border-blue-300"
-                title="Contacts"
-              >
-                <svg className="h-7 w-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-
-              {/* Call Button - iPhone style with blue theme */}
+          {/* Simple Call Button */}
+          <div className="px-6 pb-6">
+            <div className="flex justify-center mb-6">
               <button
                 onClick={initiateCall}
                 disabled={!phoneNumber || isCalling}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white w-20 h-20 rounded-full hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 flex items-center justify-center transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 active:scale-95 transform border-3 border-blue-400"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white w-16 h-16 rounded-full hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 flex items-center justify-center transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-95 transform"
               >
-                <Phone className="h-9 w-9" />
+                <Phone className="h-7 w-7" />
               </button>
-
-              {/* Call History Button */}
-              <button
-                onClick={() => router.push("/dashboard/history")}
-                className="w-16 h-16 flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-200 rounded-full shadow-xl hover:shadow-2xl transition-all hover:from-blue-200 hover:to-blue-300 active:scale-95 border-2 border-blue-300"
-                title="Call History"
-              >
-                <svg className="h-7 w-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Rate Information Card */}
-            {selectedRate && (
-              <div className="mb-6">
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl border-2 border-blue-300 shadow-2xl p-4">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse shadow-lg shadow-blue-500/50"></div>
-                    <span className="text-sm font-bold text-blue-800">Rate Information</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Globe className="h-5 w-5 text-blue-600" />
-                      <span className="text-blue-900 font-bold">{selectedRate.country}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-blue-700">${selectedRate.rate.toFixed(3)}</div>
-                      <div className="text-xs text-blue-600 font-medium">per minute</div>
-                    </div>
-                  </div>
-                  
-                  {/* Estimated cost for 1 minute */}
-                  <div className="mt-3 pt-3 border-t border-blue-200">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-blue-700 font-medium">Est. 1 min call:</span>
-                      <span className="font-bold text-blue-800">${selectedRate.rate.toFixed(3)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="px-6 pb-4">
-              <div className="grid grid-cols-4 gap-4">
-                <button
-                  onClick={() => {
-                    setPhoneNumber(prev => prev + "123");
-                    const rate = detectCountry(phoneNumber + "123");
-                    setSelectedRate(rate);
-                  }}
-                  className="flex flex-col items-center justify-center p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl shadow-lg hover:shadow-xl transition-all hover:from-blue-200 hover:to-blue-300 active:scale-95 border border-blue-300"
-                >
-                  <span className="text-blue-700 font-bold text-sm">123</span>
-                  <span className="text-xs text-blue-600 mt-1">Quick</span>
-                </button>
-
-                <button
-                  onClick={() => router.push("/dashboard/settings")}
-                  className="flex flex-col items-center justify-center p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl shadow-lg hover:shadow-xl transition-all hover:from-blue-200 hover:to-blue-300 active:scale-95 border border-blue-300"
-                >
-                  <svg className="h-5 w-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-xs text-blue-600 mt-1">Settings</span>
-                </button>
-
-                <button
-                  onClick={() => router.push("/dashboard/add-credits")}
-                  className="flex flex-col items-center justify-center p-3 bg-gradient-to-r from-green-100 to-green-200 rounded-xl shadow-lg hover:shadow-xl transition-all hover:from-green-200 hover:to-green-300 active:scale-95 border border-green-300"
-                >
-                  <svg className="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span className="text-xs text-green-600 mt-1">Credits</span>
-                </button>
-
-                <button
-                  onClick={() => router.push("/rates")}
-                  className="flex flex-col items-center justify-center p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl shadow-lg hover:shadow-xl transition-all hover:from-blue-200 hover:to-blue-300 active:scale-95 border border-blue-300"
-                >
-                  <svg className="h-5 w-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-6a2 2 0 01-2-2z" />
-                  </svg>
-                  <span className="text-xs text-blue-600 mt-1">Rates</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
