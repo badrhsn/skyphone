@@ -711,25 +711,6 @@ export default function Home() {
 
   return (
     <>
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: #3b82f6;
-          cursor: pointer;
-        }
-        .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: #3b82f6;
-          cursor: pointer;
-          border: none;
-        }
-      `}</style>
-      
       <div className="min-h-screen bg-white">
       {/* Hero Section with Dialer */}
       <div className="bg-blue-50 min-h-screen">
@@ -776,69 +757,101 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 3 Steps Section */}
-      <div className="py-12 sm:py-16 md:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How to Make International Calls in 3 Simple Steps
+      {/* 3 Steps Section - Redesigned */}
+      <div className="py-16 sm:py-20 md:py-24 bg-white relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-400 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-12 sm:mb-16 md:mb-20">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <span className="mr-2">✨</span>
+              Get Started in Minutes
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              How to Make International Calls<br />
+              <span className="text-blue-600">in 3 Simple Steps</span>
             </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              No complex setup, no lengthy verification process. Start calling worldwide in under 2 minutes.
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-blue-50 rounded-3xl p-8 text-center">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <FileText className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Sign Up</h3>
-              <p className="text-gray-600 mb-6">Sign up in seconds with just your email - no phone verification needed</p>
-              
-              <div className="space-y-3 text-sm text-left">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-gray-600">No authentication required</span>
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-16">
+            {/* Step 1 */}
+            <div className="relative group">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-blue-200/50">
+                <div className="absolute -top-4 left-8 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                  1
                 </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-gray-600">No phone numbers required</span>
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-xl">
+                  <FileText className="h-10 w-10 text-white" />
                 </div>
-              </div>
-            </div>
-            
-            <div className="bg-blue-50 rounded-3xl p-8 text-center">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <CreditCard className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Add Credits</h3>
-              <p className="text-gray-600 mb-6">Purchase credits and only pay for the minutes you actually use</p>
-              
-              <div className="space-y-3 text-sm text-left">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-gray-600">No subscriptions or recurring fees</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-gray-600">Pay only for minutes you use</span>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Sign Up</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">Sign up in seconds with just your email - no phone verification needed</p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
+                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">No authentication required</span>
+                  </div>
+                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
+                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">No phone numbers required</span>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 text-center">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Phone className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Call Anywhere</h3>
-              <p className="text-gray-600 mb-6">Call any landline or institution worldwide directly from your browser</p>
-              
-              <div className="space-y-3 text-sm text-left">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-gray-600">Available in all countries</span>
+            {/* Step 2 */}
+            <div className="relative group">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-blue-200/50">
+                <div className="absolute -top-4 left-8 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                  2
                 </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-gray-600">Calls routed through a secure system</span>
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-xl">
+                  <CreditCard className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Add Credits</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">Purchase credits and only pay for the minutes you actually use</p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
+                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">No subscriptions or recurring fees</span>
+                  </div>
+                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
+                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">Pay only for minutes you use</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Step 3 */}
+            <div className="relative group">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-blue-200/50">
+                <div className="absolute -top-4 left-8 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                  3
+                </div>
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-xl">
+                  <Phone className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Call Anywhere</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">Call any landline or institution worldwide directly from your browser</p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
+                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">Available in all countries</span>
+                  </div>
+                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
+                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">Calls routed through a secure system</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -847,340 +860,584 @@ export default function Home() {
           <div className="text-center">
             <Link 
               href={getCallUrl()} 
-              className="bg-blue-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-colors"
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
-              {session ? "Go to Dialer" : "Get started"}
+              <span>{session ? "Go to Dialer" : "Get started"}</span>
+              <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Business Section */}
-      <div className="py-20 bg-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <Building className="h-8 w-8 text-blue-600" />
-              <h2 className="text-4xl font-bold text-blue-600">Yadaphone for business</h2>
+      {/* Business Section - Redesigned */}
+      <div className="py-20 md:py-24 bg-gradient-to-br from-blue-50 via-blue-50 to-blue-100 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute top-0 right-0 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+          <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-2000"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16 md:mb-20">
+            <div className="inline-flex items-center justify-center space-x-3 mb-6">
+              <div className="bg-blue-500 rounded-full p-2 shadow-lg">
+                <Building className="h-6 w-6 text-white" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-blue-600">Yadaphone for business</h2>
             </div>
-            <p className="text-lg text-gray-600">Cheap calls to 180+ countries from browser</p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Scale your global communications with enterprise-grade features and unbeatable rates to 180+ countries
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-blue-100 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
-              <div className="flex items-center space-x-3 mb-4">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Record calls</h3>
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-16">
+            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Mic className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Record calls</h3>
+                  <p className="text-gray-600">and access AI transcripts for better business insights and compliance</p>
+                </div>
               </div>
-              <p className="text-gray-600">and access AI transcripts</p>
+              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+                <span>Learn more</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
             
-            <div className="bg-blue-100 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
-              <div className="flex items-center space-x-3 mb-4">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Add free unlimited members</h3>
+            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Add free unlimited members</h3>
+                  <p className="text-gray-600">in one account and one corporate wallet for seamless team collaboration</p>
+                </div>
               </div>
-              <p className="text-gray-600">in one account and one corporate wallet</p>
+              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+                <span>Learn more</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
             
-            <div className="bg-blue-100 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
-              <div className="flex items-center space-x-3 mb-4">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Get priority support</h3>
+            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Headphones className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Get priority support</h3>
+                  <p className="text-gray-600">we're just a message away — 24/7 dedicated enterprise support</p>
+                </div>
               </div>
-              <p className="text-gray-600">we're just a message away — 24/7</p>
+              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+                <span>Learn more</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
             
-            <div className="bg-blue-100 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
-              <div className="flex items-center space-x-3 mb-4">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Customize your setup</h3>
+            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Customize your setup</h3>
+                  <p className="text-gray-600">with features your business needs including API integration and custom branding</p>
+                </div>
               </div>
-              <p className="text-gray-600">with features your business needs</p>
+              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+                <span>Learn more</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
           </div>
           
           <div className="text-center">
-            <button className="bg-blue-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-              See enterprise plans
-            </button>
+            <div className="inline-flex flex-col sm:flex-row items-center gap-4">
+              <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                See enterprise plans
+              </button>
+              <span className="text-gray-500 text-sm">or</span>
+              <Link href="/contact" className="text-blue-600 font-semibold hover:text-blue-700 underline underline-offset-4">
+                Contact our sales team
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* See It In Action Section */}
-      <div className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">See It In Action</h2>
-          <p className="text-lg text-gray-600 mb-8">
-            Watch the demo video to see how Yadaphone works and make international calls directly from your browser.
-          </p>
+      {/* See It In Action Section - Redesigned */}
+      <div className="py-20 md:py-24 bg-white relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 50% 50%, #3b82f6 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+          }}></div>
         </div>
-      </div>
-
-      {/* Features Grid */}
-      <div className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Yadaphone for International Calls?
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <div className="mb-12">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <Eye className="h-4 w-4 mr-2" />
+              Live Demo
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              See It In <span className="text-blue-600">Action</span>
             </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Watch how Yadaphone works and see real international calls being made directly from your browser with crystal-clear quality.
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+          {/* Video Preview Placeholder */}
+          <div className="relative max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl p-8 md:p-12 shadow-2xl border border-blue-300/50">
+              <div className="bg-white rounded-2xl p-8 md:p-12 shadow-lg">
+                <div className="flex items-center justify-center space-x-4 mb-8">
+                  <div className="bg-blue-500 rounded-full p-4 shadow-lg">
+                    <Phone className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-xl font-bold text-gray-900">Live International Call Demo</h3>
+                    <p className="text-gray-600">See the call quality and ease of use</p>
+                  </div>
+                </div>
+                
+                {/* Demo Features */}
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-green-100 rounded-full p-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Crystal Clear Audio</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-green-100 rounded-full p-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Instant Connection</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-green-100 rounded-full p-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">No Downloads</span>
+                  </div>
+                </div>
+                
+                {/* Play Button */}
+                <div className="relative">
+                  <div className="bg-gray-100 rounded-2xl h-64 md:h-80 flex items-center justify-center group cursor-pointer hover:bg-gray-200 transition-colors">
+                    <div className="bg-blue-500 rounded-full p-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                      <svg className="h-12 w-12 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-white rounded-lg px-4 py-2 shadow-lg transform translate-y-8">
+                      <span className="text-sm font-medium text-gray-700">▶ Watch Demo Video</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Grid - Redesigned */}
+      <div className="py-20 md:py-24 bg-gradient-to-br from-gray-50 to-blue-50/50 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-10 w-20 h-20 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-bounce"></div>
+          <div className="absolute top-3/4 right-10 w-32 h-32 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-bounce delay-1000"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16 md:mb-20">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <Star className="h-4 w-4 mr-2" />
+              Premium Features
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Why Choose <span className="text-blue-600">Yadaphone</span><br />
+              for International Calls?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Experience the next generation of international calling with advanced features designed for modern communication needs.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <div className="md:col-span-2 bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Call Anywhere, From Anywhere</h3>
-              <p className="text-gray-600 mb-6">Make international calls to any country without restrictions, directly from your browser</p>
-              <Link href="#" className="text-blue-500 font-medium hover:text-blue-600">
-                Visit Free Caller Registry ↗
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Call Anywhere, From Anywhere</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">Make international calls to any country without restrictions, directly from your browser with enterprise-grade quality.</p>
+              <Link href="#" className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700 group-hover:translate-x-1 transition-all">
+                Visit Free Caller Registry
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Phone className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">No Country Restrictions</h3>
-              <p className="text-gray-600">Our service works globally, allowing you to connect with people and institutions worldwide</p>
+              <p className="text-gray-600">Our service works globally, connecting you with people and institutions worldwide.</p>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Zap className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">No Apps or Subscriptions</h3>
-              <p className="text-gray-600">Start calling in 2 minutes directly from your browser without installing any apps or committing to subscriptions</p>
+              <p className="text-gray-600">Start calling in 2 minutes directly from your browser without installing apps or subscriptions.</p>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <CreditCard className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Credit Based, No Subscription</h3>
-              <p className="text-gray-600">Pay only for what you use with our flexible credit system - no recurring fees or contracts</p>
+              <p className="text-gray-600">Pay only for what you use with our flexible credit system - no recurring fees or contracts.</p>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <DollarSign className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Buy Phone Numbers</h3>
-              <p className="text-gray-600">Purchase virtual phone numbers from various countries</p>
+              <p className="text-gray-600">Purchase virtual phone numbers from various countries for your business needs.</p>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <User className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Custom Caller ID</h3>
-              <p className="text-gray-600">Set your own caller ID for outgoing calls</p>
+              <p className="text-gray-600">Set your own caller ID for outgoing calls to maintain professional identity.</p>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
-                <Lock className="h-8 w-8 text-white" />
+            <div className="md:col-span-2 bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group">
+              <div className="flex items-start space-x-6">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                  <Lock className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Secure and Private</h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">All calls are encrypted end-to-end and your data is protected with enterprise-grade security protocols.</p>
+                  <Link href="#" className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700 group-hover:translate-x-1 transition-all">
+                    Learn about privacy
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Secure and Private</h3>
-              <p className="text-gray-600 mb-6">All calls are encrypted and your data is protected</p>
-              <Link href="#" className="text-blue-500 font-medium hover:text-blue-600">
-                Learn about privacy ↗
-              </Link>
             </div>
             
-            <div className="bg-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105">
-              <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Radio className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Receive Calls In Browser</h3>
-              <p className="text-gray-600">Accept incoming calls directly in your browser</p>
+              <p className="text-gray-600">Accept incoming calls directly in your browser with seamless call management.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Explore Yadaphone CTA */}
-      <div className="py-20 bg-blue-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">Explore Yadaphone</h2>
-          <p className="text-lg text-gray-600 mb-8">Test our features with a free account.</p>
+      {/* Explore Yadaphone CTA - Redesigned */}
+      <div className="py-20 md:py-24 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <div className="mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6">
+              <Zap className="h-4 w-4 mr-2" />
+              Start Your Journey
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              Explore <span className="text-blue-200">Yadaphone</span>
+            </h2>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Test our premium features with a free account and experience the future of international calling.
+            </p>
+          </div>
           
-          <Link 
-            href={getCallUrl()} 
-            className="bg-blue-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-          >
-            {session ? "Go to Dialer" : "Get started"}
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link 
+              href={getCallUrl()} 
+              className="inline-flex items-center space-x-3 bg-white text-blue-600 px-10 py-4 rounded-2xl text-lg font-semibold hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+            >
+              <Phone className="h-5 w-5" />
+              <span>{session ? "Go to Dialer" : "Get started"}</span>
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+            
+            <div className="flex items-center space-x-4 text-blue-200">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5" />
+                <span className="text-sm">No credit card required</span>
+              </div>
+              <div className="w-px h-4 bg-blue-300"></div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5" />
+                <span className="text-sm">Free first call</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Comparison Table */}
-      <div className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Ready to make your first call?
+      {/* Comparison Table - Redesigned */}
+      <div className="py-20 md:py-24 bg-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-20 w-40 h-40 bg-blue-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16 md:mb-20">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <Phone className="h-4 w-4 mr-2" />
+              Ready to Start?
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Ready to make your <span className="text-blue-600">first call?</span>
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
-              See the simplicity of browser-based calling with crystal-clear audio quality and affordable international rates yourself.
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Experience the simplicity of browser-based calling with crystal-clear audio quality and affordable international rates.
             </p>
             <Link 
               href={getCallUrl()} 
-              className="bg-blue-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-colors"
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
-              {session ? "Start Calling" : "Start calling"}
+              <span>{session ? "Start Calling" : "Start calling"}</span>
+              <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
 
           <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold text-gray-900 mb-8">Why Choose Yadaphone?</h3>
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
+              Why Choose <span className="text-blue-600">Yadaphone?</span>
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Compare our features with popular alternatives and see why we're the top choice for international calling.
+            </p>
           </div>
           
-          <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-br from-white to-blue-50/30 rounded-3xl shadow-2xl overflow-hidden border border-blue-100/50">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-blue-50 to-blue-100">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold text-blue-600">Yadaphone</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Google Voice</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">Viber</th>
+                    <th className="px-6 py-6 text-left text-sm font-bold text-gray-700 w-1/3">Features</th>
+                    <th className="px-6 py-6 text-center text-sm font-bold text-blue-600 bg-blue-500/10 border-x-2 border-blue-200">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="bg-blue-500 rounded-full p-1">
+                          <CheckCircle className="h-4 w-4 text-white" />
+                        </div>
+                        <span>Yadaphone</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-6 text-center text-sm font-medium text-gray-500">Google Voice</th>
+                    <th className="px-6 py-6 text-center text-sm font-medium text-gray-500">Viber</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4">
+                <tbody className="divide-y divide-gray-100">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">Browser-Based</div>
+                        <div className="font-semibold text-gray-900 mb-1">Browser-Based</div>
                         <div className="text-sm text-gray-500">Make calls directly from your web browser, no apps required</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-6 py-4">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">No Phone Authentication Required</div>
+                        <div className="font-semibold text-gray-900 mb-1">No Phone Authentication Required</div>
                         <div className="text-sm text-gray-500">Start calling immediately without verifying your phone number</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-6 py-4">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">Global Coverage</div>
+                        <div className="font-semibold text-gray-900 mb-1">Global Coverage</div>
                         <div className="text-sm text-gray-500">Call any country worldwide without restrictions</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-6 py-4">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">Instant Setup</div>
+                        <div className="font-semibold text-gray-900 mb-1">Instant Setup</div>
                         <div className="text-sm text-gray-500">No waiting time or verification process</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-6 py-4">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">No Subscription Required</div>
+                        <div className="font-semibold text-gray-900 mb-1">No Subscription Required</div>
                         <div className="text-sm text-gray-500">Pay only for what you use</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-6 py-4">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">Competitive Rates</div>
+                        <div className="font-semibold text-gray-900 mb-1">Competitive Rates</div>
                         <div className="text-sm text-gray-500">Best-in-class pricing for international calls</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-6 py-4">
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-6">
                       <div>
-                        <div className="font-medium text-gray-900">No Restrictions</div>
+                        <div className="font-semibold text-gray-900 mb-1">No Restrictions</div>
                         <div className="text-sm text-gray-500">No country or usage limitations</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <CheckCircle className="h-6 w-6 text-blue-500 mx-auto" />
+                    <td className="px-6 py-6 text-center bg-blue-50/30">
+                      <div className="bg-blue-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <X className="h-6 w-6 text-red-500 mx-auto" />
+                    <td className="px-6 py-6 text-center">
+                      <div className="bg-red-500 rounded-full p-2 w-8 h-8 mx-auto">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
                     </td>
                   </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">Pricing Model</div>
+                  <tr className="bg-gradient-to-r from-blue-50/50 to-blue-100/50 hover:from-blue-100/50 hover:to-blue-150/50 transition-colors">
+                    <td className="px-6 py-6">
+                      <div className="font-bold text-gray-900">Pricing Model</div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="text-sm font-medium text-blue-600">Pay-as-you-go with competitive rates</div>
+                    <td className="px-6 py-6 text-center bg-blue-100/50">
+                      <div className="text-sm font-semibold text-blue-700 bg-blue-200/50 rounded-lg px-3 py-2">
+                        Pay-as-you-go with competitive rates
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="text-sm text-gray-600">Free for US calls, international rates apply</div>
+                    <td className="px-6 py-6 text-center">
+                      <div className="text-sm text-gray-600 bg-gray-100 rounded-lg px-3 py-2">
+                        Free for US calls, international rates apply
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="text-sm text-gray-600">Subscription + per-minute rates</div>
+                    <td className="px-6 py-6 text-center">
+                      <div className="text-sm text-gray-600 bg-gray-100 rounded-lg px-3 py-2">
+                        Subscription + per-minute rates
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -1190,79 +1447,167 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Ready to Experience Section */}
-      <div className="py-20 bg-blue-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            Ready to experience the Yadaphone difference?
-          </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            Start making cheap international calls today with no setup, no subscriptions, and no restrictions.
-          </p>
-          
-          <Link 
-            href={getCallUrl()} 
-            className="bg-blue-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-colors"
-          >
-            {session ? "Go to Dialer" : "Try Yadaphone Now"}
-          </Link>
+      {/* Ready to Experience Section - Redesigned */}
+      <div className="py-20 md:py-24 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-bounce"></div>
+          <div className="absolute top-1/2 right-20 w-24 h-24 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-bounce"></div>
+          <div className="absolute bottom-20 left-1/3 w-20 h-20 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-bounce"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl border border-blue-200/50">
+            <div className="mb-8">
+              <div className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium mb-6">
+                <Zap className="h-4 w-4 mr-2" />
+                Experience the Difference
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                Ready to experience the<br />
+                <span className="text-blue-600">Yadaphone difference?</span>
+              </h2>
+              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Start making cheap international calls today with no setup, no subscriptions, and no restrictions. Join thousands of satisfied users worldwide.
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
+              <Link 
+                href={getCallUrl()} 
+                className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+              >
+                <Phone className="h-5 w-5" />
+                <span>{session ? "Go to Dialer" : "Try Yadaphone Now"}</span>
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+              
+              <div className="text-gray-500 text-sm">or</div>
+              
+              <Link href="/rates" className="text-blue-600 font-semibold hover:text-blue-700 underline underline-offset-4">
+                View all international rates
+              </Link>
+            </div>
+            
+            {/* Trust indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>180+ countries supported</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>50% cheaper than carriers</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Crystal clear quality</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Rate Calculator Section */}
-      <div className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Calculate Your Call Cost
+      {/* Rate Calculator Section - Redesigned */}
+      <div className="py-20 md:py-24 bg-white relative overflow-hidden">
+        {/* Background grid pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)`,
+            backgroundSize: '50px 50px'
+          }}></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Pricing Calculator
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Calculate Your <span className="text-blue-600">Call Cost</span>
             </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Get instant pricing for international calls to any destination with our transparent rate calculator.
+            </p>
           </div>
           
-          <RateCalculator />
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-2 shadow-2xl border border-blue-200/50">
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg">
+              <RateCalculator />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
+      {/* FAQ Section - Redesigned */}
+      <div className="py-20 md:py-24 bg-gradient-to-br from-gray-50 to-blue-50/30 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-40 h-40 bg-blue-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Support Center
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Frequently Asked <span className="text-blue-600">Questions</span>
             </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+              Find answers to common questions about Yadaphone's international calling service.
+            </p>
             
-            {/* Search FAQ */}
-            <div className="max-w-md mx-auto mb-8">
-              <input
-                type="text"
-                placeholder="Search FAQ..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:border-blue-500 outline-none"
-              />
+            {/* Enhanced Search FAQ */}
+            <div className="max-w-md mx-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search FAQ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full border-2 border-blue-200 rounded-2xl px-6 py-4 text-gray-800 focus:border-blue-500 outline-none bg-white/80 backdrop-blur-sm shadow-lg"
+                />
+                <div className="absolute right-4 top-4">
+                  <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
           
           <div className="space-y-4">
             {filteredFaqItems.map((item, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg">
+              <div key={index} className="bg-white/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50"
+                  className="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-blue-50/50 rounded-2xl transition-colors"
                 >
-                  <span className="font-medium text-gray-900">{item.question}</span>
-                  <ChevronDown 
-                    className={`h-5 w-5 text-gray-500 transition-transform ${
-                      openFaq === index ? 'rotate-180' : ''
-                    }`} 
-                  />
+                  <span className="font-semibold text-gray-900 text-lg">{item.question}</span>
+                  <div className={`bg-blue-100 rounded-full p-2 transition-transform duration-300 ${
+                    openFaq === index ? 'rotate-180 bg-blue-200' : ''
+                  }`}>
+                    <ChevronDown className="h-5 w-5 text-blue-600" />
+                  </div>
                 </button>
                 {openFaq === index && (
-                  <div className="px-6 pb-4">
-                    <p className="text-gray-600">{item.answer}</p>
-                    <div className="mt-2">
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                  <div className="px-6 pb-6">
+                    <div className="bg-blue-50/50 rounded-xl p-4 mb-4">
+                      <p className="text-gray-700 leading-relaxed">{item.answer}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block bg-blue-500 text-white text-xs px-3 py-1 rounded-full font-medium">
                         {item.category}
                       </span>
+                      <div className="text-xs text-gray-500">
+                        Was this helpful? 
+                        <button className="ml-2 text-blue-600 hover:text-blue-700">👍</button>
+                        <button className="ml-1 text-blue-600 hover:text-blue-700">👎</button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1271,70 +1616,184 @@ export default function Home() {
           </div>
           
           {filteredFaqItems.length === 0 && (
-            <div className="text-center text-gray-500 mt-8">
-              No questions found matching "{searchQuery}"
+            <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-blue-200/50">
+              <div className="text-gray-500 mb-4">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-semibold mb-2">No questions found</h3>
+                <p>No questions found matching "{searchQuery}"</p>
+              </div>
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="text-blue-600 font-medium hover:text-blue-700"
+              >
+                Clear search
+              </button>
             </div>
           )}
+          
+          {/* Help CTA */}
+          <div className="text-center mt-12">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-200/50">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Still have questions?</h3>
+              <p className="text-gray-600 mb-4">Our support team is here to help you 24/7</p>
+              <Link href="/contact" className="inline-flex items-center space-x-2 bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                <Headphones className="h-5 w-5" />
+                <span>Contact Support</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Testimonials Section */}
-      <div className="py-20 bg-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Users Say</h2>
+      {/* Testimonials Section - Redesigned */}
+      <div className="py-20 md:py-24 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-10 w-32 h-32 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse"></div>
+          <div className="absolute top-3/4 right-10 w-40 h-40 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse delay-2000"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16 md:mb-20">
+            <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-blue-700 text-sm font-medium mb-6 shadow-lg">
+              <Star className="h-4 w-4 mr-2 text-yellow-500" />
+              Customer Stories
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              What Our <span className="text-blue-600">Users Say</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Join thousands of satisfied customers who've revolutionized their international calling experience with Yadaphone.
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-blue-100 rounded-3xl p-8">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
               <div className="mb-6">
-                <Star className="h-8 w-8 text-blue-500 mb-4" />
-                <p className="text-gray-700 italic">
-                  "Yadaphone works great! The sound quality is better than the alternatives and much easier to use. Will be using from now on!"
-                </p>
+                <div className="flex items-center space-x-2 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <div className="relative">
+                  <div className="absolute -top-2 -left-2 text-6xl text-blue-200 font-serif">"</div>
+                  <p className="text-gray-700 italic text-lg leading-relaxed pl-6">
+                    Yadaphone works great! The sound quality is better than the alternatives and much easier to use. Will be using from now on!
+                  </p>
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-gray-900">Nicolas P.</div>
-                <div className="text-sm text-gray-600">Cyprus</div>
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">N</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Nicolas P.</div>
+                  <div className="text-sm text-gray-600 flex items-center">
+                    <span className="mr-1">🇨🇾</span> Cyprus
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="bg-blue-100 rounded-3xl p-8">
+            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
               <div className="mb-6">
-                <Star className="h-8 w-8 text-blue-500 mb-4" />
-                <p className="text-gray-700 italic">
-                  "I use Yadaphone weekly to call my family abroad. It's much more affordable than my phone carrier's international rates."
-                </p>
+                <div className="flex items-center space-x-2 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <div className="relative">
+                  <div className="absolute -top-2 -left-2 text-6xl text-blue-200 font-serif">"</div>
+                  <p className="text-gray-700 italic text-lg leading-relaxed pl-6">
+                    I use Yadaphone weekly to call my family abroad. It's much more affordable than my phone carrier's international rates.
+                  </p>
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-gray-900">Miguel R.</div>
-                <div className="text-sm text-gray-600">Canada</div>
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">M</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Miguel R.</div>
+                  <div className="text-sm text-gray-600 flex items-center">
+                    <span className="mr-1">🇨🇦</span> Canada
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="bg-blue-100 rounded-3xl p-8">
+            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
               <div className="mb-6">
-                <Star className="h-8 w-8 text-blue-500 mb-4" />
-                <p className="text-gray-700 italic">
-                  "I lost access to my bank while nomading in Southeast Asia. I stumbled upon Yadaphone, called my bank, and solved everything in no time!"
-                </p>
+                <div className="flex items-center space-x-2 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <div className="relative">
+                  <div className="absolute -top-2 -left-2 text-6xl text-blue-200 font-serif">"</div>
+                  <p className="text-gray-700 italic text-lg leading-relaxed pl-6">
+                    I lost access to my bank while nomading in Southeast Asia. I stumbled upon Yadaphone, called my bank, and solved everything in no time!
+                  </p>
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-gray-900">James M.</div>
-                <div className="text-sm text-gray-600">United States</div>
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">J</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">James M.</div>
+                  <div className="text-sm text-gray-600 flex items-center">
+                    <span className="mr-1">🇺🇸</span> United States
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="bg-blue-100 rounded-3xl p-8">
+            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
               <div className="mb-6">
-                <Star className="h-8 w-8 text-blue-500 mb-4" />
-                <p className="text-gray-700 italic">
-                  "I had to call the tax authorities in my base country from abroad. I've spent hours talking to the officials on Yadaphone and only spent a couple of dollars. Everything was perfect and it saved me a lot of nerves!"
-                </p>
+                <div className="flex items-center space-x-2 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <div className="relative">
+                  <div className="absolute -top-2 -left-2 text-6xl text-blue-200 font-serif">"</div>
+                  <p className="text-gray-700 italic text-lg leading-relaxed pl-6">
+                    I had to call the tax authorities in my base country from abroad. I've spent hours talking to the officials on Yadaphone and only spent a couple of dollars. Everything was perfect and it saved me a lot of nerves!
+                  </p>
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-gray-900">Thomas L.</div>
-                <div className="text-sm text-gray-600">Germany</div>
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">T</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Thomas L.</div>
+                  <div className="text-sm text-gray-600 flex items-center">
+                    <span className="mr-1">🇩🇪</span> Germany
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Trust indicators */}
+          <div className="mt-16 text-center">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-200/50 inline-block">
+              <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-blue-500" />
+                  <span className="font-medium">10,000+ Happy Customers</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  <span className="font-medium">4.9/5 Average Rating</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Globe className="h-5 w-5 text-green-500" />
+                  <span className="font-medium">180+ Countries Served</span>
+                </div>
               </div>
             </div>
           </div>
