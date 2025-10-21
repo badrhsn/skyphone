@@ -14,7 +14,11 @@ interface Provider {
 // Provider configurations
 const providers = {
   twilio: {
-    client: twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!),
+    client: process.env.TWILIO_API_KEY 
+      ? twilio(process.env.TWILIO_API_KEY, process.env.TWILIO_API_SECRET, {
+          accountSid: process.env.TWILIO_ACCOUNT_SID
+        })
+      : twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!),
     phoneNumber: process.env.TWILIO_PHONE_NUMBER!,
     priority: 1,
     regions: ['US', 'CA', 'GB', 'AU'], // Primary regions for Twilio

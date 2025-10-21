@@ -74,6 +74,8 @@ model Call {
   cost        Float
   status      CallStatus @default(INITIATED)
   twilioSid   String?
+  recordingSid String?  // Twilio recording SID
+  recordingUrl String?  // URL to access recording
   createdAt   DateTime @default(now())
   endedAt     DateTime?
 

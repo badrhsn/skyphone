@@ -108,6 +108,8 @@ export async function GET(request: NextRequest) {
         fromNumber: true,
         duration: true,
         status: true,
+        recordingSid: true,
+        recordingUrl: true,
         createdAt: true,
       },
       orderBy: {
@@ -119,14 +121,14 @@ export async function GET(request: NextRequest) {
 
     const total = await prisma.call.count({ where })
 
-    // Mock recording data (in production, this would come from actual storage)
+    // Use actual recording data
     const recordingsWithUrls = recordings.map(call => ({
       ...call,
-      hasRecording: Math.random() > 0.5, // Mock: 50% of calls have recordings
-      recordingUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/recordings/${call.twilioSid}/recording.mp3`,
+      hasRecording: !!call.recordingUrl,
+      recordingUrl: call.recordingUrl || null,
       recordingDuration: call.duration,
-      recordingSize: `${((call.duration || 0) * 0.5).toFixed(1)}MB`,
-      recordingFormat: 'mp3'
+      recordingSize: call.duration ? `${((call.duration || 0) * 0.5).toFixed(1)}MB` : null,
+      recordingFormat: call.recordingUrl ? 'mp3' : null
     }))
 
     return NextResponse.json({
