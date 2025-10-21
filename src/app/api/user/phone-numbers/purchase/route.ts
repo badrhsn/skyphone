@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 import { purchasePhoneNumber } from "@/lib/twilio";
 import { stripe } from "@/lib/stripe";
+import { processPaymentWithAutoTopup } from "@/lib/auto-topup";
 
 const prisma = new PrismaClient();
 
@@ -45,14 +46,34 @@ export async function POST(request: NextRequest) {
 
     // Check payment method preference
     if (paymentMethod === "balance" || (!paymentMethod && user.balance >= totalCost)) {
-      // User has sufficient balance - proceed with direct purchase
+      // Check if user has sufficient balance or can auto top-up
       if (user.balance < totalCost) {
-        return NextResponse.json({ 
-          error: "Insufficient balance",
-          required: totalCost,
-          current: user.balance,
-          redirectToCheckout: true
-        }, { status: 400 });
+        // Try to process payment with auto top-up
+        const { processPaymentWithAutoTopup } = await import("@/lib/auto-topup");
+        const paymentResult = await processPaymentWithAutoTopup(user.id, totalCost);
+        
+        if (!paymentResult.success) {
+          return NextResponse.json({ 
+            error: "Insufficient balance. Please add credits or enable auto top-up.",
+            required: totalCost,
+            current: user.balance,
+            redirectToCheckout: true,
+            autoTopupSuggested: true
+          }, { status: 400 });
+        }
+        
+        // Auto top-up was successful, continue with purchase
+        // Balance has already been deducted by processPaymentWithAutoTopup
+      } else {
+        // User has sufficient balance, deduct it manually
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            balance: {
+              decrement: totalCost
+            }
+          }
+        });
       }
 
       try {

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { initiateCall } from "@/lib/twilio";
+import { checkBalanceBeforeCall } from "@/lib/auto-topup";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { to, from } = await request.json();
+    const { to, from, callerIdType, callerIdInfo } = await request.json();
 
     if (!to) {
       return NextResponse.json(
@@ -21,20 +22,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's current balance
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { balance: true },
-    });
+    // Validate verified caller ID if specified
+    if (callerIdType === "verified" && callerIdInfo?.verifiedId) {
+      const verifiedCallerId = await (prisma as any).callerID.findFirst({
+        where: {
+          userId: session.user.id,
+          phoneNumber: callerIdInfo.verifiedId,
+          status: 'VERIFIED'
+        }
+      });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (!verifiedCallerId) {
+        return NextResponse.json(
+          { error: "Caller ID not verified or not found" },
+          { status: 400 }
+        );
+      }
     }
 
-    // Check if user has sufficient balance (minimum $1)
-    if (user.balance < 1) {
+    // Check balance and trigger auto top-up if needed
+    const balanceCheck = await checkBalanceBeforeCall(session.user.id, 1.0);
+    
+    if (!balanceCheck.canProceed) {
       return NextResponse.json(
-        { error: "Insufficient balance. Please add credits." },
+        { 
+          error: "Insufficient balance. Please add credits or enable auto top-up.",
+          autoTopupSuggested: true
+        },
         { status: 400 }
       );
     }
@@ -66,6 +80,12 @@ export async function POST(request: NextRequest) {
         country: rate.country,
         status: "INITIATED",
         cost: 0, // Will be updated when call ends
+        callerIdType: callerIdType || 'public',
+        // Add caller ID metadata for analytics
+        metadata: callerIdType ? JSON.stringify({ 
+          callerIdType, 
+          isVerifiedCallerId: callerIdType === 'verified' 
+        }) : null,
       },
     });
 

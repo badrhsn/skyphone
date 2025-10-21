@@ -344,6 +344,75 @@ export const releasePhoneNumber = async (phoneNumberSid: string) => {
   }
 }
 
+// SMS Functions for Caller ID Verification
+export const sendSMS = async (to: string, message: string, from?: string) => {
+  try {
+    const fromNumber = from || providers.twilio.phoneNumber
+    
+    const sms = await client.messages.create({
+      to,
+      from: fromNumber,
+      body: message
+    })
+
+    return {
+      sid: sms.sid,
+      status: sms.status,
+      to: sms.to,
+      from: sms.from,
+      body: sms.body,
+      dateCreated: sms.dateCreated
+    }
+  } catch (error) {
+    console.error('Error sending SMS:', error)
+    throw error
+  }
+}
+
+export const sendCallerIdVerificationSMS = async (to: string, verificationCode: string) => {
+  const message = `Your YadaPhone caller ID verification code is: ${verificationCode}. This code expires in 15 minutes.`
+  
+  try {
+    return await sendSMS(to, message)
+  } catch (error) {
+    console.error('Error sending verification SMS:', error)
+    throw error
+  }
+}
+
+// Voice Call Verification (alternative to SMS)
+export const makeVerificationCall = async (to: string, verificationCode: string) => {
+  try {
+    const call = await client.calls.create({
+      to,
+      from: providers.twilio.phoneNumber,
+      twiml: `
+        <Response>
+          <Say voice="alice" language="en-US">
+            Hello! Your YadaPhone caller ID verification code is: 
+            <say-as interpret-as="digits">${verificationCode}</say-as>
+            I repeat, your verification code is: 
+            <say-as interpret-as="digits">${verificationCode}</say-as>
+            This code expires in 15 minutes. Thank you!
+          </Say>
+        </Response>
+      `
+    })
+
+    return {
+      sid: call.sid,
+      status: call.status,
+      to: call.to,
+      from: call.from,
+      direction: call.direction,
+      dateCreated: call.dateCreated
+    }
+  } catch (error) {
+    console.error('Error making verification call:', error)
+    throw error
+  }
+}
+
 // Helper function to get pricing based on country and type
 const getPhoneNumberPrice = (countryCode: string, type: 'local' | 'toll-free'): number => {
   const pricing: { [key: string]: { local: number; tollFree: number } } = {

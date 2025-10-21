@@ -49,8 +49,7 @@ export default function Dialer() {
   const [rates, setRates] = useState<CallRate[]>([]);
   const [selectedRate, setSelectedRate] = useState<CallRate | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [callerIdOption, setCallerIdOption] = useState<"public" | "custom" | "bought">("public");
-  const [customCallerId, setCustomCallerId] = useState("");
+  const [callerIdOption, setCallerIdOption] = useState<"public" | "bought" | "verified">("public");
   const [showCallerOptions, setShowCallerOptions] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState({ name: "United States", flag: "🇺🇸", code: "+1" });
   const [showCountryOptions, setShowCountryOptions] = useState(false);
@@ -59,6 +58,11 @@ export default function Dialer() {
   const [countrySearch, setCountrySearch] = useState("");
   const [countries, setCountries] = useState<{ name: string; flag: string; code: string }[]>([]);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+  const [verifiedCallerIds, setVerifiedCallerIds] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [showContactsList, setShowContactsList] = useState(false);
+  const [contactSearch, setContactSearch] = useState("");
+  
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
@@ -67,6 +71,8 @@ export default function Dialer() {
       fetchUserData();
       fetchAvailableNumbers();
       fetchCountries();
+      fetchVerifiedCallerIds();
+      fetchContacts();
     }
   }, [status, router]);
 
@@ -95,13 +101,18 @@ export default function Dialer() {
       if (showCallerOptions && !target.closest('[data-caller-dropdown]')) {
         setShowCallerOptions(false);
       }
+      
+      // Check if click is outside the contacts dropdown
+      if (showContactsList && !target.closest('[data-contacts-dropdown]')) {
+        setShowContactsList(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showCallerOptions, showCountryOptions]);
+  }, [showCallerOptions, showCountryOptions, showContactsList]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -144,14 +155,58 @@ export default function Dialer() {
         const numbers = await response.json();
         setAvailableNumbers(numbers);
         
-        // Set default caller ID if user has bought numbers
-        if (numbers.length > 0 && !selectedCallerId) {
-          setSelectedCallerId(numbers[0].phoneNumber);
-          setCallerIdOption("bought");
+        // Set default caller ID based on priority: public > bought > verified
+        if (!selectedCallerId) {
+          const publicNumbers = numbers.filter((num: any) => num.type === 'public');
+          const boughtNumbers = numbers.filter((num: any) => num.type === 'premium');
+          
+          if (publicNumbers.length > 0) {
+            setSelectedCallerId(publicNumbers[0].phoneNumber);
+            setCallerIdOption("public");
+          } else if (boughtNumbers.length > 0) {
+            setSelectedCallerId(boughtNumbers[0].phoneNumber);
+            setCallerIdOption("bought");
+          } else {
+            // Fallback to default platform number if no numbers in API
+            setSelectedCallerId("+12293983710");
+            setCallerIdOption("public");
+          }
         }
       }
     } catch (error) {
       console.error("Failed to fetch available numbers:", error);
+    }
+  };
+
+  const fetchVerifiedCallerIds = async () => {
+    try {
+      const response = await fetch("/api/user/caller-ids");
+      if (response.ok) {
+        const data = await response.json();
+        const verified = data.callerIds?.filter((id: any) => id.status === 'VERIFIED') || [];
+        setVerifiedCallerIds(verified);
+        
+        // Set default verified caller ID if no other caller ID is selected
+        if (verified.length > 0 && !selectedCallerId && availableNumbers.length === 0) {
+          setSelectedCallerId(verified[0].phoneNumber);
+          setCallerIdOption("verified");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch verified caller IDs:", error);
+    }
+  };
+
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch("/api/user/contacts");
+      if (response.ok) {
+        const data = await response.json();
+        setContacts(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch contacts:", error);
+      setContacts([]);
     }
   };
 
@@ -256,6 +311,14 @@ export default function Dialer() {
     });
   };
 
+  const handleContactSelect = (contact: any) => {
+    if (isCalling) return;
+    setPhoneNumber(contact.phoneNumber);
+    const rate = detectCountry(contact.phoneNumber);
+    setSelectedRate(rate);
+    setShowContactsList(false);
+  };
+
   const deleteLastDigit = () => {
     if (isCalling) return;
     setPhoneNumber(prev => {
@@ -299,8 +362,16 @@ export default function Dialer() {
     try {
       const callerInfo = {
         type: callerIdOption,
-        customId: callerIdOption === "custom" ? customCallerId : null,
+        verifiedId: callerIdOption === "verified" ? selectedCallerId : null,
       };
+
+      // Determine the "from" number based on caller ID type
+      let fromNumber = "+1234567890"; // Default fallback
+      if (callerIdOption === "verified" && selectedCallerId) {
+        fromNumber = selectedCallerId;
+      } else if (callerIdOption === "bought" && selectedCallerId) {
+        fromNumber = selectedCallerId;
+      }
 
       const response = await fetch("/api/calls/initiate", {
         method: "POST",
@@ -309,10 +380,9 @@ export default function Dialer() {
         },
         body: JSON.stringify({
           to: phoneNumber,
-          from: callerInfo.type === "custom" && callerInfo.customId 
-            ? callerInfo.customId 
-            : "+1234567890", // Default number
+          from: fromNumber,
           callerIdType: callerIdOption,
+          callerIdInfo: callerInfo,
         }),
       });
 
@@ -517,6 +587,17 @@ export default function Dialer() {
                   </svg>
                 </button>
               )}
+
+              {/* Contacts Button */}
+              <button
+                type="button"
+                onClick={() => setShowContactsList(!showContactsList)}
+                className="p-1.5 mr-2 hover:bg-blue-50 rounded-full transition-colors text-blue-600 flex-shrink-0"
+                disabled={isCalling}
+                title="Select from contacts"
+              >
+                <Contact className="w-5 h-5" />
+              </button>
             </div>
 
             {/* Country Dropdown */}
@@ -569,6 +650,69 @@ export default function Dialer() {
               </div>
             )}
 
+            {/* Contacts Dropdown */}
+            {showContactsList && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-72 overflow-hidden z-50" data-contacts-dropdown="menu">
+                {/* Search Input */}
+                <div className="p-3 border-b border-gray-100">
+                  <input
+                    type="text"
+                    placeholder="Search contacts..."
+                    value={contactSearch}
+                    onChange={(e) => setContactSearch(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
+                
+                {/* Contacts List */}
+                <div className="max-h-48 overflow-y-auto">
+                  {contacts.length === 0 ? (
+                    <div className="px-4 py-6 text-center">
+                      <Contact className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 text-sm mb-3">No contacts yet</p>
+                      <button
+                        onClick={() => router.push("/dashboard/contacts")}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                      >
+                        Add your first contact
+                      </button>
+                    </div>
+                  ) : (
+                    (() => {
+                      const filteredContacts = contacts.filter(contact =>
+                        contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
+                        contact.phoneNumber.includes(contactSearch)
+                      );
+                      
+                      return filteredContacts.length === 0 ? (
+                        <div className="px-3 py-4 text-gray-500 text-sm text-center">
+                          No contacts found for "{contactSearch}"
+                        </div>
+                      ) : (
+                        filteredContacts.map((contact: any) => (
+                          <button
+                            key={contact.id}
+                            onClick={() => handleContactSelect(contact)}
+                            className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="bg-blue-100 p-2 rounded-full">
+                              <Contact className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 truncate">{contact.name}</p>
+                              <p className="text-sm text-gray-500 truncate">{contact.phoneNumber}</p>
+                            </div>
+                            <Phone className="w-4 h-4 text-green-600" />
+                          </button>
+                        ))
+                      );
+                    })()
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Optional: Number formatting hint */}
             {phoneNumber && (
               <div className="px-4 pb-2">
@@ -591,9 +735,9 @@ export default function Dialer() {
                 >
                   <Globe className="h-4 w-4 text-white" />
                   <span className="font-bold">
-                    {callerIdOption === "public" && "Public number"}
-                    {callerIdOption === "custom" && customCallerId ? customCallerId : "Custom caller ID"}
-                    {callerIdOption === "bought" && selectedCallerId ? selectedCallerId : "Bought number"}
+                    {callerIdOption === "public" && (selectedCallerId || "Public number")}
+                    {callerIdOption === "bought" && (selectedCallerId || "Bought number")}
+                    {callerIdOption === "verified" && (selectedCallerId || "Verified caller ID")}
                   </span>
                   <svg className={`h-4 w-4 text-white transition-transform ${showCallerOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -604,116 +748,204 @@ export default function Dialer() {
                 {showCallerOptions && (
                   <div className="absolute right-0 mt-2 w-72 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl border border-blue-200 py-2 z-50 animate-in slide-in-from-top-2 max-h-96 overflow-y-auto" data-caller-dropdown="menu">
                     
-                    {/* Public Numbers Section */}
+                    {/* Public Numbers Section - Always Available */}
                     <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100">
-                      Public Numbers
+                      🌐 Platform Numbers (Free)
                     </div>
                     
-                    {availableNumbers.filter(num => num.type === 'public').map((number) => (
+                    {/* Show available public numbers OR fallback option */}
+                    {availableNumbers.filter(num => num.type === 'public').length > 0 ? (
+                      availableNumbers.filter(num => num.type === 'public').map((number) => (
+                        <button 
+                          key={number.id}
+                          onClick={() => {
+                            setCallerIdOption("public");
+                            setSelectedCallerId(number.phoneNumber);
+                            setShowCallerOptions(false);
+                          }}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
+                            callerIdOption === "public" && selectedCallerId === number.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
+                          }`}
+                        >
+                          <Globe className="h-5 w-5 text-blue-600" />
+                          <div className="flex-1 text-left">
+                            <div className="text-gray-900 font-medium">{number.phoneNumber}</div>
+                            <div className="text-xs text-gray-500">{number.country}</div>
+                          </div>
+                          {callerIdOption === "public" && selectedCallerId === number.phoneNumber && 
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          }
+                        </button>
+                      ))
+                    ) : (
+                      /* Fallback: Default platform number */
                       <button 
-                        key={number.id}
                         onClick={() => {
                           setCallerIdOption("public");
-                          setSelectedCallerId(number.phoneNumber);
+                          setSelectedCallerId("+12293983710"); // Your default Twilio number
                           setShowCallerOptions(false);
                         }}
                         className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                          callerIdOption === "public" && selectedCallerId === number.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
+                          callerIdOption === "public" ? "bg-blue-100 border-r-2 border-blue-500" : ""
                         }`}
                       >
                         <Globe className="h-5 w-5 text-blue-600" />
                         <div className="flex-1 text-left">
-                          <div className="text-gray-900 font-medium">{number.phoneNumber}</div>
-                          <div className="text-xs text-gray-500">{number.country}</div>
+                          <div className="text-gray-900 font-medium">+12293983710</div>
+                          <div className="text-xs text-gray-500">United States • Default</div>
                         </div>
-                        {callerIdOption === "public" && selectedCallerId === number.phoneNumber && 
+                        {callerIdOption === "public" && 
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         }
                       </button>
-                    ))}
+                    )}
 
                     {/* Bought Numbers Section */}
-                    {availableNumbers.filter(num => num.type === 'premium').length > 0 && (
-                      <>
-                        <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100 mt-2">
-                          Your Numbers
-                        </div>
-                        
-                        {availableNumbers.filter(num => num.type === 'premium').map((number) => (
-                          <button 
-                            key={number.id}
-                            onClick={() => {
-                              setCallerIdOption("bought");
-                              setSelectedCallerId(number.phoneNumber);
-                              setShowCallerOptions(false);
-                            }}
-                            className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                              callerIdOption === "bought" && selectedCallerId === number.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
-                            }`}
-                          >
-                            <Phone className="h-5 w-5 text-green-600" />
-                            <div className="flex-1 text-left">
-                              <div className="text-gray-900 font-medium">{number.phoneNumber}</div>
-                              <div className="text-xs text-green-600">${number.monthlyFee}/month</div>
-                            </div>
-                            {callerIdOption === "bought" && selectedCallerId === number.phoneNumber && 
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            }
-                          </button>
-                        ))}
-                      </>
-                    )}
-                    
-                    {/* Custom Caller ID Option */}
                     <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100 mt-2">
-                      Custom Options
+                      📱 Your Bought Numbers
                     </div>
                     
-                    <button 
-                      onClick={() => {
-                        setCallerIdOption("custom");
-                        setShowCallerOptions(false);
-                      }}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                        callerIdOption === "custom" ? "bg-blue-100 border-r-2 border-blue-500" : ""
-                      }`}
-                    >
-                      <MessageCircle className="h-5 w-5 text-purple-600" />
-                      <span className="text-gray-900 font-medium">Custom caller ID</span>
-                      {callerIdOption === "custom" && <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full"></div>}
-                    </button>
+                    {availableNumbers.filter(num => num.type === 'premium').length > 0 ? (
+                      availableNumbers.filter(num => num.type === 'premium').map((number) => (
+                        <button 
+                          key={number.id}
+                          onClick={() => {
+                            setCallerIdOption("bought");
+                            setSelectedCallerId(number.phoneNumber);
+                            setShowCallerOptions(false);
+                          }}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
+                            callerIdOption === "bought" && selectedCallerId === number.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
+                          }`}
+                        >
+                          <Phone className="h-5 w-5 text-green-600" />
+                          <div className="flex-1 text-left">
+                            <div className="text-gray-900 font-medium">{number.phoneNumber}</div>
+                            <div className="text-xs text-green-600">${number.monthlyFee}/month</div>
+                          </div>
+                          {callerIdOption === "bought" && selectedCallerId === number.phoneNumber && 
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          }
+                        </button>
+                      ))
+                    ) : (
+                      /* No bought numbers - show buy option */
+                      <div className="px-4 py-3 text-gray-500 text-sm">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Phone className="h-4 w-4 text-gray-400" />
+                          <span>No numbers purchased yet</span>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            router.push("/dashboard/buy-number");
+                            setShowCallerOptions(false);
+                          }}
+                          className="text-green-600 hover:text-green-700 text-xs font-medium"
+                        >
+                          → Buy your first number
+                        </button>
+                      </div>
+                    )}
                     
-                    {/* Buy More Numbers */}
-                    <button 
-                      onClick={() => {
-                        router.push("/dashboard/buy-number");
-                        setShowCallerOptions(false);
-                      }}
-                      className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-green-50 transition-colors border-2 border-dashed border-green-200 mx-2 my-2 rounded-xl"
-                    >
-                      <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      <span className="text-gray-900 font-medium">Buy phone number</span>
-                      <span className="ml-auto bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">NEW</span>
-                    </button>
+                    {/* Verified Caller IDs Section */}
+                    <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100 mt-2">
+                      ✅ Your Verified Numbers
+                    </div>
+                    
+                    {verifiedCallerIds.length > 0 ? (
+                      verifiedCallerIds.map((callerId) => (
+                        <button 
+                          key={callerId.id}
+                          onClick={() => {
+                            setCallerIdOption("verified");
+                            setSelectedCallerId(callerId.phoneNumber);
+                            setShowCallerOptions(false);
+                          }}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
+                            callerIdOption === "verified" && selectedCallerId === callerId.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
+                          }`}
+                        >
+                          <div className="h-5 w-5 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 text-left">
+                            <div className="text-gray-900 font-medium">{callerId.phoneNumber}</div>
+                            <div className="text-xs text-green-600">✅ Verified • Custom rates may apply</div>
+                          </div>
+                          {callerIdOption === "verified" && selectedCallerId === callerId.phoneNumber && 
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          }
+                        </button>
+                      ))
+                    ) : (
+                      /* No verified caller IDs - show add option */
+                      <div className="px-4 py-3 text-gray-500 text-sm">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="h-4 w-4 bg-gray-300 rounded-full flex items-center justify-center">
+                            <svg className="h-2 w-2 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <span>No caller IDs verified yet</span>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            router.push("/dashboard/settings");
+                            setShowCallerOptions(false);
+                          }}
+                          className="text-blue-600 hover:text-blue-700 text-xs font-medium"
+                        >
+                          → Verify your own number
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Quick Actions */}
+                    <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100 mt-2">
+                      🚀 Quick Actions
+                    </div>
+                    
+                    <div className="p-2 space-y-2">
+                      {/* Verify Your Own Number */}
+                      <button 
+                        onClick={() => {
+                          router.push("/dashboard/settings");
+                          setShowCallerOptions(false);
+                        }}
+                        className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-blue-50 transition-colors border border-dashed border-blue-200 rounded-lg"
+                      >
+                        <div className="h-4 w-4 bg-blue-100 rounded-full flex items-center justify-center">
+                          <svg className="h-2 w-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700 text-sm font-medium">Verify your number</span>
+                        <span className="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium">FREE</span>
+                      </button>
+                      
+                      {/* Buy More Numbers */}
+                      <button 
+                        onClick={() => {
+                          router.push("/dashboard/buy-number");
+                          setShowCallerOptions(false);
+                        }}
+                        className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-green-50 transition-colors border border-dashed border-green-200 rounded-lg"
+                      >
+                        <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span className="text-gray-700 text-sm font-medium">Buy phone number</span>
+                        <span className="ml-auto bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">PREMIUM</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
             
-            {/* Custom Caller ID Input */}
-            {callerIdOption === "custom" && (
-              <div className="mb-4">
-                <input
-                  type="tel"
-                  value={customCallerId}
-                  onChange={(e) => setCustomCallerId(e.target.value)}
-                  placeholder="Enter custom caller ID"
-                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-white rounded-xl border border-blue-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            )}
+
             
             <button 
               onClick={() => router.push("/dashboard/contacts")}
@@ -833,6 +1065,40 @@ export default function Dialer() {
               </button>
             </div>
           </div>
+
+          {/* Quick Contacts Section */}
+          {contacts.length > 0 && (
+            <div className="px-6 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-gray-700 text-sm font-medium">Quick Contacts</h3>
+                <button
+                  onClick={() => router.push("/dashboard/contacts")}
+                  className="text-blue-600 text-xs hover:text-blue-700 transition-colors"
+                >
+                  View all
+                </button>
+              </div>
+              <div className="space-y-2">
+                {contacts.slice(0, 3).map((contact: any) => (
+                  <button
+                    key={contact.id}
+                    onClick={() => handleContactSelect(contact)}
+                    disabled={isCalling}
+                    className="w-full flex items-center space-x-3 p-3 bg-white hover:bg-gray-50 rounded-xl transition-colors shadow-sm border border-gray-100 disabled:opacity-50"
+                  >
+                    <div className="bg-blue-100 p-2 rounded-full">
+                      <Contact className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1 text-left min-w-0">
+                      <p className="font-medium text-gray-900 truncate text-sm">{contact.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{contact.phoneNumber}</p>
+                    </div>
+                    <Phone className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Simple Call Button */}
           <div className="px-6 pb-6">

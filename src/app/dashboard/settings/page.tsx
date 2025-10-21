@@ -8,19 +8,25 @@ import {
   User, 
   CreditCard, 
   ArrowLeft, 
-  Save, 
   Phone,
-  Key,
+  Shield,
   Gift,
   Eye,
   Lock,
   LogOut,
   Plus,
   CheckCircle,
-  X
+  X,
+  Edit3,
+  Wallet,
+  Bell,
+  ChevronRight,
+  Key
 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import AutoTopupComponent from "@/components/AutoTopupComponent";
+import CallerIDComponent from "@/components/CallerIDComponent";
 
 interface UserProfile {
   id: string;
@@ -44,7 +50,6 @@ export default function Settings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [autoTopUp, setAutoTopUp] = useState(false);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [availableNumbers, setAvailableNumbers] = useState<any[]>([]);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -112,7 +117,6 @@ export default function Settings() {
         },
         body: JSON.stringify({
           name: profile?.name,
-          autoTopUp,
         }),
       });
 
@@ -189,86 +193,82 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header is already rendered by layout */}
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-lg border border-gray-200">
-          
-          {/* Page Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
-              <div className="bg-blue-100 p-3 rounded-full">
-                <SettingsIcon className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Account Settings</h1>
-                <p className="text-gray-600">Manage your account preferences and settings</p>
-              </div>
-            </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
             <Link
               href="/dashboard"
-              className="text-gray-700 hover:text-blue-600 flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-200 text-gray-600 hover:text-gray-900 hover:shadow-md transition-all duration-200"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
+              <ArrowLeft className="h-5 w-5" />
             </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+              <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+            </div>
           </div>
+        </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            
-            {/* Left Column */}
-            <div className="space-y-6">
+        {/* Settings Cards */}
+        <div className="space-y-6">
+          
+          {/* Profile Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <User className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Profile</h2>
+                    <p className="text-gray-600 text-sm">Manage your account information</p>
+                  </div>
+                </div>
+                <button className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Edit3 className="h-5 w-5" />
+                </button>
+              </div>
               
-              {/* Account Information */}
-              <div className="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-blue-500 p-2 rounded-full">
-                    <User className="h-5 w-5 text-white" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-800">Account Information</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <div className="mt-1 text-gray-900 font-medium">{profile?.email}</div>
                 </div>
-                
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4">
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 font-medium">Email:</span>
-                        <span className="text-gray-900">{profile?.email}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 font-medium">Member since:</span>
-                        <span className="text-gray-900">
-                          {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-3">
-                    <button className="text-blue-600 hover:text-blue-700 flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                      <Eye className="h-4 w-4" />
-                      <span>View billing portal</span>
-                    </button>
-                    <button 
-                      onClick={() => setShowChangePassword(!showChangePassword)}
-                      className="text-purple-600 hover:text-purple-700 flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-purple-200 hover:border-purple-300 transition-colors"
-                    >
-                      <Lock className="h-4 w-4" />
-                      <span>Change password</span>
-                    </button>
-                    <button 
-                      onClick={handleSignOut}
-                      className="text-red-600 hover:text-red-700 flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-red-200 hover:border-red-300 transition-colors"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Sign out</span>
-                    </button>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Member since</label>
+                  <div className="mt-1 text-gray-900 font-medium">
+                    {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                   </div>
                 </div>
-
-                {/* Change Password Form */}
-                {showChangePassword && (
+              </div>
+              
+              <div className="flex items-center space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <button 
+                  onClick={() => setShowChangePassword(!showChangePassword)}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <Lock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Change Password</span>
+                </button>
+                <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Eye className="h-4 w-4" />
+                  <span className="text-sm font-medium">Billing Portal</span>
+                </button>
+                <button 
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2 text-red-600 hover:text-red-700 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors ml-auto"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="text-sm font-medium">Sign Out</span>
+                </button>
+              </div>
+              
+              {/* Change Password Form */}
+              {showChangePassword && (
                   <form onSubmit={handleChangePassword} className="mt-6 p-6 bg-white rounded-xl border border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Change Password</h3>
                     <div className="space-y-4">
@@ -317,103 +317,144 @@ export default function Settings() {
                     </div>
                   </form>
                 )}
-              </div>
-
-              {/* Balance */}
-              <div className="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="bg-blue-500 p-2 rounded-full">
-                    <CreditCard className="h-5 w-5 text-white" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-800">Balance</h2>
-                </div>
-                
-                <div className="bg-white rounded-xl p-6 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-blue-100 p-3 rounded-full">
-                        <span className="text-2xl">💰</span>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600 font-medium">Current Balance</p>
-                        <p className="text-3xl font-bold text-gray-900">${profile?.balance?.toFixed(2) || "0.00"}</p>
-                      </div>
-                    </div>
-                    <Link
-                      href="/dashboard/add-credits"
-                      className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 flex items-center space-x-2 transition-colors"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span>Add Credits</span>
-                    </Link>
-                  </div>
-                </div>
-                
-                <div className="bg-white rounded-xl p-4">
-                  <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      id="autoTopUp"
-                      checked={autoTopUp}
-                      onChange={(e) => setAutoTopUp(e.target.checked)}
-                      className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <div>
-                      <label htmlFor="autoTopUp" className="text-sm font-medium text-gray-900">
-                        Auto top-up when low
-                      </label>
-                      <p className="text-xs text-gray-600">Never interrupt an important call</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="mt-4 w-full bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
-                >
-                  {isSaving ? "Saving..." : "Save Settings"}
-                </button>
-              </div>
             </div>
+          </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              
-              {/* Promo Codes */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-purple-100 p-2 rounded-full">
-                    <Gift className="h-5 w-5 text-purple-600" />
+          {/* Balance Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-green-600" />
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-800">Promo Codes</h2>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Balance</h2>
+                    <p className="text-gray-600 text-sm">Manage your account balance</p>
+                  </div>
                 </div>
-                {promoCodes.length > 0 ? (
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl mb-4">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Current Balance</p>
+                  <p className="text-3xl font-bold text-gray-900">${profile?.balance?.toFixed(2) || "0.00"}</p>
+                </div>
+                <Link
+                  href="/dashboard/add-credits"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium flex items-center space-x-2 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Credits</span>
+                </Link>
+              </div>
+                
+
+            </div>
+          </div>
+
+          {/* Auto Top-up Settings */}
+          <AutoTopupComponent />
+
+          {/* Caller ID Settings */}
+          <CallerIDComponent />
+
+          {/* Additional Settings */}
+          <div className="grid md:grid-cols-2 gap-6">
+            
+            {/* Phone Numbers Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <Phone className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Phone Numbers</h2>
+                      <p className="text-gray-600 text-sm">Manage your phone numbers</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard/buy-number"
+                    className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                  >
+                    <Plus className="h-5 w-5" />
+                  </Link>
+                </div>
+                
+                {availableNumbers.filter(num => num.type === 'premium').length > 0 ? (
                   <div className="space-y-3">
-                    {promoCodes.map((promo) => (
-                      <div key={promo.id} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-bold text-purple-800 text-lg">{promo.code}</div>
-                            <div className="text-sm text-purple-600">{promo.discount}% discount</div>
-                          </div>
-                          <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            promo.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                    {availableNumbers.filter(num => num.type === 'premium').slice(0, 3).map((number) => (
+                      <div key={number.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <div className="font-medium text-gray-900">{number.phoneNumber}</div>
+                          <div className="text-sm text-gray-600">{number.country}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-gray-900">${number.monthlyFee}/mo</div>
+                          <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                            number.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
                           }`}>
-                            {promo.isActive ? "Active" : "Used"}
+                            {number.isActive ? "Active" : "Inactive"}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-gray-50 rounded-xl p-6 text-center">
-                    <div className="text-4xl mb-3">🎁</div>
-                    <p className="text-gray-600 mb-2">You don't have any active promo codes at the moment.</p>
-                    <p className="text-sm text-gray-500">Complete feedback surveys to earn discount codes!</p>
+                  <div className="text-center py-8">
+                    <Phone className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-600 mb-4">No phone numbers</p>
+                    <Link
+                      href="/dashboard/buy-number"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center space-x-2 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Buy Number</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Promo Codes Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                      <Gift className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Promo Codes</h2>
+                      <p className="text-gray-600 text-sm">Active discount codes</p>
+                    </div>
+                  </div>
+                </div>
+                {promoCodes.length > 0 ? (
+                  <div className="space-y-3">
+                    {promoCodes.slice(0, 3).map((promo) => (
+                      <div key={promo.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                        <div>
+                          <div className="font-bold text-purple-800">{promo.code}</div>
+                          <div className="text-sm text-purple-600">{promo.discount}% discount</div>
+                        </div>
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          promo.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {promo.isActive ? "Active" : "Used"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Gift className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-600 mb-4">No promo codes</p>
                     <Link
                       href="/earn-credits"
-                      className="inline-flex items-center space-x-2 bg-purple-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-600 transition-colors mt-3"
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center space-x-2 transition-colors"
                     >
                       <Gift className="h-4 w-4" />
                       <span>Earn Credits</span>
@@ -421,81 +462,19 @@ export default function Settings() {
                   </div>
                 )}
               </div>
-
-              {/* Phone Numbers */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-blue-100 p-2 rounded-full">
-                    <Phone className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-800">Phone Numbers</h2>
-                </div>
-                {availableNumbers.filter(num => num.type === 'premium').length > 0 ? (
-                  <div className="space-y-3">
-                    {availableNumbers.filter(num => num.type === 'premium').map((number) => (
-                      <div key={number.id} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-bold text-blue-800 text-lg">{number.phoneNumber}</div>
-                            <div className="text-sm text-blue-600">{number.country}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-blue-800">${number.monthlyFee}/month</div>
-                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              number.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-                            }`}>
-                              {number.isActive ? "Active" : "Inactive"}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-xl p-6 text-center">
-                    <div className="text-4xl mb-3">📱</div>
-                    <p className="text-gray-600 mb-4">No phone numbers found</p>
-                    <Link
-                      href="/dashboard/buy-number"
-                      className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 flex items-center space-x-2 mx-auto transition-colors"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span>Buy a new phone number</span>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* Caller IDs */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-orange-100 p-2 rounded-full">
-                    <Key className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-800">Caller IDs</h2>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-6 text-center">
-                  <div className="text-4xl mb-3">🆔</div>
-                  <p className="text-gray-600 mb-4">No caller IDs found</p>
-                  <button className="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 flex items-center space-x-2 mx-auto transition-colors">
-                    <Plus className="h-4 w-4" />
-                    <span>Add a new caller ID</span>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 
           {/* Message Display */}
           {message && (
-            <div className={`mt-8 p-4 rounded-xl border ${
+            <div className={`p-4 rounded-xl border ${
               message.includes("successfully") 
-                ? "bg-blue-50 text-blue-700 border-blue-200" 
+                ? "bg-green-50 text-green-700 border-green-200" 
                 : "bg-red-50 text-red-700 border-red-200"
             }`}>
               <div className="flex items-center space-x-2">
                 {message.includes("successfully") ? (
-                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                  <CheckCircle className="h-5 w-5 text-green-600" />
                 ) : (
                   <X className="h-5 w-5 text-red-600" />
                 )}
@@ -503,7 +482,7 @@ export default function Settings() {
               </div>
             </div>
           )}
-
+          
         </div>
       </div>
     </div>

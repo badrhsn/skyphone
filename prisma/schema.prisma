@@ -46,6 +46,9 @@ model User {
   image         String?
   balance       Float     @default(0)
   isAdmin       Boolean   @default(false)
+  autoTopupEnabled    Boolean @default(false)
+  autoTopupThreshold  Float   @default(2.0)
+  autoTopupAmount     Float   @default(10.0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -55,6 +58,7 @@ model User {
   payments Payment[]
   phoneNumbers PhoneNumber[]
   contacts Contact[]
+  callerIds CallerID[]
 }
 
 model VerificationToken {
@@ -75,14 +79,17 @@ model Call {
   duration    Int      @default(0) // in seconds
   cost        Float
   status      CallStatus @default(INITIATED)
+  callerIdType String  @default("public") // public, custom, bought, verified
   twilioSid   String?
   recordingSid String?  // Twilio recording SID
   recordingUrl String?  // URL to access recording
+  metadata    String?  // JSON metadata for caller ID info
   createdAt   DateTime @default(now())
   endedAt     DateTime?
 
   @@index([userId])
   @@index([createdAt])
+  @@index([callerIdType])
 }
 
 model CallRate {
@@ -206,4 +213,33 @@ model Contact {
 
   @@index([userId])
   @@index([phoneNumber])
+}
+
+model CallerID {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phoneNumber     String
+  country         String?
+  friendlyName    String?         // User-defined name for this caller ID
+  status          CallerIDStatus  @default(PENDING)
+  verificationCode String?        // SMS/Call verification code
+  verificationCodeExpiry DateTime? // Expiry time for verification code
+  verificationAttempts Int         @default(0)
+  verifiedAt      DateTime?
+  isActive        Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([userId, phoneNumber])
+  @@index([userId])
+  @@index([status])
+}
+
+enum CallerIDStatus {
+  PENDING
+  VERIFYING
+  VERIFIED
+  FAILED
+  EXPIRED
 }
