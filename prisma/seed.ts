@@ -7,21 +7,21 @@ async function main() {
 
   // Create initial call rates
   const rates = [
-    { country: 'United States', countryCode: '+1', rate: 0.02, currency: 'USD' },
-    { country: 'United Kingdom', countryCode: '+44', rate: 0.03, currency: 'USD' },
-    { country: 'Germany', countryCode: '+49', rate: 0.025, currency: 'USD' },
-    { country: 'France', countryCode: '+33', rate: 0.025, currency: 'USD' },
-    { country: 'Japan', countryCode: '+81', rate: 0.04, currency: 'USD' },
-    { country: 'Australia', countryCode: '+61', rate: 0.035, currency: 'USD' },
-    { country: 'Canada', countryCode: '+1', rate: 0.02, currency: 'USD' },
-    { country: 'India', countryCode: '+91', rate: 0.015, currency: 'USD' },
-    { country: 'China', countryCode: '+86', rate: 0.03, currency: 'USD' },
-    { country: 'Brazil', countryCode: '+55', rate: 0.025, currency: 'USD' },
-    { country: 'Mexico', countryCode: '+52', rate: 0.02, currency: 'USD' },
-    { country: 'Russia', countryCode: '+7', rate: 0.03, currency: 'USD' },
-    { country: 'South Korea', countryCode: '+82', rate: 0.035, currency: 'USD' },
-    { country: 'Italy', countryCode: '+39', rate: 0.025, currency: 'USD' },
-    { country: 'Spain', countryCode: '+34', rate: 0.025, currency: 'USD' },
+    { country: 'United States', countryCode: '+1', rate: 0.04, currency: 'USD' },        // Increased from $0.02
+    { country: 'United Kingdom', countryCode: '+44', rate: 0.05, currency: 'USD' },      // Increased from $0.03
+    { country: 'Germany', countryCode: '+49', rate: 0.045, currency: 'USD' },            // Increased from $0.025
+    { country: 'France', countryCode: '+33', rate: 0.045, currency: 'USD' },             // Increased from $0.025
+    { country: 'Japan', countryCode: '+81', rate: 0.06, currency: 'USD' },               // Increased from $0.04
+    { country: 'Australia', countryCode: '+61', rate: 0.055, currency: 'USD' },          // Increased from $0.035
+    { country: 'Canada', countryCode: '+1', rate: 0.04, currency: 'USD' },               // Increased from $0.02
+    { country: 'India', countryCode: '+91', rate: 0.025, currency: 'USD' },              // Increased from $0.015
+    { country: 'China', countryCode: '+86', rate: 0.05, currency: 'USD' },               // Increased from $0.03
+    { country: 'Brazil', countryCode: '+55', rate: 0.045, currency: 'USD' },             // Increased from $0.025
+    { country: 'Mexico', countryCode: '+52', rate: 0.04, currency: 'USD' },              // Increased from $0.02
+    { country: 'Russia', countryCode: '+7', rate: 0.05, currency: 'USD' },               // Increased from $0.03
+    { country: 'South Korea', countryCode: '+82', rate: 0.055, currency: 'USD' },        // Increased from $0.035
+    { country: 'Italy', countryCode: '+39', rate: 0.045, currency: 'USD' },              // Increased from $0.025
+    { country: 'Spain', countryCode: '+34', rate: 0.045, currency: 'USD' },              // Increased from $0.025
   ]
 
   for (const rate of rates) {

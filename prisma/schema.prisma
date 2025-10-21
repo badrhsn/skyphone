@@ -53,6 +53,8 @@ model User {
   sessions Session[]
   calls    Call[]
   payments Payment[]
+  phoneNumbers PhoneNumber[]
+  contacts Contact[]
 }
 
 model VerificationToken {
@@ -159,4 +161,49 @@ enum CallAnalyticsStatus {
   FAILOVER_SUCCESS  
   FAILOVER_FAILED
   FAILED
+}
+
+model PhoneNumber {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phoneNumber   String   @unique
+  country       String
+  countryCode   String
+  city          String?
+  type          PhoneNumberType @default(LOCAL)
+  monthlyPrice  Float
+  setupFee      Float
+  isActive      Boolean  @default(true)
+  twilioSid     String?  // Twilio phone number SID
+  capabilities  String   // JSON string of capabilities
+  purchaseDate  DateTime @default(now())
+  nextBilling   DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+enum PhoneNumberType {
+  LOCAL
+  TOLL_FREE
+  MOBILE
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  phoneNumber String
+  email       String?
+  country     String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([phoneNumber])
 }

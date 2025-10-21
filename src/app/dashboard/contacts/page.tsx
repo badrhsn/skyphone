@@ -40,30 +40,17 @@ export default function ContactsPage() {
 
   const fetchContacts = async () => {
     try {
-      // For now, use mock data since we don't have a contacts API yet
-      const mockContacts: Contact[] = [
-        {
-          id: "1",
-          name: "John Doe",
-          phoneNumber: "+1234567890",
-          email: "john.doe@example.com",
-          country: "United States",
-          notes: "Business contact",
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: "2", 
-          name: "Jane Smith",
-          phoneNumber: "+4412345678",
-          email: "jane.smith@example.com",
-          country: "United Kingdom",
-          notes: "Family friend",
-          createdAt: new Date().toISOString()
-        }
-      ];
-      setContacts(mockContacts);
+      const response = await fetch("/api/user/contacts");
+      if (response.ok) {
+        const data = await response.json();
+        setContacts(data);
+      } else {
+        console.error("Failed to fetch contacts");
+        setContacts([]);
+      }
     } catch (error) {
       console.error("Error fetching contacts:", error);
+      setContacts([]);
     } finally {
       setIsLoading(false);
     }
@@ -71,19 +58,51 @@ export default function ContactsPage() {
 
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just add to local state
-    const contact: Contact = {
-      id: Date.now().toString(),
-      name: newContact.name,
-      phoneNumber: newContact.phoneNumber,
-      email: newContact.email,
-      notes: newContact.notes,
-      createdAt: new Date().toISOString()
-    };
     
-    setContacts([...contacts, contact]);
-    setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
-    setShowAddContact(false);
+    try {
+      const response = await fetch("/api/user/contacts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newContact),
+      });
+
+      if (response.ok) {
+        const contact = await response.json();
+        setContacts([...contacts, contact]);
+        setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
+        setShowAddContact(false);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to add contact");
+      }
+    } catch (error) {
+      console.error("Error adding contact:", error);
+      alert("Failed to add contact. Please try again.");
+    }
+  };
+
+  const handleDeleteContact = async (contactId: string) => {
+    if (!confirm("Are you sure you want to delete this contact?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/user/contacts?id=${contactId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setContacts(contacts.filter(contact => contact.id !== contactId));
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete contact");
+      }
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+      alert("Failed to delete contact. Please try again.");
+    }
   };
 
   const handleCall = (phoneNumber: string) => {
@@ -203,7 +222,10 @@ export default function ContactsPage() {
                       <button className="text-gray-600 hover:text-blue-600">
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button className="text-gray-600 hover:text-red-600">
+                      <button 
+                        onClick={() => handleDeleteContact(contact.id)}
+                        className="text-gray-600 hover:text-red-600"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>

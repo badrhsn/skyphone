@@ -228,3 +228,133 @@ export const getCallStatus = async (callSid: string) => {
     throw error
   }
 }
+
+// Phone Number Management Functions
+export const searchAvailableNumbers = async (countryCode: string, areaCode?: string) => {
+  try {
+    let searchParams: any = {
+      limit: 20,
+    }
+
+    if (countryCode === 'US' || countryCode === 'CA') {
+      searchParams.countryCode = countryCode
+      if (areaCode) {
+        searchParams.areaCode = areaCode
+      }
+    } else {
+      throw new Error('Currently only US and Canada numbers are supported')
+    }
+
+    const availableNumbers = await client.availablePhoneNumbers(countryCode)
+      .local
+      .list(searchParams)
+
+    return availableNumbers.map(number => ({
+      phoneNumber: number.phoneNumber,
+      friendlyName: number.friendlyName,
+      capabilities: {
+        voice: number.capabilities.voice,
+        sms: number.capabilities.sms,
+        mms: number.capabilities.mms,
+        fax: number.capabilities.fax
+      },
+      country: countryCode,
+      locality: number.locality,
+      region: number.region,
+      postalCode: number.postalCode,
+      isoCountry: number.isoCountry,
+      addressRequirements: number.addressRequirements,
+      beta: number.beta,
+      monthlyPrice: getPhoneNumberPrice(countryCode, 'local'),
+      setupFee: 2.00 // Increased from $1.00 to $2.00
+    }))
+  } catch (error) {
+    console.error('Error searching available numbers:', error)
+    throw error
+  }
+}
+
+export const searchTollFreeNumbers = async (countryCode: string) => {
+  try {
+    if (countryCode !== 'US' && countryCode !== 'CA') {
+      throw new Error('Toll-free numbers currently only available for US and Canada')
+    }
+
+    const availableNumbers = await client.availablePhoneNumbers(countryCode)
+      .tollFree
+      .list({ limit: 20 })
+
+    return availableNumbers.map(number => ({
+      phoneNumber: number.phoneNumber,
+      friendlyName: number.friendlyName,
+      capabilities: {
+        voice: number.capabilities.voice,
+        sms: number.capabilities.sms,
+        mms: number.capabilities.mms,
+        fax: number.capabilities.fax
+      },
+      country: countryCode,
+      locality: number.locality,
+      region: number.region,
+      postalCode: number.postalCode,
+      isoCountry: number.isoCountry,
+      addressRequirements: number.addressRequirements,
+      beta: number.beta,
+      monthlyPrice: getPhoneNumberPrice(countryCode, 'toll-free'),
+      setupFee: 10.00 // Increased from $5.00 to $10.00 for premium toll-free
+    }))
+  } catch (error) {
+    console.error('Error searching toll-free numbers:', error)
+    throw error
+  }
+}
+
+export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: string) => {
+  try {
+    const purchasedNumber = await client.incomingPhoneNumbers.create({
+      phoneNumber,
+      friendlyName: friendlyName || phoneNumber,
+      voiceUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/twilio/voice`,
+      smsUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/twilio/sms`,
+      statusCallback: `${process.env.NEXT_PUBLIC_APP_URL}/api/twilio/status`,
+      statusCallbackMethod: 'POST'
+    })
+
+    return {
+      sid: purchasedNumber.sid,
+      phoneNumber: purchasedNumber.phoneNumber,
+      friendlyName: purchasedNumber.friendlyName,
+      capabilities: purchasedNumber.capabilities,
+      status: purchasedNumber.status,
+      dateCreated: purchasedNumber.dateCreated
+    }
+  } catch (error) {
+    console.error('Error purchasing phone number:', error)
+    throw error
+  }
+}
+
+export const releasePhoneNumber = async (phoneNumberSid: string) => {
+  try {
+    await client.incomingPhoneNumbers(phoneNumberSid).remove()
+    return { success: true }
+  } catch (error) {
+    console.error('Error releasing phone number:', error)
+    throw error
+  }
+}
+
+// Helper function to get pricing based on country and type
+const getPhoneNumberPrice = (countryCode: string, type: 'local' | 'toll-free'): number => {
+  const pricing: { [key: string]: { local: number; tollFree: number } } = {
+    'US': { local: 2.00, tollFree: 4.00 },  // Increased from $1/$2 to $2/$4
+    'CA': { local: 2.50, tollFree: 5.00 }   // Increased from $1.25/$2.50 to $2.50/$5
+  }
+
+  const countryPricing = pricing[countryCode]
+  if (!countryPricing) {
+    throw new Error(`Pricing not available for country: ${countryCode}`)
+  }
+
+  return type === 'local' ? countryPricing.local : countryPricing.tollFree
+}

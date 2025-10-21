@@ -455,7 +455,7 @@ function RateCalculator() {
   const selectedRate = rates.find(r => r.country === selectedCountry);
   const currentRate = selectedRate 
     ? (callType === "mobile" ? selectedRate.mobileRate : selectedRate.landlineRate) 
-    : 0.02;
+    : 0.04; // Updated from 0.02 to 0.04
 
   const totalCost = currentRate * duration;
 

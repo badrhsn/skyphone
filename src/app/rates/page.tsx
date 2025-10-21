@@ -119,9 +119,9 @@ export default function RatesPage() {
   };
 
   const calculateCost = (rate: Rate) => {
-    // Add a small markup for mobile vs landline
+    // Add a higher markup for mobile vs landline
     const baseRate = rate.rate;
-    const mobileRate = baseRate * 1.1; // 10% higher for mobile
+    const mobileRate = baseRate * 1.25; // Increased from 10% to 25% higher for mobile
     return callType === "mobile" ? mobileRate : baseRate;
   };
 

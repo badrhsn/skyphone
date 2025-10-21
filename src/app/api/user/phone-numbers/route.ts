@@ -1,71 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const phoneNumbers = await prisma.phoneNumber.findMany({
+      where: {
+        userId: session.user.id,
+        isActive: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    // Parse capabilities from JSON string and format the response
+    const formattedNumbers = phoneNumbers.map(number => ({
+      id: number.id,
+      phoneNumber: number.phoneNumber,
+      country: number.country,
+      countryCode: number.countryCode,
+      city: number.city,
+      type: number.type.toLowerCase().replace('_', '-'),
+      monthlyPrice: number.monthlyPrice,
+      setupFee: number.setupFee,
+      isActive: number.isActive,
+      capabilities: JSON.parse(number.capabilities),
+      purchaseDate: number.purchaseDate.toISOString(),
+      nextBilling: number.nextBilling.toISOString(),
+      twilioSid: number.twilioSid,
+    }));
 
-    // For now, return some mock phone numbers since we don't have a phone numbers table yet
-    // In a real implementation, you would fetch from a PhoneNumbers table
-    const mockNumbers = [
-      {
-        id: "1",
-        phoneNumber: "+1234567890",
-        country: "United States",
-        countryCode: "+1",
-        type: "premium",
-        monthlyFee: 5.00,
-        isActive: true,
-        purchaseDate: new Date().toISOString(),
-      }
-    ];
-
-    // You could also add some public numbers that are available to all users
-    const publicNumbers = [
-      {
-        id: "public-1",
-        phoneNumber: "Anonymous",
-        country: "Global",
-        countryCode: "",
-        type: "public",
-        monthlyFee: 0,
-        isActive: true,
-        purchaseDate: null,
-      },
-      {
-        id: "public-2", 
-        phoneNumber: "+1800-YADAPHONE",
-        country: "United States",
-        countryCode: "+1",
-        type: "public",
-        monthlyFee: 0,
-        isActive: true,
-        purchaseDate: null,
-      }
-    ];
-
-    const allNumbers = [...mockNumbers, ...publicNumbers];
-
-    return NextResponse.json(allNumbers);
+    return NextResponse.json(formattedNumbers);
   } catch (error) {
-    console.error("Error fetching phone numbers:", error);
+    console.error("Error fetching user phone numbers:", error);
     return NextResponse.json(
       { error: "Failed to fetch phone numbers" },
       { status: 500 }
