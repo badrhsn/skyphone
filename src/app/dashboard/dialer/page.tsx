@@ -1568,15 +1568,6 @@ export default function Dialer() {
                 </div>
               </div>
             )}
-
-            {/* Optional: Number formatting hint */}
-            {phoneNumber && (
-              <div className="px-4 pb-2">
-                <div className="text-xs text-blue-600 font-medium">
-                  {selectedCountry.code} {phoneNumber}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Call From Options */}
