@@ -216,7 +216,7 @@ export default function AnalyticsDashboard() {
             </h3>
             <div className="space-y-4">
               {analytics.countryStats.map((country, index) => (
-                <div key={country.country} className="flex items-center justify-between">
+                <div key={`${country.country}-${index}`} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <span className="text-sm font-medium text-gray-500 w-6">#{index + 1}</span>
                     <span className="font-medium">{country.country}</span>
@@ -239,7 +239,7 @@ export default function AnalyticsDashboard() {
           </h3>
           <div className="h-64 flex items-end space-x-1">
             {analytics.hourlyStats.map((stat) => (
-              <div key={stat.hour} className="flex-1 flex flex-col items-center">
+              <div key={`hour-${stat.hour}`} className="flex-1 flex flex-col items-center">
                 <div 
                   className="w-full bg-blue-500 rounded-t"
                   style={{ height: `${(stat.calls / Math.max(...analytics.hourlyStats.map(s => s.calls))) * 200}px` }}

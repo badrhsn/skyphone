@@ -1,6 +1,9 @@
 "use client";
 
+import React from "react";
 import { HelpCircle, Phone, CreditCard, Shield, Clock } from "lucide-react";
+import PageLayout, { Card, Button } from "../../components/PageLayout";
+import Link from "next/link";
 
 export default function FAQPage() {
   const faqs = [
@@ -79,34 +82,28 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <HelpCircle className="h-8 w-8 text-blue-500" />
-            <h1 className="text-4xl font-bold text-gray-800">
-              Frequently Asked Questions
-            </h1>
-          </div>
-          <p className="text-xl text-gray-600">
-            Find answers to common questions about Skyphone
-          </p>
-        </div>
+    <PageLayout
+      title="Frequently Asked Questions"
+      description="Find answers to common questions about Skyphone"
+      icon={HelpCircle}
+    >
 
-        {/* FAQ Sections */}
-        <div className="space-y-12">
-          {faqs.map((section, sectionIndex) => (
-            <div key={sectionIndex} className="bg-white rounded-2xl p-8 shadow-lg">
+      {/* FAQ Sections */}
+      <div className="space-y-8">
+        {faqs.map((section, sectionIndex) => (
+          <Card key={sectionIndex}>
+            <div className="p-8">
               <div className="flex items-center space-x-3 mb-6">
-                {section.icon}
-                <h2 className="text-2xl font-bold text-gray-800">{section.category}</h2>
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                  {React.cloneElement(section.icon, { className: "h-6 w-6 text-white" })}
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">{section.category}</h2>
               </div>
               
               <div className="space-y-6">
                 {section.questions.map((faq, faqIndex) => (
-                  <div key={faqIndex} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  <div key={faqIndex} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
                       {faq.question}
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
@@ -116,33 +113,33 @@ export default function FAQPage() {
                 ))}
               </div>
             </div>
-          ))}
-        </div>
+          </Card>
+        ))}
+      </div>
 
-        {/* Contact Section */}
-        <div className="bg-blue-50 rounded-2xl p-8 mt-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+      {/* Contact Section */}
+      <Card>
+        <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
             Still have questions?
           </h2>
           <p className="text-gray-600 mb-6">
             Our support team is here to help you get the most out of Skyphone
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="mailto:support@skyphone.com"
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors"
-            >
-              Email Support
+            <a href="mailto:support@skyphone.com">
+              <Button>
+                Email Support
+              </Button>
             </a>
-            <a
-              href="/contact"
-              className="bg-white text-blue-500 border border-blue-500 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors"
-            >
-              Contact Us
-            </a>
+            <Link href="/contact">
+              <Button variant="secondary">
+                Contact Us
+              </Button>
+            </Link>
           </div>
         </div>
-      </div>
-    </div>
+      </Card>
+    </PageLayout>
   );
 }

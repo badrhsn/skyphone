@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Phone, Plus, Check, X, AlertCircle, Loader2 } from "lucide-react";
+import { useModal } from "./Modal";
 
 interface CallerID {
   id: string;
@@ -26,6 +27,7 @@ export default function CallerIDComponent({ className = "" }: CallerIDComponentP
   const [verifyingNumber, setVerifyingNumber] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { showConfirm, ModalComponent } = useModal();
 
   useEffect(() => {
     fetchCallerIDs();
@@ -137,8 +139,18 @@ export default function CallerIDComponent({ className = "" }: CallerIDComponentP
   };
 
   const handleDeleteCallerID = async (callerIdId: string) => {
-    if (!confirm('Are you sure you want to remove this caller ID?')) return;
+    showConfirm(
+      "Remove Caller ID",
+      "Are you sure you want to remove this caller ID?",
+      () => {
+        deleteCallerID(callerIdId);
+      },
+      "Remove",
+      "Cancel"
+    );
+  };
 
+  const deleteCallerID = async (callerIdId: string) => {
     try {
       const response = await fetch(`/api/user/caller-ids/${callerIdId}`, {
         method: 'DELETE',
@@ -370,6 +382,8 @@ export default function CallerIDComponent({ className = "" }: CallerIDComponentP
           </div>
         )}
       </div>
+      
+      {ModalComponent}
     </div>
   );
 }

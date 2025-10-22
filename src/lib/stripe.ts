@@ -1,8 +1,32 @@
 import Stripe from 'stripe'
+import { getStripeConfig } from './config-helper'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-})
+// Initialize Stripe - will be set up properly when config is loaded
+let stripe: Stripe | null = null;
+
+// Function to get or create Stripe instance
+export async function getStripe(): Promise<Stripe> {
+  if (stripe) {
+    return stripe;
+  }
+
+  const config = await getStripeConfig();
+  if (!config?.secretKey) {
+    throw new Error('Stripe configuration not found. Please configure Stripe in the admin dashboard.');
+  }
+
+  stripe = new Stripe(config.secretKey, {
+    apiVersion: '2025-09-30.clover',
+  });
+
+  return stripe;
+}
+
+// Export config helper
+export { getStripeConfig } from './config-helper';
+
+// For backward compatibility - deprecated, use getStripe() instead
+export { stripe } from './stripe-legacy';
 
 export const formatAmountForStripe = (amount: number, currency: string): number => {
   const numberFormat = new Intl.NumberFormat(['en-US'], {

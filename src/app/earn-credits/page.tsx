@@ -16,6 +16,7 @@ import {
   ExternalLink 
 } from "lucide-react";
 import Link from "next/link";
+import { useModal } from "@/components/Modal";
 
 interface Task {
   id: string;
@@ -36,6 +37,7 @@ interface ReferralStat {
 export default function EarnCreditsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { showSuccess, ModalComponent } = useModal();
   const [referralCode, setReferralCode] = useState("");
   const [copiedCode, setCopiedCode] = useState(false);
   const [referralStats, setReferralStats] = useState<ReferralStat>({
@@ -156,7 +158,7 @@ export default function EarnCreditsPage() {
 
   const completeTask = async (taskId: string) => {
     // Mock task completion - in real implementation, this would call API
-    alert("Task completed! Credits will be added to your account within 24 hours.");
+    showSuccess("Task Completed!", "Credits will be added to your account within 24 hours.");
   };
 
   if (status === "loading") {
@@ -336,6 +338,8 @@ export default function EarnCreditsPage() {
           </div>
         </div>
       </div>
+      
+      {ModalComponent}
     </div>
   );
 }

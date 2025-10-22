@@ -59,6 +59,7 @@ model User {
   phoneNumbers PhoneNumber[]
   contacts Contact[]
   callerIds CallerID[]
+  configurationAudits ConfigurationAudit[]
 }
 
 model VerificationToken {
@@ -93,17 +94,19 @@ model Call {
 }
 
 model CallRate {
-  id          String  @id @default(cuid())
-  country     String
-  countryCode String
-  flag        String? // Country flag emoji
-  rate        Float   // per minute
-  currency    String  @default("USD")
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String  @id @default(cuid())
+  country         String  // Destination country
+  countryCode     String  // Destination country code
+  callerIdCountry String  // Caller ID country (e.g., "US", "UK", "DE", "FR")
+  flag            String? // Country flag emoji
+  rate            Float   // per minute
+  currency        String  @default("USD")
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  @@unique([countryCode])
+  @@unique([countryCode, callerIdCountry])
+  @@index([callerIdCountry])
 }
 
 model Payment {
@@ -242,4 +245,40 @@ enum CallerIDStatus {
   VERIFIED
   FAILED
   EXPIRED
+}
+
+model ApiConfiguration {
+  id          String   @id @default(cuid())
+  provider    String   @unique // "twilio", "stripe", "google_oauth", etc.
+  configData  String   // JSON string with encrypted sensitive data
+  isActive    Boolean  @default(true)
+  environment String   @default("production") // "development", "staging", "production"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastUsed    DateTime?
+  
+  // Metadata for configuration management
+  version     String   @default("1.0")
+  description String?
+  
+  @@index([provider])
+  @@index([environment])
+}
+
+model ConfigurationAudit {
+  id              String   @id @default(cuid())
+  configurationId String
+  action          String   // "created", "updated", "accessed", "rotated"
+  userId          String?  // Who made the change
+  previousValue   String?  // Encrypted previous value (for rollback)
+  metadata        String?  // JSON with additional context
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+  
+  user User? @relation(fields: [userId], references: [id])
+  
+  @@index([configurationId])
+  @@index([action])
+  @@index([createdAt])
 }

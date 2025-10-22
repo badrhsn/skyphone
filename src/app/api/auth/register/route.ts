@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         name: name || email.split('@')[0], // Use email username as default name
         email,
         password: hashedPassword,
-        balance: 5.0, // Give new users $5 free credits
+        balance: 0, // Give new users $5 free credits
         isAdmin: false,
       },
     });

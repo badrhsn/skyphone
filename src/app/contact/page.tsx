@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Mail, MapPin, Phone, Send, MessageCircle, Clock } from "lucide-react";
+import PageLayout, { Card, Button } from "../../components/PageLayout";
+import Link from "next/link";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -33,29 +35,26 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Contact Us
-          </h1>
-          <p className="text-xl text-gray-600">
-            We're here to help! Get in touch with our support team
-          </p>
-        </div>
+    <PageLayout
+      title="Contact Us"
+      description="We're here to help! Get in touch with our support team"
+      icon={MessageCircle}
+    >
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Get in Touch</h2>
+      <div className="grid lg:grid-cols-2 gap-12">
+        {/* Contact Information */}
+        <div className="space-y-8">
+          <Card>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <MapPin className="h-6 w-6 text-blue-500 mt-1" />
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mt-1">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Address</h3>
+                    <h3 className="font-semibold text-gray-900">Address</h3>
                     <p className="text-gray-600">
                       Webgasse 8<br />
                       1060 Vienna, Austria
@@ -64,23 +63,27 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <Mail className="h-6 w-6 text-blue-500 mt-1" />
+                  <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg mt-1">
+                    <Mail className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Email</h3>
-                    <a href="mailto:info@skyphone.com" className="text-blue-600 hover:text-blue-800">
+                    <h3 className="font-semibold text-gray-900">Email</h3>
+                    <a href="mailto:info@skyphone.com" className="text-blue-600 hover:text-blue-800 transition-colors">
                       info@skyphone.com
                     </a>
                     <br />
-                    <a href="mailto:support@skyphone.com" className="text-blue-600 hover:text-blue-800">
+                    <a href="mailto:support@skyphone.com" className="text-blue-600 hover:text-blue-800 transition-colors">
                       support@skyphone.com
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <Clock className="h-6 w-6 text-blue-500 mt-1" />
+                  <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg mt-1">
+                    <Clock className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Support Hours</h3>
+                    <h3 className="font-semibold text-gray-900">Support Hours</h3>
                     <p className="text-gray-600">
                       Monday - Friday: 9:00 AM - 6:00 PM (CET)<br />
                       Saturday: 10:00 AM - 4:00 PM (CET)<br />
@@ -90,17 +93,19 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <MessageCircle className="h-6 w-6 text-blue-500 mt-1" />
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg mt-1">
+                    <MessageCircle className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">Social Media</h3>
+                    <h3 className="font-semibold text-gray-900">Social Media</h3>
                     <div className="space-y-1">
-                      <a href="https://twitter.com/skyphone" className="block text-blue-600 hover:text-blue-800">
+                      <a href="https://twitter.com/skyphone" className="block text-blue-600 hover:text-blue-800 transition-colors">
                         Follow us on X (Twitter)
                       </a>
-                      <a href="https://linkedin.com/company/skyphone" className="block text-blue-600 hover:text-blue-800">
+                      <a href="https://linkedin.com/company/skyphone" className="block text-blue-600 hover:text-blue-800 transition-colors">
                         Connect on LinkedIn
                       </a>
-                      <a href="https://reddit.com/r/skyphone" className="block text-blue-600 hover:text-blue-800">
+                      <a href="https://reddit.com/r/skyphone" className="block text-blue-600 hover:text-blue-800 transition-colors">
                         Join our Reddit community
                       </a>
                     </div>
@@ -108,43 +113,48 @@ export default function ContactPage() {
                 </div>
               </div>
             </div>
+          </Card>
 
-            {/* Quick Help */}
-            <div className="bg-blue-50 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Need Quick Help?</h3>
+          {/* Quick Help */}
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Quick Help?</h3>
               <div className="space-y-3">
-                <a href="/faq" className="block text-blue-600 hover:text-blue-800 font-medium">
+                <Link href="/faq" className="block text-blue-600 hover:text-blue-800 font-medium transition-colors">
                   📋 Check our FAQ
-                </a>
-                <a href="/rates" className="block text-blue-600 hover:text-blue-800 font-medium">
+                </Link>
+                <Link href="/rates" className="block text-blue-600 hover:text-blue-800 font-medium transition-colors">
                   💰 View calling rates
-                </a>
-                <a href="/dashboard" className="block text-blue-600 hover:text-blue-800 font-medium">
+                </Link>
+                <Link href="/dashboard" className="block text-blue-600 hover:text-blue-800 font-medium transition-colors">
                   🏠 Go to your dashboard
-                </a>
+                </Link>
               </div>
             </div>
-          </div>
+          </Card>
+        </div>
 
-          {/* Contact Form */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Send us a Message</h2>
+        {/* Contact Form */}
+        <Card>
+          <div className="p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
             
             {isSubmitted ? (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Send className="h-8 w-8 text-blue-600" />
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Send className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Message Sent!</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent!</h3>
                 <p className="text-gray-600">
                   Thank you for contacting us. We'll get back to you within 24 hours.
                 </p>
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => setIsSubmitted(false)}
-                  className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
+                  className="mt-4"
                 >
                   Send Another Message
-                </button>
+                </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -222,16 +232,16 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl"
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       <span>Sending...</span>
                     </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4" />
+                      <Send className="h-4 w-4 mr-2" />
                       <span>Send Message</span>
                     </>
                   )}
@@ -239,8 +249,8 @@ export default function ContactPage() {
               </form>
             )}
           </div>
-        </div>
+        </Card>
       </div>
-    </div>
+    </PageLayout>
   );
 }

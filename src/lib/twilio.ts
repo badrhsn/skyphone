@@ -1,6 +1,7 @@
 import twilio from 'twilio'
 import Telnyx from 'telnyx'
 import { Vonage } from '@vonage/server-sdk'
+import { getTwilioConfig, getTelnyxConfig, getVonageConfig } from './config-helper'
 
 // Provider type definitions
 interface Provider {
@@ -11,44 +12,129 @@ interface Provider {
   regions: string[]
 }
 
-// Provider configurations
-const providers = {
-  twilio: {
-    client: process.env.TWILIO_API_KEY 
-      ? twilio(process.env.TWILIO_API_KEY, process.env.TWILIO_API_SECRET, {
-          accountSid: process.env.TWILIO_ACCOUNT_SID
-        })
-      : twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!),
-    phoneNumber: process.env.TWILIO_PHONE_NUMBER!,
-    priority: 1,
-    regions: ['US', 'CA', 'GB', 'AU'], // Primary regions for Twilio
-  },
-  telnyx: {
-    client: process.env.TELNYX_API_KEY ? new Telnyx({ apiKey: process.env.TELNYX_API_KEY }) : null,
-    phoneNumber: process.env.TELNYX_PHONE_NUMBER || '',
-    priority: 2,
-    regions: ['EU', 'AS', 'US'], // Primary regions for Telnyx
-  },
-  vonage: {
-    client: (process.env.VONAGE_API_KEY && process.env.VONAGE_API_SECRET) 
-      ? new Vonage({
-          apiKey: process.env.VONAGE_API_KEY,
-          apiSecret: process.env.VONAGE_API_SECRET
-        }) 
-      : null,
-    phoneNumber: process.env.VONAGE_PHONE_NUMBER || '',
-    priority: 3,
-    regions: ['GLOBAL'], // Fallback provider
+// Cache for initialized clients
+let providersCache: any = null
+
+// Get providers with secure configuration
+const getProviders = async () => {
+  if (providersCache) {
+    return providersCache
+  }
+
+  try {
+    const [twilioConfig, telnyxConfig, vonageConfig] = await Promise.all([
+      getTwilioConfig(),
+      getTelnyxConfig(),
+      getVonageConfig()
+    ])
+
+    providersCache = {
+      twilio: {
+        client: twilioConfig?.apiKey 
+          ? twilio(twilioConfig.apiKey, twilioConfig.apiSecret, {
+              accountSid: twilioConfig.accountSid
+            })
+          : twilioConfig?.accountSid && twilioConfig?.authToken
+            ? twilio(twilioConfig.accountSid, twilioConfig.authToken)
+            : null,
+        phoneNumber: twilioConfig?.phoneNumber || '',
+        priority: 1,
+        regions: ['US', 'CA', 'GB', 'AU'], // Primary regions for Twilio
+      },
+      telnyx: {
+        client: telnyxConfig?.apiKey ? new Telnyx({ apiKey: telnyxConfig.apiKey }) : null,
+        phoneNumber: telnyxConfig?.phoneNumber || '',
+        priority: 2,
+        regions: ['EU', 'AS', 'US'], // Primary regions for Telnyx
+      },
+      vonage: {
+        client: (vonageConfig?.apiKey && vonageConfig?.apiSecret) 
+          ? new Vonage({
+              apiKey: vonageConfig.apiKey,
+              apiSecret: vonageConfig.apiSecret
+            }) 
+          : null,
+        phoneNumber: vonageConfig?.phoneNumber || '',
+        priority: 3,
+        regions: ['GLOBAL'], // Fallback provider
+      }
+    }
+
+    return providersCache
+  } catch (error) {
+    console.error('Error initializing providers with secure config:', error)
+    
+    // Fallback to environment variables
+    providersCache = {
+      twilio: {
+        client: process.env.TWILIO_API_KEY 
+          ? twilio(process.env.TWILIO_API_KEY, process.env.TWILIO_API_SECRET, {
+              accountSid: process.env.TWILIO_ACCOUNT_SID
+            })
+          : process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
+            ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+            : null,
+        phoneNumber: process.env.TWILIO_PHONE_NUMBER || '',
+        priority: 1,
+        regions: ['US', 'CA', 'GB', 'AU'],
+      },
+      telnyx: {
+        client: process.env.TELNYX_API_KEY ? new Telnyx({ apiKey: process.env.TELNYX_API_KEY }) : null,
+        phoneNumber: process.env.TELNYX_PHONE_NUMBER || '',
+        priority: 2,
+        regions: ['EU', 'AS', 'US'],
+      },
+      vonage: {
+        client: (process.env.VONAGE_API_KEY && process.env.VONAGE_API_SECRET) 
+          ? new Vonage({
+              apiKey: process.env.VONAGE_API_KEY,
+              apiSecret: process.env.VONAGE_API_SECRET
+            }) 
+          : null,
+        phoneNumber: process.env.VONAGE_PHONE_NUMBER || '',
+        priority: 3,
+        regions: ['GLOBAL'],
+      }
+    }
+
+    console.warn('Using environment variables for provider configuration')
+    return providersCache
   }
 }
 
 // Legacy export for backward compatibility
-export const client = providers.twilio.client
+let legacyClient: any = null
+
+export const getTwilioClient = async () => {
+  const providers = await getProviders()
+  return providers.twilio.client
+}
+
+// Maintain legacy export for immediate backward compatibility
+export const getClient = getTwilioClient
+
+// Initialize legacy client
+const initLegacyClient = async () => {
+  if (!legacyClient) {
+    legacyClient = await getTwilioClient()
+  }
+  return legacyClient
+}
+
+// Warning: This is a synchronous export that may not work with secure config
+export let client: any = null
+
+// Initialize client asynchronously
+getTwilioClient().then(c => {
+  client = c
+}).catch(error => {
+  console.error('Failed to initialize Twilio client:', error)
+})
 
 // Enhanced call routing with provider failover
 export const initiateCall = async (to: string, from?: string) => {
   const destinationCountry = getCountryFromNumber(to)
-  const bestProvider = selectBestProvider(destinationCountry)
+  const bestProvider = await selectBestProvider(destinationCountry)
   
   try {
     const call = await attemptCallWithProvider(bestProvider, to, from)
@@ -61,7 +147,7 @@ export const initiateCall = async (to: string, from?: string) => {
     console.error(`Call failed with ${bestProvider.name}:`, error)
     
     // Try failover providers
-    const failoverProviders = getFailoverProviders(bestProvider.name)
+    const failoverProviders = await getFailoverProviders(bestProvider.name)
     
     for (const provider of failoverProviders) {
       try {
@@ -100,10 +186,11 @@ const attemptCallWithProvider = async (provider: any, to: string, from?: string)
     if (!provider.client) {
       throw new Error('Telnyx client not configured')
     }
+    const telnyxConfig = await getTelnyxConfig()
     return await provider.client.calls.create({
       to,
       from: fromNumber,
-      connection_id: process.env.TELNYX_CONNECTION_ID,
+      connection_id: telnyxConfig?.connectionId || process.env.TELNYX_CONNECTION_ID,
       webhook_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/telnyx/voice`,
     })
   }
@@ -123,12 +210,14 @@ const attemptCallWithProvider = async (provider: any, to: string, from?: string)
 }
 
 // Select best provider based on destination and performance
-const selectBestProvider = (countryCode: string) => {
+const selectBestProvider = async (countryCode: string) => {
+  const providers = await getProviders()
+  
   // Get available providers (only those with configured clients)
   const availableProviders = Object.entries(providers)
-    .filter(([_, config]) => config.client !== null)
-    .map(([name, config]) => ({ name, ...config }))
-    .sort((a, b) => a.priority - b.priority)
+    .filter(([_, config]: [string, any]) => config.client !== null)
+    .map(([name, config]: [string, any]) => ({ name, ...config }))
+    .sort((a: any, b: any) => a.priority - b.priority)
   
   if (availableProviders.length === 0) {
     throw new Error('No providers configured')
@@ -157,15 +246,14 @@ const selectBestProvider = (countryCode: string) => {
 }
 
 // Get failover providers in priority order
-const getFailoverProviders = (primaryProvider: string): Provider[] => {
-  // Return other available providers as failover
-  // For now, empty array since only Twilio is configured
-  // In production, this would return configured backup providers:
-  // return Object.values(providers)
-  //   .filter(p => p.name !== primaryProvider)
-  //   .sort((a, b) => a.priority - b.priority)
+const getFailoverProviders = async (primaryProvider: string): Promise<Provider[]> => {
+  const providers = await getProviders()
   
-  return []
+  // Return other available providers as failover
+  return Object.entries(providers)
+    .filter(([name, config]: [string, any]) => name !== primaryProvider && config.client !== null)
+    .map(([name, config]: [string, any]) => ({ name, ...config }))
+    .sort((a: any, b: any) => a.priority - b.priority)
 }
 
 // Extract country code from phone number
@@ -221,7 +309,11 @@ const logCallAttempt = async (
 
 export const getCallStatus = async (callSid: string) => {
   try {
-    const call = await client.calls(callSid).fetch()
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+    const call = await twilioClient.calls(callSid).fetch()
     return call
   } catch (error) {
     console.error('Error fetching call status:', error)
@@ -232,6 +324,11 @@ export const getCallStatus = async (callSid: string) => {
 // Phone Number Management Functions
 export const searchAvailableNumbers = async (countryCode: string, areaCode?: string) => {
   try {
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+
     let searchParams: any = {
       limit: 20,
     }
@@ -245,11 +342,11 @@ export const searchAvailableNumbers = async (countryCode: string, areaCode?: str
       throw new Error('Currently only US and Canada numbers are supported')
     }
 
-    const availableNumbers = await client.availablePhoneNumbers(countryCode)
+    const availableNumbers = await twilioClient.availablePhoneNumbers(countryCode)
       .local
       .list(searchParams)
 
-    return availableNumbers.map(number => ({
+    return availableNumbers.map((number: any) => ({
       phoneNumber: number.phoneNumber,
       friendlyName: number.friendlyName,
       capabilities: {
@@ -276,15 +373,20 @@ export const searchAvailableNumbers = async (countryCode: string, areaCode?: str
 
 export const searchTollFreeNumbers = async (countryCode: string) => {
   try {
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+
     if (countryCode !== 'US' && countryCode !== 'CA') {
       throw new Error('Toll-free numbers currently only available for US and Canada')
     }
 
-    const availableNumbers = await client.availablePhoneNumbers(countryCode)
+    const availableNumbers = await twilioClient.availablePhoneNumbers(countryCode)
       .tollFree
       .list({ limit: 20 })
 
-    return availableNumbers.map(number => ({
+    return availableNumbers.map((number: any) => ({
       phoneNumber: number.phoneNumber,
       friendlyName: number.friendlyName,
       capabilities: {
@@ -311,7 +413,12 @@ export const searchTollFreeNumbers = async (countryCode: string) => {
 
 export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: string) => {
   try {
-    const purchasedNumber = await client.incomingPhoneNumbers.create({
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+
+    const purchasedNumber = await twilioClient.incomingPhoneNumbers.create({
       phoneNumber,
       friendlyName: friendlyName || phoneNumber,
       voiceUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/twilio/voice`,
@@ -336,7 +443,11 @@ export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: st
 
 export const releasePhoneNumber = async (phoneNumberSid: string) => {
   try {
-    await client.incomingPhoneNumbers(phoneNumberSid).remove()
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+    await twilioClient.incomingPhoneNumbers(phoneNumberSid).remove()
     return { success: true }
   } catch (error) {
     console.error('Error releasing phone number:', error)
@@ -347,9 +458,15 @@ export const releasePhoneNumber = async (phoneNumberSid: string) => {
 // SMS Functions for Caller ID Verification
 export const sendSMS = async (to: string, message: string, from?: string) => {
   try {
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+
+    const providers = await getProviders()
     const fromNumber = from || providers.twilio.phoneNumber
     
-    const sms = await client.messages.create({
+    const sms = await twilioClient.messages.create({
       to,
       from: fromNumber,
       body: message
@@ -383,7 +500,13 @@ export const sendCallerIdVerificationSMS = async (to: string, verificationCode: 
 // Voice Call Verification (alternative to SMS)
 export const makeVerificationCall = async (to: string, verificationCode: string) => {
   try {
-    const call = await client.calls.create({
+    const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+
+    const providers = await getProviders()
+    const call = await twilioClient.calls.create({
       to,
       from: providers.twilio.phoneNumber,
       twiml: `

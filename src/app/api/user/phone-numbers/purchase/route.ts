@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import { purchasePhoneNumber } from "@/lib/twilio";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { processPaymentWithAutoTopup } from "@/lib/auto-topup";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,117 +42,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Phone number already purchased" }, { status: 400 });
     }
 
-    // Check payment method preference
-    if (paymentMethod === "balance" || (!paymentMethod && user.balance >= totalCost)) {
-      // Check if user has sufficient balance or can auto top-up
-      if (user.balance < totalCost) {
-        // Try to process payment with auto top-up
-        const { processPaymentWithAutoTopup } = await import("@/lib/auto-topup");
-        const paymentResult = await processPaymentWithAutoTopup(user.id, totalCost);
-        
-        if (!paymentResult.success) {
-          return NextResponse.json({ 
-            error: "Insufficient balance. Please add credits or enable auto top-up.",
-            required: totalCost,
-            current: user.balance,
-            redirectToCheckout: true,
-            autoTopupSuggested: true
-          }, { status: 400 });
-        }
-        
-        // Auto top-up was successful, continue with purchase
-        // Balance has already been deducted by processPaymentWithAutoTopup
-      } else {
-        // User has sufficient balance, deduct it manually
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            balance: {
-              decrement: totalCost
-            }
-          }
-        });
-      }
-
-      try {
-        // Purchase the number from Twilio
-        const twilioNumber = await purchasePhoneNumber(phoneNumber, `${user.name || user.email} - ${phoneNumber}`);
-
-        // Start transaction to purchase number and deduct balance
-        const result = await prisma.$transaction(async (tx) => {
-          // Create phone number record
-          const newPhoneNumber = await tx.phoneNumber.create({
-            data: {
-              userId: user.id,
-              phoneNumber,
-              country,
-              countryCode,
-              city,
-              type: type === "toll-free" ? "TOLL_FREE" : "LOCAL",
-              monthlyPrice,
-              setupFee,
-              twilioSid: twilioNumber.sid,
-              capabilities: JSON.stringify(capabilities || { voice: true, sms: true, fax: false }),
-              nextBilling: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-            },
-          });
-
-          // Deduct balance from user
-          await tx.user.update({
-            where: { id: user.id },
-            data: {
-              balance: {
-                decrement: totalCost
-              }
-            }
-          });
-
-          // Create payment record
-          await tx.payment.create({
-            data: {
-              userId: user.id,
-              amount: -totalCost, // Negative amount for purchase
-              currency: "USD",
-              status: "COMPLETED",
-              stripePaymentId: `phone_purchase_${newPhoneNumber.id}`,
-            }
-          });
-
-          return newPhoneNumber;
-        });
-
-        return NextResponse.json({
-          success: true,
-          method: "balance",
-          phoneNumber: {
-            id: result.id,
-            phoneNumber: result.phoneNumber,
-            country: result.country,
-            countryCode: result.countryCode,
-            city: result.city,
-            type: result.type,
-            monthlyPrice: result.monthlyPrice,
-            setupFee: result.setupFee,
-            isActive: result.isActive,
-            capabilities: JSON.parse(result.capabilities),
-            purchaseDate: result.purchaseDate,
-            nextBilling: result.nextBilling,
-            twilioSid: result.twilioSid,
-          },
-          newBalance: user.balance - totalCost
-        });
-
-      } catch (twilioError) {
-        console.error("Twilio purchase error:", twilioError);
-        return NextResponse.json({ 
-          error: "Failed to purchase number from provider. Please try again." 
-        }, { status: 500 });
-      }
-
-    } else {
-      // User wants to pay directly or has insufficient balance - create Stripe checkout
-      try {
-        const checkoutSession = await stripe.checkout.sessions.create({
+    // Always use Stripe checkout for phone number purchases
+    try {
+      const stripe = await getStripe();
+      const checkoutSession = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: [
             {
@@ -188,18 +79,17 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          method: "checkout",
+          paymentType: "checkout",
           sessionId: checkoutSession.id,
           checkoutUrl: checkoutSession.url,
           totalCost
         });
 
-      } catch (stripeError) {
-        console.error("Stripe checkout error:", stripeError);
-        return NextResponse.json({ 
-          error: "Failed to create payment session. Please try again." 
-        }, { status: 500 });
-      }
+    } catch (stripeError) {
+      console.error("Stripe checkout error:", stripeError);
+      return NextResponse.json({ 
+        error: "Failed to create payment session. Please try again." 
+      }, { status: 500 });
     }
 
   } catch (error) {

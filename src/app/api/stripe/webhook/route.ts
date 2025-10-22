@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
+import { getStripeConfig } from "@/lib/config-helper";
 import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
 
@@ -15,10 +16,17 @@ export async function POST(request: NextRequest) {
   let event;
 
   try {
+    const stripe = await getStripe();
+    const config = await getStripeConfig();
+    
+    if (!config?.webhookSecret) {
+      return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+    }
+    
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      config.webhookSecret
     );
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
@@ -49,40 +57,84 @@ export async function POST(request: NextRequest) {
               const { purchasePhoneNumber } = await import("@/lib/twilio");
               
               // Purchase the number from Twilio
-              const twilioNumber = await purchasePhoneNumber(phoneNumber);
+              const twilioNumber = await purchasePhoneNumber(phoneNumber, `${userId} - ${phoneNumber}`);
 
-              // Create phone number record in database
-              await prisma.phoneNumber.create({
-                data: {
-                  userId,
-                  phoneNumber,
-                  country: country || "United States",
-                  countryCode: countryCode || "+1",
-                  city: city || "",
-                  type: type === "toll-free" ? "TOLL_FREE" : "LOCAL",
-                  monthlyPrice,
-                  setupFee,
-                  twilioSid: twilioNumber.sid,
-                  capabilities: capabilities || JSON.stringify({ voice: true, sms: true, fax: false }),
-                  nextBilling: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                },
+              // Use transaction to ensure data consistency
+              await prisma.$transaction(async (tx) => {
+                // Create phone number record in database
+                await tx.phoneNumber.create({
+                  data: {
+                    userId,
+                    phoneNumber,
+                    country: country || "United States",
+                    countryCode: countryCode || "+1",
+                    city: city || "",
+                    type: type === "toll-free" ? "TOLL_FREE" : "LOCAL",
+                    monthlyPrice,
+                    setupFee,
+                    twilioSid: twilioNumber.sid,
+                    capabilities: capabilities || JSON.stringify({ voice: true, sms: true, fax: false }),
+                    nextBilling: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                    isActive: true, // Mark as active immediately
+                  },
+                });
+
+                // Create payment record
+                await tx.payment.create({
+                  data: {
+                    userId,
+                    amount: monthlyPrice + setupFee,
+                    currency: "USD",
+                    status: "COMPLETED",
+                    stripePaymentId: session.payment_intent as string,
+                    stripeSessionId: session.id,
+                  },
+                });
               });
 
-              // Create payment record
-              await prisma.payment.create({
-                data: {
-                  userId,
-                  amount: monthlyPrice + setupFee,
-                  currency: "USD",
-                  status: "COMPLETED",
-                  stripePaymentId: session.payment_intent as string,
-                  stripeSessionId: session.id,
-                },
-              });
+              console.log(`Phone number ${phoneNumber} successfully purchased for user ${userId}`);
 
             } catch (twilioError) {
               console.error("Failed to purchase phone number from Twilio:", twilioError);
-              // Could implement refund logic here
+              
+              // Create a payment record but mark the phone number as failed
+              try {
+                await prisma.$transaction(async (tx) => {
+                  // Create phone number record but mark as inactive due to Twilio failure
+                  await tx.phoneNumber.create({
+                    data: {
+                      userId,
+                      phoneNumber,
+                      country: country || "United States",
+                      countryCode: countryCode || "+1",
+                      city: city || "",
+                      type: type === "toll-free" ? "TOLL_FREE" : "LOCAL",
+                      monthlyPrice,
+                      setupFee,
+                      twilioSid: null, // No Twilio SID since purchase failed
+                      capabilities: capabilities || JSON.stringify({ voice: true, sms: true, fax: false }),
+                      nextBilling: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                      isActive: false, // Mark as inactive due to failure
+                    },
+                  });
+
+                  // Still create payment record since customer was charged
+                  await tx.payment.create({
+                    data: {
+                      userId,
+                      amount: monthlyPrice + setupFee,
+                      currency: "USD",
+                      status: "COMPLETED", // Payment completed but service failed
+                      stripePaymentId: session.payment_intent as string,
+                      stripeSessionId: session.id,
+                    },
+                  });
+                });
+              } catch (dbError) {
+                console.error("Failed to create failure record:", dbError);
+              }
+              
+              // TODO: Implement automatic refund logic here
             }
           }
         } else {

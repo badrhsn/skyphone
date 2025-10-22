@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const callerIdCountry = searchParams.get('callerIdCountry');
+
+    let whereClause: any = {};
+    if (callerIdCountry) {
+      whereClause = { callerIdCountry: callerIdCountry };
+    }
+
     const rates = await prisma.callRate.findMany({
+      where: whereClause,
       orderBy: [
         { isActive: 'desc' },
+        { callerIdCountry: 'asc' } as any,
         { country: 'asc' }
       ]
     })

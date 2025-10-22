@@ -50,6 +50,27 @@ export default function ContactsPage() {
     email: "",
     notes: ""
   });
+  const [favoriteContacts, setFavoriteContacts] = useState<string[]>([]);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  
+  // Modal states
+  const [deleteModal, setDeleteModal] = useState<{
+    show: boolean;
+    contactId?: string;
+    contactName?: string;
+    isMultiple?: boolean;
+    count?: number;
+  }>({ show: false });
+  const [errorModal, setErrorModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+  }>({ show: false, title: '', message: '' });
+  const [infoModal, setInfoModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+  }>({ show: false, title: '', message: '' });
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -81,31 +102,73 @@ export default function ContactsPage() {
     e.preventDefault();
     
     try {
-      const response = await fetch("/api/user/contacts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newContact),
-      });
+      if (editingContact) {
+        // Update existing contact
+        const response = await fetch("/api/user/contacts", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...newContact, id: editingContact.id }),
+        });
 
-      if (response.ok) {
-        const contact = await response.json();
-        setContacts([...contacts, contact]);
-        setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
-        setShowAddContact(false);
+        if (response.ok) {
+          const updatedContact = await response.json();
+          setContacts(contacts.map(c => c.id === editingContact.id ? updatedContact : c));
+          setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
+          setEditingContact(null);
+          setShowAddContact(false);
+        } else {
+          const errorData = await response.json();
+          setErrorModal({
+            show: true,
+            title: "Update Failed",
+            message: errorData.error || "Failed to update contact"
+          });
+        }
       } else {
-        const errorData = await response.json();
-        alert(errorData.error || "Failed to add contact");
+        // Add new contact
+        const response = await fetch("/api/user/contacts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newContact),
+        });
+
+        if (response.ok) {
+          const contact = await response.json();
+          setContacts([...contacts, contact]);
+          setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
+          setShowAddContact(false);
+        } else {
+          const errorData = await response.json();
+          setErrorModal({
+            show: true,
+            title: "Add Contact Failed",
+            message: errorData.error || "Failed to add contact"
+          });
+        }
       }
     } catch (error) {
-      console.error("Error adding contact:", error);
-      alert("Failed to add contact. Please try again.");
+      console.error("Error saving contact:", error);
+      setErrorModal({
+        show: true,
+        title: "Save Failed",
+        message: "Failed to save contact. Please try again."
+      });
     }
   };
 
-  const handleDeleteContact = async (contactId: string) => {
-    if (!confirm("Are you sure you want to delete this contact?")) {
+  const handleDeleteContact = async (contactId: string, skipConfirmation: boolean = false) => {
+    if (!skipConfirmation) {
+      const contact = contacts.find(c => c.id === contactId);
+      setDeleteModal({
+        show: true,
+        contactId,
+        contactName: contact?.name || "this contact",
+        isMultiple: false
+      });
       return;
     }
 
@@ -116,18 +179,32 @@ export default function ContactsPage() {
 
       if (response.ok) {
         setContacts(contacts.filter(contact => contact.id !== contactId));
+        setDeleteModal({ show: false });
       } else {
         const errorData = await response.json();
-        alert(errorData.error || "Failed to delete contact");
+        setErrorModal({
+          show: true,
+          title: "Delete Failed",
+          message: errorData.error || "Failed to delete contact"
+        });
       }
     } catch (error) {
       console.error("Error deleting contact:", error);
-      alert("Failed to delete contact. Please try again.");
+      setErrorModal({
+        show: true,
+        title: "Delete Failed",
+        message: "Failed to delete contact. Please try again."
+      });
     }
   };
 
-  const handleCall = (phoneNumber: string) => {
-    router.push(`/dashboard/dialer?number=${encodeURIComponent(phoneNumber)}`);
+  const handleCall = (phoneNumber: string, contactCountry?: string) => {
+    const params = new URLSearchParams();
+    params.set('number', phoneNumber);
+    if (contactCountry) {
+      params.set('country', contactCountry);
+    }
+    router.push(`/dashboard/dialer?${params.toString()}`);
   };
 
   const filteredContacts = contacts.filter(contact =>
@@ -226,10 +303,33 @@ export default function ContactsPage() {
                 >
                   <Users className="h-4 w-4 text-gray-600" />
                 </button>
-                <button className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors" title="Export Contacts">
+                <button 
+                  onClick={() => {
+                    const csvContent = "data:text/csv;charset=utf-8," 
+                      + "Name,Phone Number,Email,Notes\n"
+                      + contacts.map(c => `"${c.name}","${c.phoneNumber}","${c.email || ''}","${c.notes || ''}"`).join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "contacts.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors" 
+                  title="Export Contacts"
+                >
                   <Download className="h-4 w-4 text-gray-600" />
                 </button>
-                <button className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors" title="Import Contacts">
+                <button 
+                  onClick={() => setInfoModal({
+                    show: true,
+                    title: "Import Contacts",
+                    message: "Import feature coming soon! You can manually add contacts for now."
+                  })}
+                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors" 
+                  title="Import Contacts"
+                >
                   <Upload className="h-4 w-4 text-gray-600" />
                 </button>
               </div>
@@ -258,11 +358,35 @@ export default function ContactsPage() {
               
               {selectedContacts.length > 0 && (
                 <div className="flex items-center space-x-2">
-                  <button className="text-sm text-red-600 hover:text-red-700 font-medium">
+                  <button 
+                    onClick={() => {
+                      setDeleteModal({
+                        show: true,
+                        isMultiple: true,
+                        count: selectedContacts.length
+                      });
+                    }}
+                    className="text-sm text-red-600 hover:text-red-700 font-medium"
+                  >
                     Delete Selected
                   </button>
                   <div className="w-px h-4 bg-gray-300"></div>
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                  <button 
+                    onClick={() => {
+                      const selectedContactsData = contacts.filter(c => selectedContacts.includes(c.id));
+                      const csvContent = "data:text/csv;charset=utf-8," 
+                        + "Name,Phone Number,Email,Notes\n"
+                        + selectedContactsData.map(c => `"${c.name}","${c.phoneNumber}","${c.email || ''}","${c.notes || ''}"`).join("\n");
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", "selected_contacts.csv");
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
                     Export Selected
                   </button>
                 </div>
@@ -308,6 +432,20 @@ export default function ContactsPage() {
                   <div className="flex items-center justify-between">
                     {/* Contact Info */}
                     <div className="flex items-center space-x-4 flex-1">
+                      {/* Checkbox */}
+                      <input
+                        type="checkbox"
+                        checked={selectedContacts.includes(contact.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedContacts([...selectedContacts, contact.id]);
+                          } else {
+                            setSelectedContacts(selectedContacts.filter(id => id !== contact.id));
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      
                       {/* Avatar */}
                       <div className="relative">
                         <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -322,7 +460,20 @@ export default function ContactsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-3">
                           <h3 className="text-lg font-semibold text-gray-900 truncate">{contact.name}</h3>
-                          <Star className="h-4 w-4 text-gray-300 hover:text-yellow-500 cursor-pointer transition-colors" />
+                          <Star 
+                            onClick={() => {
+                              if (favoriteContacts.includes(contact.id)) {
+                                setFavoriteContacts(favoriteContacts.filter(id => id !== contact.id));
+                              } else {
+                                setFavoriteContacts([...favoriteContacts, contact.id]);
+                              }
+                            }}
+                            className={`h-4 w-4 cursor-pointer transition-colors ${
+                              favoriteContacts.includes(contact.id) 
+                                ? 'text-yellow-500 fill-yellow-500' 
+                                : 'text-gray-300 hover:text-yellow-500'
+                            }`} 
+                          />
                         </div>
                         
                         <div className="flex items-center space-x-4 mt-1">
@@ -353,7 +504,7 @@ export default function ContactsPage() {
                     {/* Actions */}
                     <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => handleCall(contact.phoneNumber)}
+                        onClick={() => handleCall(contact.phoneNumber, contact.country)}
                         className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl group/call"
                         title="Call this contact"
                       >
@@ -361,21 +512,29 @@ export default function ContactsPage() {
                       </button>
                       
                       <button 
+                        onClick={() => {
+                          setEditingContact(contact);
+                          setNewContact({
+                            name: contact.name,
+                            phoneNumber: contact.phoneNumber,
+                            email: contact.email || "",
+                            notes: contact.notes || ""
+                          });
+                          setShowAddContact(true);
+                        }}
                         className="bg-white/80 hover:bg-white text-gray-600 hover:text-blue-600 p-3 rounded-xl border border-gray-200 hover:border-blue-300 transition-all shadow-sm hover:shadow-md"
                         title="Edit contact"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
                       
-                      <div className="relative">
-                        <button 
-                          className="bg-white/80 hover:bg-white text-gray-600 hover:text-gray-700 p-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-all shadow-sm hover:shadow-md"
-                          title="More options"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
-                        {/* Dropdown menu could go here */}
-                      </div>
+                      <button
+                        onClick={() => handleDeleteContact(contact.id)}
+                        className="bg-white/80 hover:bg-red-50 text-gray-600 hover:text-red-600 p-3 rounded-xl border border-gray-200 hover:border-red-300 transition-all shadow-sm hover:shadow-md"
+                        title="Delete contact"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -394,12 +553,20 @@ export default function ContactsPage() {
                     <Plus className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Add New Contact</h2>
-                    <p className="text-sm text-gray-600">Create a new contact in your phone book</p>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {editingContact ? "Edit Contact" : "Add New Contact"}
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      {editingContact ? "Update contact information" : "Create a new contact in your phone book"}
+                    </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowAddContact(false)}
+                  onClick={() => {
+                    setShowAddContact(false);
+                    setEditingContact(null);
+                    setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
+                  }}
                   className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
                 >
                   <span className="text-gray-400 hover:text-gray-600 text-xl">✕</span>
@@ -485,17 +652,127 @@ export default function ContactsPage() {
                     type="submit"
                     className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
-                    Add Contact
+                    {editingContact ? "Update Contact" : "Add Contact"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowAddContact(false)}
+                    onClick={() => {
+                      setShowAddContact(false);
+                      setEditingContact(null);
+                      setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
+                    }}
                     className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-4 rounded-xl font-semibold transition-all"
                   >
                     Cancel
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteModal.show && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Trash2 className="h-8 w-8 text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  {deleteModal.isMultiple ? "Delete Multiple Contacts" : "Delete Contact"}
+                </h3>
+                <p className="text-gray-600 mb-8">
+                  {deleteModal.isMultiple 
+                    ? `Are you sure you want to delete ${deleteModal.count} selected contacts? This action cannot be undone.`
+                    : `Are you sure you want to delete "${deleteModal.contactName}"? This action cannot be undone.`
+                  }
+                </p>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setDeleteModal({ show: false })}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (deleteModal.isMultiple) {
+                        // Handle bulk delete
+                        Promise.all(selectedContacts.map(contactId => 
+                          fetch(`/api/user/contacts?id=${contactId}`, { method: "DELETE" })
+                        )).then(() => {
+                          setContacts(contacts.filter(c => !selectedContacts.includes(c.id)));
+                          setSelectedContacts([]);
+                          setDeleteModal({ show: false });
+                        }).catch(() => {
+                          setErrorModal({
+                            show: true,
+                            title: "Delete Failed",
+                            message: "Failed to delete some contacts. Please try again."
+                          });
+                          setDeleteModal({ show: false });
+                        });
+                      } else if (deleteModal.contactId) {
+                        handleDeleteContact(deleteModal.contactId, true);
+                      }
+                    }}
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error Modal */}
+        {errorModal.show && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-red-600 text-2xl">⚠️</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  {errorModal.title}
+                </h3>
+                <p className="text-gray-600 mb-8">
+                  {errorModal.message}
+                </p>
+                <button
+                  onClick={() => setErrorModal({ show: false, title: '', message: '' })}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Info Modal */}
+        {infoModal.show && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-blue-600 text-2xl">ℹ️</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  {infoModal.title}
+                </h3>
+                <p className="text-gray-600 mb-8">
+                  {infoModal.message}
+                </p>
+                <button
+                  onClick={() => setInfoModal({ show: false, title: '', message: '' })}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                >
+                  OK
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Phone, ArrowLeft, Globe, DollarSign, Check, Search, RefreshCw, MapPin, Zap } from "lucide-react";
 import Link from "next/link";
+import { useModal } from "@/components/Modal";
 
 interface PhoneNumber {
   id: string;
@@ -26,6 +27,7 @@ interface PhoneNumber {
 export default function BuyNumberPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { showSuccess, showError, showConfirm, ModalComponent } = useModal();
   const [selectedCountry, setSelectedCountry] = useState("United States");
   const [availableNumbers, setAvailableNumbers] = useState<PhoneNumber[]>([]);
   const [loading, setLoading] = useState(false);
@@ -85,11 +87,18 @@ export default function BuyNumberPage() {
     const totalCost = (number.monthlyPrice || 0) + (number.setupFee || 0);
     const phoneNum = number.phoneNumber || number.number || 'this number';
     
-    const confirmed = confirm(
-      `Purchase ${phoneNum} for $${totalCost.toFixed(2)}?\n\nMonthly: $${number.monthlyPrice || 0}\nSetup: $${number.setupFee || 0}\nTotal: $${totalCost.toFixed(2)}`
+    showConfirm(
+      "Purchase Phone Number",
+      `Purchase ${phoneNum} for $${totalCost.toFixed(2)}?\n\nMonthly: $${number.monthlyPrice || 0}\nSetup: $${number.setupFee || 0}\nTotal: $${totalCost.toFixed(2)}`,
+      () => {
+        handlePurchase(number);
+      },
+      "Purchase",
+      "Cancel"
     );
+  };
 
-    if (confirmed) {
+  const handlePurchase = async (number: PhoneNumber) => {
       setPurchasingNumber(number.id);
       try {
         const response = await fetch('/api/user/phone-numbers/purchase', {
@@ -114,26 +123,29 @@ export default function BuyNumberPage() {
         if (response.ok) {
           if (result.paymentType === 'balance') {
             // Payment was deducted from balance
-            alert("Number purchased successfully! You can now use this number for outgoing calls.");
+            showSuccess("Purchase Successful", "Number purchased successfully! You can now use this number for outgoing calls.");
             setUserBalance(result.newBalance);
             fetchAvailableNumbers(); // Refresh available numbers
           } else if (result.paymentType === 'checkout' && result.checkoutUrl) {
             // Redirect to Stripe checkout
+            console.log("Redirecting to Stripe checkout:", result.checkoutUrl);
             window.location.href = result.checkoutUrl;
+            return; // Don't execute finally block until redirect completes
+          } else {
+            showError("Purchase Failed", "Unexpected response format. Please try again.");
           }
         } else {
-          alert(result.error || "Failed to purchase number. Please try again.");
+          showError("Purchase Failed", result.error || "Failed to purchase number. Please try again.");
         }
       } catch (error) {
         console.error("Error purchasing number:", error);
-        alert("Failed to purchase number. Please try again.");
+        showError("Purchase Error", "Failed to purchase number. Please try again.");
       } finally {
         setPurchasingNumber(null);
       }
-    }
   };
 
-    // Filter numbers based on search query and type
+  // Filter numbers based on search query and type
   const filteredNumbers = availableNumbers.filter((number: PhoneNumber) => {
     const phoneNumber = number.phoneNumber || number.number;
     
@@ -171,35 +183,44 @@ export default function BuyNumberPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Link 
-              href="/dashboard" 
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-200 text-gray-600 hover:text-gray-900 hover:shadow-md transition-all duration-200"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Get Your Number</h1>
-              <p className="text-gray-600 mt-1">Purchase a new phone number to make and receive calls</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Modern Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/dashboard" 
+                className="p-2 hover:bg-white/80 rounded-xl transition-colors shadow-sm"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600" />
+              </Link>
+              <div>
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                    <Phone className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Get Your Number</h1>
+                    <p className="text-sm text-gray-600">Purchase a new phone number to make and receive calls</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-200">
-            <p className="text-sm text-gray-600 font-medium">Your Balance</p>
-            <p className="text-2xl font-bold text-gray-900">${userBalance.toFixed(2)}</p>
+            
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border border-white/20">
+              <p className="text-sm text-gray-600 font-medium">Your Balance</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">${userBalance.toFixed(2)}</p>
+            </div>
           </div>
         </div>
 
         {/* Info Message */}
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-2xl p-6 mb-6 backdrop-blur-sm">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <Phone className="h-4 w-4 text-blue-600" />
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                <Phone className="h-4 w-4 text-white" />
               </div>
             </div>
             <div>
@@ -213,24 +234,24 @@ export default function BuyNumberPage() {
 
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 mb-6">
           <div className="space-y-4">
             {/* Search Bar */}
             <div className="flex items-center space-x-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search by number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
                 />
               </div>
               <button
                 onClick={fetchAvailableNumbers}
                 disabled={loading}
-                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 <span>{loading ? 'Searching...' : 'Refresh'}</span>
@@ -508,6 +529,8 @@ export default function BuyNumberPage() {
           }
         }
       `}</style>
+
+      {ModalComponent}
     </div>
   );
 }

@@ -6,6 +6,177 @@ import { useRouter } from "next/navigation";
 import { Settings as SettingsIcon, Users, DollarSign, Phone, Plus, Edit, Trash2, ArrowLeft, CreditCard, Activity, Zap, Database } from "lucide-react";
 import Link from "next/link";
 import AdminNavigation from "@/components/AdminNavigation";
+import { useModal } from "@/components/Modal";
+
+// Configurations Tab Component
+function ConfigurationsTab() {
+  const [configStatus, setConfigStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchConfigStatus();
+  }, []);
+
+  const fetchConfigStatus = async () => {
+    try {
+      const response = await fetch('/api/admin/configurations/status');
+      if (response.ok) {
+        const data = await response.json();
+        setConfigStatus(data);
+      }
+    } catch (error) {
+      console.error('Error fetching config status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'secure':
+        return <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>;
+      case 'env':
+        return <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>;
+      default:
+        return <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'secure':
+        return <span className="text-sm text-green-600">Secure (Database)</span>;
+      case 'env':
+        return <span className="text-sm text-yellow-600">Environment Variables</span>;
+      default:
+        return <span className="text-sm text-red-600">Not Configured</span>;
+    }
+  };
+
+  const getProviderIcon = (provider: string) => {
+    switch (provider) {
+      case 'TWILIO':
+        return <Zap className="h-4 w-4 text-purple-600" />;
+      case 'STRIPE':
+        return <CreditCard className="h-4 w-4 text-blue-600" />;
+      case 'GOOGLE_OAUTH':
+        return <Users className="h-4 w-4 text-red-600" />;
+      case 'TELNYX':
+        return <Phone className="h-4 w-4 text-green-600" />;
+      case 'VONAGE':
+        return <Activity className="h-4 w-4 text-orange-600" />;
+      default:
+        return <SettingsIcon className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getProviderDescription = (provider: string) => {
+    switch (provider) {
+      case 'TWILIO':
+        return 'Voice calling and SMS services';
+      case 'STRIPE':
+        return 'Payment processing';
+      case 'GOOGLE_OAUTH':
+        return 'User authentication';
+      case 'TELNYX':
+        return 'Cloud communications platform';
+      case 'VONAGE':
+        return 'Voice and messaging APIs';
+      default:
+        return 'API configuration';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border rounded-lg p-4">
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white shadow rounded-lg p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-lg font-medium text-gray-900">API Configurations</h3>
+          {configStatus && (
+            <p className="text-sm text-gray-600 mt-1">
+              {configStatus.summary.secure}/{configStatus.summary.total} using secure storage
+            </p>
+          )}
+        </div>
+        <Link
+          href="/admin/configurations"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+        >
+          <SettingsIcon className="h-4 w-4 mr-2" />
+          Manage Configurations
+        </Link>
+      </div>
+      
+      {configStatus && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {configStatus.status.map((config: any) => (
+              <div key={config.provider} className="border rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    {getProviderIcon(config.provider)}
+                  </div>
+                  <h4 className="ml-3 text-lg font-medium text-gray-900">
+                    {config.provider.replace('_', ' ')}
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  {getProviderDescription(config.provider)}
+                </p>
+                <div className="flex items-center">
+                  {getStatusIcon(config.status)}
+                  {getStatusText(config.status)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {configStatus.summary.environment > 0 && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Migration Recommended
+                  </h3>
+                  <div className="mt-2 text-sm text-yellow-700">
+                    <p>
+                      {configStatus.summary.environment} configuration(s) are using environment variables. 
+                      For enhanced security, migrate to encrypted database storage.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
 
 interface CallRate {
   id: string;
@@ -79,6 +250,7 @@ export default function AdminPanel() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [creditAmount, setCreditAmount] = useState('');
+  const { showConfirm, showSuccess, ModalComponent } = useModal();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -180,8 +352,18 @@ export default function AdminPanel() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
-    
+    showConfirm(
+      "Delete User",
+      "Are you sure you want to delete this user?",
+      () => {
+        deleteUser(userId);
+      },
+      "Delete",
+      "Cancel"
+    );
+  };
+
+  const deleteUser = async (userId: string) => {
     try {
       const response = await fetch("/api/admin/users", {
         method: "DELETE",
@@ -198,8 +380,18 @@ export default function AdminPanel() {
   };
 
   const handleRefundCall = async (callId: string) => {
-    if (!confirm("Are you sure you want to refund this call?")) return;
-    
+    showConfirm(
+      "Refund Call",
+      "Are you sure you want to refund this call?",
+      () => {
+        refundCall(callId);
+      },
+      "Refund",
+      "Cancel"
+    );
+  };
+
+  const refundCall = async (callId: string) => {
     try {
       const response = await fetch("/api/admin/calls", {
         method: "PATCH",
@@ -210,7 +402,7 @@ export default function AdminPanel() {
       if (response.ok) {
         // Refresh data
         fetchData();
-        alert("Call refunded successfully!");
+        showSuccess("Success", "Call refunded successfully!");
       }
     } catch (error) {
       console.error("Error refunding call:", error);
@@ -218,8 +410,18 @@ export default function AdminPanel() {
   };
 
   const handleRefundPayment = async (paymentId: string) => {
-    if (!confirm("Are you sure you want to refund this payment?")) return;
-    
+    showConfirm(
+      "Refund Payment",
+      "Are you sure you want to refund this payment?",
+      () => {
+        refundPayment(paymentId);
+      },
+      "Refund",
+      "Cancel"
+    );
+  };
+
+  const refundPayment = async (paymentId: string) => {
     try {
       const response = await fetch("/api/admin/payments", {
         method: "PATCH",
@@ -230,7 +432,7 @@ export default function AdminPanel() {
       if (response.ok) {
         // Refresh data
         fetchData();
-        alert("Payment refunded successfully!");
+        showSuccess("Success", "Payment refunded successfully!");
       }
     } catch (error) {
       console.error("Error refunding payment:", error);
@@ -264,7 +466,7 @@ export default function AdminPanel() {
       });
 
       if (response.ok) {
-        alert("Provider tested successfully!");
+        showSuccess("Success", "Provider tested successfully!");
         fetchData(); // Refresh to get updated lastChecked time
       }
     } catch (error) {
@@ -334,7 +536,7 @@ export default function AdminPanel() {
 
       if (response.ok) {
         fetchData(); // Refresh to get updated provider statuses
-        alert("Provider statuses refreshed!");
+        showSuccess("Success", "Provider statuses refreshed!");
       }
     } catch (error) {
       console.error("Error refreshing providers:", error);
@@ -375,6 +577,7 @@ export default function AdminPanel() {
                 { id: "payments", name: "Payments", icon: CreditCard },
                 { id: "rates", name: "Rates", icon: Database },
                 { id: "providers", name: "Providers", icon: Activity },
+                { id: "configurations", name: "Configurations", icon: SettingsIcon },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -955,6 +1158,11 @@ export default function AdminPanel() {
               </div>
             </div>
           )}
+
+          {/* Configurations Tab */}
+          {activeTab === "configurations" && (
+            <ConfigurationsTab />
+          )}
         </div>
       </div>
 
@@ -1009,6 +1217,8 @@ export default function AdminPanel() {
           </div>
         </div>
       )}
+      
+      {ModalComponent}
     </div>
   );
 }

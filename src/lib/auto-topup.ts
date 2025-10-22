@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 interface AutoTopupResult {
   success: boolean;
@@ -34,6 +34,8 @@ export async function checkAndTriggerAutoTopup(userId: string): Promise<AutoTopu
     const topupAmount = userWithAutoTopup.autoTopupAmount || 10.0;
 
     // Create Stripe payment intent for auto top-up
+      try {
+    const stripe = await getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(topupAmount * 100), // Convert to cents
       currency: "usd",

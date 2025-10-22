@@ -8,6 +8,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useModal } from "@/components/Modal";
 
 interface Rate {
   id: string;
@@ -30,6 +31,7 @@ function PhoneDialer() {
   const [countries, setCountries] = useState<{ name: string; flag: string; code: string }[]>([]);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
   const { data: session, status } = useSession();
+  const { showError, ModalComponent } = useModal();
 
   useEffect(() => {
     if (session && status === "authenticated") {
@@ -177,12 +179,12 @@ function PhoneDialer() {
       } else {
         setCallStatus("idle");
         setIsDialing(false);
-        alert(data.error || "Failed to initiate call");
+        showError("Call Failed", data.error || "Failed to initiate call");
       }
     } catch (error) {
       setCallStatus("idle");
       setIsDialing(false);
-      alert("Failed to initiate call");
+      showError("Call Failed", "Failed to initiate call");
       console.error("Call initiation error:", error);
     }
   };
@@ -410,6 +412,8 @@ function PhoneDialer() {
           <div className="text-xl font-bold text-blue-600">$0.02/min</div>
         </div>
       )}
+      
+      {ModalComponent}
     </div>
   );
 }
