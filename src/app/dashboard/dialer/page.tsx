@@ -1151,14 +1151,46 @@ export default function Dialer() {
 
   const handleNumberChange = (value: string) => {
     if (isCalling) return;
-    setPhoneNumber(value);
-    const rate = detectCountry(value);
+    
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/[^0-9]/g, '');
+    
+    // If empty, just clear
+    if (!digitsOnly) {
+      setPhoneNumber('');
+      setSelectedRate(null);
+      return;
+    }
+    
+    // Auto-format with selected country code
+    let formattedNumber = '';
+    const countryCodeDigits = selectedCountry.code.replace('+', '');
+    
+    // If user typed the country code themselves, don't duplicate it
+    if (digitsOnly.startsWith(countryCodeDigits)) {
+      formattedNumber = '+' + digitsOnly;
+    } else {
+      // Prepend the selected country code
+      formattedNumber = selectedCountry.code + digitsOnly;
+    }
+    
+    setPhoneNumber(formattedNumber);
+    const rate = detectCountry(formattedNumber);
     setSelectedRate(rate || null);
   };
 
   const handleNumberInput = (digit: string) => {
     if (isCalling) return;
     setPhoneNumber(prev => {
+      // If starting fresh or number doesn't have country code, add it
+      if (!prev || !prev.startsWith('+')) {
+        const newNumber = selectedCountry.code + digit;
+        const rate = detectCountry(newNumber);
+        setSelectedRate(rate || null);
+        return newNumber;
+      }
+      
+      // Otherwise just append the digit
       const newNumber = prev + digit;
       const rate = detectCountry(newNumber);
       setSelectedRate(rate || null);
