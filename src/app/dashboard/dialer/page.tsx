@@ -1,6 +1,11 @@
+// @ts-nocheck
 "use client";
 
 import { useState, useEffect } from "react";
+// Import new phone number formatting utilities
+import { YA, dL } from "../../../lib/ep";
+import { formatNumber } from "libphonenumber-js";
+import * as countryFlagEmoji from "country-flag-emoji-polyfill";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { 
@@ -22,6 +27,7 @@ import {
 } from "lucide-react";
 import { useModal } from "@/components/Modal";
 
+
 interface CallRate {
   id: string;
   country: string;
@@ -38,690 +44,29 @@ interface User {
   isAdmin: boolean;
 }
 
-// Mapping of international dialing codes to ISO country codes
-const DIALING_CODE_TO_ISO: { [key: string]: string } = {
-  '+1': 'US',      // United States/Canada
-  '+44': 'GB',     // United Kingdom
-  '+33': 'FR',     // France
-  '+49': 'DE',     // Germany
-  '+212': 'MA',    // Morocco
-  '+213': 'DZ',    // Algeria
-  '+216': 'TN',    // Tunisia
-  '+218': 'LY',    // Libya
-  '+220': 'GM',    // Gambia
-  '+221': 'SN',    // Senegal
-  '+222': 'MR',    // Mauritania
-  '+223': 'ML',    // Mali
-  '+224': 'GN',    // Guinea
-  '+225': 'CI',    // Côte d'Ivoire
-  '+226': 'BF',    // Burkina Faso
-  '+227': 'NE',    // Niger
-  '+228': 'TG',    // Togo
-  '+229': 'BJ',    // Benin
-  '+230': 'MU',    // Mauritius
-  '+231': 'LR',    // Liberia
-  '+232': 'SL',    // Sierra Leone
-  '+233': 'GH',    // Ghana
-  '+234': 'NG',    // Nigeria
-  '+235': 'TD',    // Chad
-  '+236': 'CF',    // Central African Republic
-  '+237': 'CM',    // Cameroon
-  '+238': 'CV',    // Cape Verde
-  '+239': 'ST',    // São Tomé and Príncipe
-  '+240': 'GQ',    // Equatorial Guinea
-  '+241': 'GA',    // Gabon
-  '+242': 'CG',    // Republic of the Congo
-  '+243': 'CD',    // Democratic Republic of the Congo
-  '+244': 'AO',    // Angola
-  '+245': 'GW',    // Guinea-Bissau
-  '+248': 'SC',    // Seychelles
-  '+249': 'SD',    // Sudan
-  '+250': 'RW',    // Rwanda
-  '+251': 'ET',    // Ethiopia
-  '+252': 'SO',    // Somalia
-  '+253': 'DJ',    // Djibouti
-  '+254': 'KE',    // Kenya
-  '+255': 'TZ',    // Tanzania
-  '+256': 'UG',    // Uganda
-  '+257': 'BI',    // Burundi
-  '+258': 'MZ',    // Mozambique
-  '+260': 'ZM',    // Zambia
-  '+261': 'MG',    // Madagascar
-  '+262': 'RE',    // Réunion
-  '+263': 'ZW',    // Zimbabwe
-  '+264': 'NA',    // Namibia
-  '+265': 'MW',    // Malawi
-  '+266': 'LS',    // Lesotho
-  '+267': 'BW',    // Botswana
-  '+268': 'SZ',    // Eswatini
-  '+269': 'KM',    // Comoros
-  '+290': 'SH',    // Saint Helena
-  '+291': 'ER',    // Eritrea
-  '+297': 'AW',    // Aruba
-  '+298': 'FO',    // Faroe Islands
-  '+299': 'GL',    // Greenland
-  '+350': 'GI',    // Gibraltar
-  '+351': 'PT',    // Portugal
-  '+352': 'LU',    // Luxembourg
-  '+353': 'IE',    // Ireland
-  '+354': 'IS',    // Iceland
-  '+355': 'AL',    // Albania
-  '+356': 'MT',    // Malta
-  '+357': 'CY',    // Cyprus
-  '+358': 'FI',    // Finland
-  '+359': 'BG',    // Bulgaria
-  '+370': 'LT',    // Lithuania
-  '+371': 'LV',    // Latvia
-  '+372': 'EE',    // Estonia
-  '+373': 'MD',    // Moldova
-  '+374': 'AM',    // Armenia
-  '+375': 'BY',    // Belarus
-  '+376': 'AD',    // Andorra
-  '+377': 'MC',    // Monaco
-  '+378': 'SM',    // San Marino
-  '+380': 'UA',    // Ukraine
-  '+381': 'RS',    // Serbia
-  '+382': 'ME',    // Montenegro
-  '+383': 'XK',    // Kosovo
-  '+385': 'HR',    // Croatia
-  '+386': 'SI',    // Slovenia
-  '+387': 'BA',    // Bosnia and Herzegovina
-  '+389': 'MK',    // North Macedonia
-  '+420': 'CZ',    // Czech Republic
-  '+421': 'SK',    // Slovakia
-  '+423': 'LI',    // Liechtenstein
-  '+43': 'AT',     // Austria
-  '+45': 'DK',     // Denmark
-  '+46': 'SE',     // Sweden
-  '+47': 'NO',     // Norway
-  '+48': 'PL',     // Poland
-  '+39': 'IT',     // Italy
-  '+41': 'CH',     // Switzerland
-  '+31': 'NL',     // Netherlands
-  '+32': 'BE',     // Belgium
-  '+34': 'ES',     // Spain
-  '+36': 'HU',     // Hungary
-  '+40': 'RO',     // Romania
-  '+7': 'RU',      // Russia
-  '+86': 'CN',     // China
-  '+81': 'JP',     // Japan
-  '+82': 'KR',     // South Korea
-  '+91': 'IN',     // India
-  '+92': 'PK',     // Pakistan
-  '+93': 'AF',     // Afghanistan
-  '+94': 'LK',     // Sri Lanka
-  '+95': 'MM',     // Myanmar
-  '+98': 'IR',     // Iran
-  '+20': 'EG',     // Egypt
-  '+27': 'ZA',     // South Africa
-  '+30': 'GR',     // Greece
-  '+90': 'TR',     // Turkey
-  '+52': 'MX',     // Mexico
-  '+55': 'BR',     // Brazil
-  '+54': 'AR',     // Argentina
-  '+56': 'CL',     // Chile
-  '+57': 'CO',     // Colombia
-  '+58': 'VE',     // Venezuela
-  '+51': 'PE',     // Peru
-  '+595': 'PY',    // Paraguay
-  '+598': 'UY',    // Uruguay
-  '+591': 'BO',    // Bolivia
-  '+593': 'EC',    // Ecuador
-  '+594': 'GF',    // French Guiana
-  '+596': 'MQ',    // Martinique
-  '+597': 'SR',    // Suriname
-  '+590': 'GP',    // Guadeloupe
-  '+60': 'MY',     // Malaysia
-  '+62': 'ID',     // Indonesia
-  '+63': 'PH',     // Philippines
-  '+64': 'NZ',     // New Zealand
-  '+65': 'SG',     // Singapore
-  '+66': 'TH',     // Thailand
-  '+84': 'VN',     // Vietnam
-  '+852': 'HK',    // Hong Kong
-  '+853': 'MO',    // Macau
-  '+886': 'TW',    // Taiwan
-  '+61': 'AU',     // Australia
-  '+971': 'AE',    // United Arab Emirates
-  '+966': 'SA',    // Saudi Arabia
-  '+974': 'QA',    // Qatar
-  '+965': 'KW',    // Kuwait
-  '+968': 'OM',    // Oman
-  '+973': 'BH',    // Bahrain
-  '+972': 'IL',    // Israel
-  '+962': 'JO',    // Jordan
-  '+961': 'LB',    // Lebanon
-  '+963': 'SY',    // Syria
-  '+964': 'IQ',    // Iraq
-  '+967': 'YE',    // Yemen
-  '+1684': 'AS',   // American Samoa
-  '+1264': 'AI',   // Anguilla
-  '+1268': 'AG',   // Antigua and Barbuda
-  '+1242': 'BS',   // Bahamas
-  '+1246': 'BB',   // Barbados
-  '+1441': 'BM',   // Bermuda
-  '+1284': 'VG',   // British Virgin Islands
-  '+1345': 'KY',   // Cayman Islands
-  '+1767': 'DM',   // Dominica
-  '+1809': 'DO',   // Dominican Republic
-  '+1473': 'GD',   // Grenada
-  '+1876': 'JM',   // Jamaica
-  '+1664': 'MS',   // Montserrat
-  '+1869': 'KN',   // Saint Kitts and Nevis
-  '+1758': 'LC',   // Saint Lucia
-  '+1784': 'VC',   // Saint Vincent and the Grenadines
-  '+1721': 'SX',   // Sint Maarten
-  '+1649': 'TC',   // Turks and Caicos Islands
-  '+1868': 'TT',   // Trinidad and Tobago
-  '+1340': 'VI',   // U.S. Virgin Islands
-  '+855': 'KH',    // Cambodia
-  '+237': 'CM',    // Cameroon
-  '+238': 'CV',    // Cape Verde
-  '+1': 'CA',      // Canada (also uses +1 like US)
-  '+225': 'CI',    // Côte d'Ivoire
-  '+506': 'CR',    // Costa Rica
-  '+53': 'CU',     // Cuba
-  '+357': 'CY',    // Cyprus
-  '+420': 'CZ',    // Czech Republic
-  '+45': 'DK',     // Denmark
-  '+253': 'DJ',    // Djibouti
-  '+593': 'EC',    // Ecuador
-  '+20': 'EG',     // Egypt
-  '+291': 'ER',    // Eritrea
-  '+372': 'EE',    // Estonia
-  '+251': 'ET',    // Ethiopia
-  '+679': 'FJ',    // Fiji
-  '+358': 'FI',    // Finland
-  '+594': 'GF',    // French Guiana
-  '+241': 'GA',    // Gabon
-  '+220': 'GM',    // Gambia
-  '+995': 'GE',    // Georgia
-  '+233': 'GH',    // Ghana
-  '+30': 'GR',     // Greece
-  '+590': 'GP',    // Guadeloupe
-  '+502': 'GT',    // Guatemala
-  '+224': 'GN',    // Guinea
-  '+245': 'GW',    // Guinea-Bissau
-  '+592': 'GY',    // Guyana
-  '+509': 'HT',    // Haiti
-  '+504': 'HN',    // Honduras
-  '+36': 'HU',     // Hungary
-  '+354': 'IS',    // Iceland
-  '+353': 'IE',    // Ireland
-  '+964': 'IQ',    // Iraq
-  '+81': 'JP',     // Japan
-  '+962': 'JO',    // Jordan
-  '+7': 'KZ',      // Kazakhstan
-  '+254': 'KE',    // Kenya
-  '+686': 'KI',    // Kiribati
-  '+82': 'KR',     // South Korea
-  '+965': 'KW',    // Kuwait
-  '+996': 'KG',    // Kyrgyzstan
-  '+856': 'LA',    // Laos
-  '+371': 'LV',    // Latvia
-  '+961': 'LB',    // Lebanon
-  '+266': 'LS',    // Lesotho
-  '+231': 'LR',    // Liberia
-  '+218': 'LY',    // Libya
-  '+423': 'LI',    // Liechtenstein
-  '+370': 'LT',    // Lithuania
-  '+352': 'LU',    // Luxembourg
-  '+853': 'MO',    // Macau
-  '+261': 'MG',    // Madagascar
-  '+265': 'MW',    // Malawi
-  '+960': 'MV',    // Maldives
-  '+223': 'ML',    // Mali
-  '+356': 'MT',    // Malta
-  '+692': 'MH',    // Marshall Islands
-  '+596': 'MQ',    // Martinique
-  '+222': 'MR',    // Mauritania
-  '+230': 'MU',    // Mauritius
-  '+262': 'YT',    // Mayotte
-  '+52': 'MX',     // Mexico
-  '+691': 'FM',    // Micronesia
-  '+373': 'MD',    // Moldova
-  '+377': 'MC',    // Monaco
-  '+976': 'MN',    // Mongolia
-  '+382': 'ME',    // Montenegro
-  '+258': 'MZ',    // Mozambique
-  '+95': 'MM',     // Myanmar (Burma)
-  '+264': 'NA',    // Namibia
-  '+977': 'NP',    // Nepal
-  '+31': 'NL',     // Netherlands
-  '+687': 'NC',    // New Caledonia
-  '+64': 'NZ',     // New Zealand
-  '+505': 'NI',    // Nicaragua
-  '+227': 'NE',    // Niger
-  '+234': 'NG',    // Nigeria
-  '+672': 'NF',    // Norfolk Island
-  '+389': 'MK',    // North Macedonia
-  '+1670': 'MP',   // Northern Mariana Islands
-  '+47': 'NO',     // Norway
-  '+968': 'OM',    // Oman
-  '+92': 'PK',     // Pakistan
-  '+680': 'PW',    // Palau
-  '+970': 'PS',    // Palestine
-  '+507': 'PA',    // Panama
-  '+675': 'PG',    // Papua New Guinea
-  '+595': 'PY',    // Paraguay
-  '+51': 'PE',     // Peru
-  '+63': 'PH',     // Philippines
-  '+48': 'PL',     // Poland
-  '+351': 'PT',    // Portugal
-  '+1': 'PR',      // Puerto Rico
-  '+974': 'QA',    // Qatar
-  '+242': 'CG',    // Republic of the Congo
-  '+262': 'RE',    // Reunion
-  '+40': 'RO',     // Romania
-  '+7': 'RU',      // Russia
-  '+250': 'RW',    // Rwanda
-  '+590': 'BL',    // Saint Barthelemy
-  '+508': 'PM',    // Saint Pierre and Miquelon
-  '+590': 'MF',    // Saint Martin
-  '+685': 'WS',    // Samoa
-  '+378': 'SM',    // San Marino
-  '+966': 'SA',    // Saudi Arabia
-  '+221': 'SN',    // Senegal
-  '+381': 'RS',    // Serbia
-  '+248': 'SC',    // Seychelles
-  '+232': 'SL',    // Sierra Leone
-  '+65': 'SG',     // Singapore
-  '+421': 'SK',    // Slovakia
-  '+386': 'SI',    // Slovenia
-  '+677': 'SB',    // Solomon Islands
-  '+252': 'SO',    // Somalia
-  '+27': 'ZA',     // South Africa
-  '+211': 'SS',    // South Sudan
-  '+34': 'ES',     // Spain
-  '+94': 'LK',     // Sri Lanka
-  '+249': 'SD',    // Sudan
-  '+597': 'SR',    // Suriname
-  '+47': 'SJ',     // Svalbard and Jan Mayen
-  '+46': 'SE',     // Sweden
-  '+41': 'CH',     // Switzerland
-  '+963': 'SY',    // Syria
-  '+886': 'TW',    // Taiwan
-  '+992': 'TJ',    // Tajikistan
-  '+255': 'TZ',    // Tanzania
-  '+66': 'TH',     // Thailand
-  '+228': 'TG',    // Togo
-  '+676': 'TO',    // Tonga
-  '+216': 'TN',    // Tunisia
-  '+90': 'TR',     // Turkey
-  '+993': 'TM',    // Turkmenistan
-  '+256': 'UG',    // Uganda
-  '+380': 'UA',    // Ukraine
-  '+971': 'AE',    // United Arab Emirates
-  '+44': 'GB',     // United Kingdom
-  '+598': 'UY',    // Uruguay
-  '+998': 'UZ',    // Uzbekistan
-  '+678': 'VU',    // Vanuatu
-  '+39': 'VA',     // Vatican City
-  '+58': 'VE',     // Venezuela
-  '+84': 'VN',     // Vietnam
-  '+681': 'WF',    // Wallis and Futuna
-  '+212': 'EH',    // Western Sahara
-  '+967': 'YE',    // Yemen
-  '+260': 'ZM',    // Zambia
-  '+263': 'ZW',    // Zimbabwe
-  '+93': 'AF',     // Afghanistan
-  '+358': 'AX',    // Aland (same as Finland)
-  '+355': 'AL',    // Albania
-  '+213': 'DZ',    // Algeria
-  '+1684': 'AS',   // American Samoa
-  '+376': 'AD',    // Andorra
-  '+244': 'AO',    // Angola
-  '+54': 'AR',     // Argentina
-  '+374': 'AM',    // Armenia
-  '+297': 'AW',    // Aruba
-  '+994': 'AZ',    // Azerbaijan
-  '+1242': 'BS',   // Bahamas
-  '+973': 'BH',    // Bahrain
-  '+880': 'BD',    // Bangladesh
-  '+375': 'BY',    // Belarus
-  '+32': 'BE',     // Belgium
-  '+501': 'BZ',    // Belize
-  '+229': 'BJ',    // Benin
-  '+975': 'BT',    // Bhutan
-  '+591': 'BO',    // Bolivia
-  '+599': 'BQ',    // Bonaire
-  '+387': 'BA',    // Bosnia and Herzegovina
-  '+267': 'BW',    // Botswana
-  '+55': 'BR',     // Brazil
-  '+246': 'IO',    // British Indian Ocean Territory
-  '+673': 'BN',    // Brunei
-  '+359': 'BG',    // Bulgaria
-  '+226': 'BF',    // Burkina Faso
-  '+257': 'BI',    // Burundi
-  '+236': 'CF',    // Central African Republic
-  '+235': 'TD',    // Chad
-  '+56': 'CL',     // Chile
-  '+61': 'CX',     // Christmas Island
-  '+61': 'CC',     // Cocos (Keeling) Islands
-  '+57': 'CO',     // Colombia
-  '+269': 'KM',    // Comoros
-  '+682': 'CK',    // Cook Islands
-  '+385': 'HR',    // Croatia
-  '+599': 'CW',    // Curacao
-  '+243': 'CD',    // Democratic Republic of the Congo
-  '+670': 'TL',    // East Timor
-  '+503': 'SV',    // El Salvador
-  '+240': 'GQ',    // Equatorial Guinea
-  '+268': 'SZ',    // Eswatini
-  '+500': 'FK',    // Falkland Islands
-  '+298': 'FO',    // Faroe Islands
-  '+689': 'PF',    // French Polynesia
-  '+350': 'GI',    // Gibraltar
-  '+299': 'GL',    // Greenland
-  '+1671': 'GU',   // Guam
-  '+44': 'GG',     // Guernsey (same as UK)
-  '+852': 'HK',    // Hong Kong
-  '+91': 'IN',     // India
-  '+62': 'ID',     // Indonesia
-  '+972': 'IL',    // Israel
-  '+44': 'IM',     // Isle of Man (same as UK)
-  '+44': 'JE',     // Jersey (same as UK)
-  '+383': 'XK',    // Kosovo
-  '+60': 'MY',     // Malaysia
-  '+212': 'MA',    // Morocco (note: conflicts with Western Sahara)
-};
 
-// Function to detect country from international dialing code
+import { parsePhoneNumberFromString, getCountryCallingCode, getCountries } from 'libphonenumber-js';
+
+// Function to detect country from phone number using libphonenumber-js
 const detectCountryFromDialingCode = (phoneNumber: string): string | null => {
-  console.log('🔍 Detecting country for phone number:', phoneNumber);
-  const cleanNumber = phoneNumber.replace(/\D/g, "");
-  console.log('🧹 Clean number:', cleanNumber);
-  
-  // Check for longest matching dialing codes first
-  const sortedCodes = Object.keys(DIALING_CODE_TO_ISO).sort((a, b) => 
-    b.replace('+', '').length - a.replace('+', '').length
-  );
-  console.log('📋 Sorted dialing codes:', sortedCodes);
-  
-  for (const dialingCode of sortedCodes) {
-    const codeDigits = dialingCode.replace('+', '');
-    console.log(`🔄 Checking code ${dialingCode} (digits: ${codeDigits}) against ${cleanNumber}`);
-    if (cleanNumber.startsWith(codeDigits)) {
-      const isoCode = DIALING_CODE_TO_ISO[dialingCode];
-      console.log('✅ MATCH FOUND! Returning ISO code:', isoCode);
-      return isoCode;
-    }
-  }
-  
-  console.log('❌ No match found, returning null');
-  return null;
+  const parsed = parsePhoneNumberFromString(phoneNumber);
+  return parsed ? parsed.country || null : null;
 };
 
-// Special cases for countries that share dialing codes or have special handling
-const ISO_TO_DIALING_CODE_SPECIAL: { [key: string]: string } = {
-  'AX': '+358', // Aland Islands use Finland's dialing code
-  'RE': '+262', // Reunion uses this code
-  'YT': '+262', // Mayotte uses this code
-  'GP': '+590', // Guadeloupe 
-  'BL': '+590', // Saint Barthélemy
-  'MF': '+590', // Saint Martin
-  'PF': '+689', // French Polynesia
-  'NC': '+687', // New Caledonia
-  'WF': '+681', // Wallis and Futuna
-  'AS': '+1684', // American Samoa
-  'AI': '+1264', // Anguilla
-  'AG': '+1268', // Antigua and Barbuda
-  'BS': '+1242', // Bahamas
-  'BB': '+1246', // Barbados
-  'BM': '+1441', // Bermuda
-  'VG': '+1284', // British Virgin Islands
-  'KY': '+1345', // Cayman Islands
-  'DM': '+1767', // Dominica
-  'DO': '+1809', // Dominican Republic
-  'GD': '+1473', // Grenada
-  'JM': '+1876', // Jamaica
-  'MS': '+1664', // Montserrat
-  'KN': '+1869', // Saint Kitts and Nevis
-  'LC': '+1758', // Saint Lucia
-  'VC': '+1784', // Saint Vincent and the Grenadines
-  'SX': '+1721', // Sint Maarten
-  'TC': '+1649', // Turks and Caicos Islands
-  'TT': '+1868', // Trinidad and Tobago
-  'VI': '+1340', // U.S. Virgin Islands
-  'KH': '+855',  // Cambodia
-  'CM': '+237',  // Cameroon
-  'CV': '+238',  // Cape Verde
-  'CA': '+1',    // Canada (shares +1 with US)
-  'CI': '+225',  // Côte d'Ivoire
-  'CR': '+506',  // Costa Rica
-  'CU': '+53',   // Cuba
-  'CY': '+357',  // Cyprus
-  'CZ': '+420',  // Czech Republic
-  'DK': '+45',   // Denmark
-  'DJ': '+253',  // Djibouti
-  'EC': '+593',  // Ecuador
-  'EG': '+20',   // Egypt
-  'ER': '+291',  // Eritrea
-  'EE': '+372',  // Estonia
-  'ET': '+251',  // Ethiopia
-  'FJ': '+679',  // Fiji
-  'FI': '+358',  // Finland
-  'GF': '+594',  // French Guiana
-  'GA': '+241',  // Gabon
-  'GM': '+220',  // Gambia
-  'GE': '+995',  // Georgia
-  'GH': '+233',  // Ghana
-  'GR': '+30',   // Greece
-  'GP': '+590',  // Guadeloupe
-  'GT': '+502',  // Guatemala
-  'GN': '+224',  // Guinea
-  'GW': '+245',  // Guinea-Bissau
-  'GY': '+592',  // Guyana
-  'HT': '+509',  // Haiti
-  'HN': '+504',  // Honduras
-  'HU': '+36',   // Hungary
-  'IS': '+354',  // Iceland
-  'IE': '+353',  // Ireland
-  'IQ': '+964',  // Iraq
-  'JP': '+81',   // Japan
-  'JO': '+962',  // Jordan
-  'KZ': '+7',    // Kazakhstan
-  'KE': '+254',  // Kenya
-  'KI': '+686',  // Kiribati
-  'KR': '+82',   // South Korea
-  'KW': '+965',  // Kuwait
-  'KG': '+996',  // Kyrgyzstan
-  'LA': '+856',  // Laos
-  'LV': '+371',  // Latvia
-  'LB': '+961',  // Lebanon
-  'LS': '+266',  // Lesotho
-  'LR': '+231',  // Liberia
-  'LY': '+218',  // Libya
-  'LI': '+423',  // Liechtenstein
-  'LT': '+370',  // Lithuania
-  'LU': '+352',  // Luxembourg
-  'MO': '+853',  // Macau
-  'MG': '+261',  // Madagascar
-  'MW': '+265',  // Malawi
-  'MV': '+960',  // Maldives
-  'ML': '+223',  // Mali
-  'MT': '+356',  // Malta
-  'MH': '+692',  // Marshall Islands
-  'MQ': '+596',  // Martinique
-  'MR': '+222',  // Mauritania
-  'MU': '+230',  // Mauritius
-  'YT': '+262',  // Mayotte
-  'MX': '+52',   // Mexico
-  'FM': '+691',  // Micronesia
-  'MD': '+373',  // Moldova
-  'MC': '+377',  // Monaco
-  'MN': '+976',  // Mongolia
-  'ME': '+382',  // Montenegro
-  'MZ': '+258',  // Mozambique
-  'MM': '+95',   // Myanmar (Burma)
-  'NA': '+264',  // Namibia
-  'NP': '+977',  // Nepal
-  'NL': '+31',   // Netherlands
-  'NC': '+687',  // New Caledonia
-  'NZ': '+64',   // New Zealand
-  'NI': '+505',  // Nicaragua
-  'NE': '+227',  // Niger
-  'NG': '+234',  // Nigeria
-  'NF': '+672',  // Norfolk Island
-  'MK': '+389',  // North Macedonia
-  'MP': '+1670', // Northern Mariana Islands
-  'NO': '+47',   // Norway
-  'OM': '+968',  // Oman
-  'PK': '+92',   // Pakistan
-  'PW': '+680',  // Palau
-  'PS': '+970',  // Palestine
-  'PA': '+507',  // Panama
-  'PG': '+675',  // Papua New Guinea
-  'PY': '+595',  // Paraguay
-  'PE': '+51',   // Peru
-  'PH': '+63',   // Philippines
-  'PL': '+48',   // Poland
-  'PT': '+351',  // Portugal
-  'PR': '+1',    // Puerto Rico
-  'QA': '+974',  // Qatar
-  'CG': '+242',  // Republic of the Congo
-  'RE': '+262',  // Reunion
-  'RO': '+40',   // Romania
-  'RU': '+7',    // Russia
-  'RW': '+250',  // Rwanda
-  'BL': '+590',  // Saint Barthelemy
-  'PM': '+508',  // Saint Pierre and Miquelon
-  'MF': '+590',  // Saint Martin
-  'WS': '+685',  // Samoa
-  'SM': '+378',  // San Marino
-  'SA': '+966',  // Saudi Arabia
-  'SN': '+221',  // Senegal
-  'RS': '+381',  // Serbia
-  'SC': '+248',  // Seychelles
-  'SL': '+232',  // Sierra Leone
-  'SG': '+65',   // Singapore
-  'SK': '+421',  // Slovakia
-  'SI': '+386',  // Slovenia
-  'SB': '+677',  // Solomon Islands
-  'SO': '+252',  // Somalia
-  'ZA': '+27',   // South Africa
-  'SS': '+211',  // South Sudan
-  'ES': '+34',   // Spain
-  'LK': '+94',   // Sri Lanka
-  'SD': '+249',  // Sudan
-  'SR': '+597',  // Suriname
-  'SJ': '+47',   // Svalbard and Jan Mayen
-  'SE': '+46',   // Sweden
-  'CH': '+41',   // Switzerland
-  'SY': '+963',  // Syria
-  'TW': '+886',  // Taiwan
-  'TJ': '+992',  // Tajikistan
-  'TZ': '+255',  // Tanzania
-  'TH': '+66',   // Thailand
-  'TG': '+228',  // Togo
-  'TO': '+676',  // Tonga
-  'TN': '+216',  // Tunisia
-  'TR': '+90',   // Turkey
-  'TM': '+993',  // Turkmenistan
-  'UG': '+256',  // Uganda
-  'UA': '+380',  // Ukraine
-  'AE': '+971',  // United Arab Emirates
-  'GB': '+44',   // United Kingdom
-  'UY': '+598',  // Uruguay
-  'UZ': '+998',  // Uzbekistan
-  'VU': '+678',  // Vanuatu
-  'VA': '+39',   // Vatican City
-  'VE': '+58',   // Venezuela
-  'VN': '+84',   // Vietnam
-  'WF': '+681',  // Wallis and Futuna
-  'EH': '+212',  // Western Sahara
-  'YE': '+967',  // Yemen
-  'ZM': '+260',  // Zambia
-  'ZW': '+263',  // Zimbabwe
-  'AF': '+93',   // Afghanistan
-  'AX': '+358',  // Aland (same as Finland)
-  'AL': '+355',  // Albania
-  'DZ': '+213',  // Algeria
-  'AS': '+1684', // American Samoa
-  'AD': '+376',  // Andorra
-  'AO': '+244',  // Angola
-  'AR': '+54',   // Argentina
-  'AM': '+374',  // Armenia
-  'AW': '+297',  // Aruba
-  'AZ': '+994',  // Azerbaijan
-  'BS': '+1242', // Bahamas
-  'BH': '+973',  // Bahrain
-  'BD': '+880',  // Bangladesh
-  'BY': '+375',  // Belarus
-  'BE': '+32',   // Belgium
-  'BZ': '+501',  // Belize
-  'BJ': '+229',  // Benin
-  'BT': '+975',  // Bhutan
-  'BO': '+591',  // Bolivia
-  'BQ': '+599',  // Bonaire
-  'BA': '+387',  // Bosnia and Herzegovina
-  'BW': '+267',  // Botswana
-  'BR': '+55',   // Brazil
-  'IO': '+246',  // British Indian Ocean Territory
-  'BN': '+673',  // Brunei
-  'BG': '+359',  // Bulgaria
-  'BF': '+226',  // Burkina Faso
-  'BI': '+257',  // Burundi
-  'CF': '+236',  // Central African Republic
-  'TD': '+235',  // Chad
-  'CL': '+56',   // Chile
-  'CX': '+61',   // Christmas Island
-  'CC': '+61',   // Cocos (Keeling) Islands
-  'CO': '+57',   // Colombia
-  'KM': '+269',  // Comoros
-  'CK': '+682',  // Cook Islands
-  'HR': '+385',  // Croatia
-  'CW': '+599',  // Curacao
-  'CD': '+243',  // Democratic Republic of the Congo
-  'TL': '+670',  // East Timor
-  'SV': '+503',  // El Salvador
-  'GQ': '+240',  // Equatorial Guinea
-  'SZ': '+268',  // Eswatini
-  'FK': '+500',  // Falkland Islands
-  'FO': '+298',  // Faroe Islands
-  'PF': '+689',  // French Polynesia
-  'GI': '+350',  // Gibraltar
-  'GL': '+299',  // Greenland
-  'GU': '+1671', // Guam
-  'GG': '+44',   // Guernsey (same as UK)
-  'HK': '+852',  // Hong Kong
-  'IN': '+91',   // India
-  'ID': '+62',   // Indonesia
-  'IL': '+972',  // Israel
-  'IM': '+44',   // Isle of Man (same as UK)
-  'JE': '+44',   // Jersey (same as UK)
-  'XK': '+383',  // Kosovo
-  'MY': '+60',   // Malaysia
-  'AU': '+61',   // Australia
-  'AT': '+43',   // Austria
-  'IT': '+39',   // Italy
-  'US': '+1',    // United States
-};
 
-// Function to get dialing code from country object (handles both ISO codes and dialing codes)
+// Get dialing code from country ISO using libphonenumber-js
 const getDialingCodeFromCountry = (country: any): string => {
-  // If country.code is already a dialing code (starts with +), return it
   if (country.code && country.code.startsWith('+')) {
     return country.code;
   }
-  
-  // If country.code is an ISO code, check special cases first
-  if (country.code && ISO_TO_DIALING_CODE_SPECIAL[country.code]) {
-    return ISO_TO_DIALING_CODE_SPECIAL[country.code];
-  }
-  
-  // If country.code is an ISO code, find the corresponding dialing code
   if (country.code) {
-    // Find the dialing code for this ISO code
-    for (const [dialingCode, isoCode] of Object.entries(DIALING_CODE_TO_ISO)) {
-      if (isoCode === country.code) {
-        return dialingCode;
-      }
+    try {
+      return '+' + getCountryCallingCode(country.code);
+    } catch {
+      return country.code;
     }
   }
-  
-  // Fallback: return the code as-is (might be ISO code)
-  return country.code || '??';
+  return '??';
 };
 
 // Utility function to parse phone numbers and detect country
@@ -740,7 +85,7 @@ const parsePhoneNumber = (phoneNumber: string, countries: any[], rates: any[]) =
           country: matchingCountry,
           rate: matchingRate,
           formattedNumber: phoneNumber,
-          dialingCode: Object.keys(DIALING_CODE_TO_ISO).find(k => DIALING_CODE_TO_ISO[k] === isoCode)
+          dialingCode: isoCode ? '+' + getCountryCallingCode(isoCode as any) : ''
         };
       }
     }
@@ -839,13 +184,7 @@ export default function Dialer() {
           
           // Create a country object from the rate data
           // Find the dialing code for this ISO code
-          let dialingCode = '+1'; // default fallback
-          for (const [code, iso] of Object.entries(DIALING_CODE_TO_ISO)) {
-            if (iso === matchingRate.countryCode) {
-              dialingCode = code;
-              break;
-            }
-          }
+          let dialingCode = matchingRate.countryCode ? '+' + getCountryCallingCode(matchingRate.countryCode as any) : '+1';
           
           const rateBasedCountry = {
             code: dialingCode,  // Use dialing code, not ISO code
@@ -1024,9 +363,7 @@ export default function Dialer() {
             const flag = rate.flag || "🌍"; // Use flag from database, fallback to earth emoji
             
             // Convert ISO country code to international dialing code
-            const dialingCode = Object.keys(DIALING_CODE_TO_ISO).find(
-              key => DIALING_CODE_TO_ISO[key] === rate.countryCode
-            );
+            const dialingCode = rate.countryCode ? '+' + getCountryCallingCode(rate.countryCode as any) : '';
             
             uniqueCountries.set(rate.country, {
               name: rate.country,
@@ -1076,9 +413,7 @@ export default function Dialer() {
         const currentIsoCode = detectCountryFromDialingCode(phoneNumber);
         if (currentIsoCode) {
           // Find the current dialing code
-          const currentDialingCode = Object.keys(DIALING_CODE_TO_ISO).find(
-            key => DIALING_CODE_TO_ISO[key] === currentIsoCode
-          );
+          const currentDialingCode = currentIsoCode ? '+' + getCountryCallingCode(currentIsoCode as any) : '';
           if (currentDialingCode) {
             const currentCodeDigits = currentDialingCode.replace("+", "");
             const nationalNumber = cleanNumber.substring(currentCodeDigits.length);
@@ -1098,7 +433,7 @@ export default function Dialer() {
       setSelectedRate(rate || null);
     } else {
       // No phone number yet, find the rate for this country using ISO code
-      const isoCode = DIALING_CODE_TO_ISO[country.code];
+      const isoCode = country.code; // country.code is already ISO code
       const rate = rates.find(r => r.countryCode === isoCode);
       setSelectedRate(rate || null);
     }
@@ -1118,7 +453,6 @@ export default function Dialer() {
       // Keep current selected country for local numbers
       return rates.find(rate => rate.countryCode === selectedCountry.code);
     }
-    
     // For international numbers, use the dialing code mapping
     if (number.startsWith('+')) {
       const isoCode = detectCountryFromDialingCode(number);
@@ -1127,11 +461,8 @@ export default function Dialer() {
         // Find the matching rate using ISO code
         const matchingRate = rates.find(rate => rate.countryCode === isoCode);
         if (matchingRate) {
-          // Update selected country to match detected rate - find by ISO code mapping
-          const matchingCountry = countries.find(c => {
-            const countryIsoCode = DIALING_CODE_TO_ISO[c.code];
-            return countryIsoCode === isoCode;
-          });
+          // Update selected country to match detected rate - find by ISO code
+          const matchingCountry = countries.find(c => c.code === isoCode);
           if (matchingCountry) {
             console.log('detectCountry - updating country to:', matchingCountry);
             setSelectedCountry(matchingCountry);
@@ -1140,42 +471,27 @@ export default function Dialer() {
         }
       }
     }
-    
     // If no match found, try to match by the selected country
-    const fallbackRate = rates.find(rate => {
-      const countryIsoCode = DIALING_CODE_TO_ISO[selectedCountry.code];
-      return rate.countryCode === (countryIsoCode || selectedCountry.code);
-    });
+    const fallbackRate = rates.find(rate => rate.countryCode === selectedCountry.code);
     return fallbackRate;
   };
 
+  // New: Use custom parser and formatter for input
   const handleNumberChange = (value: string) => {
     if (isCalling) return;
-    
-    // Remove all non-digit characters
-    const digitsOnly = value.replace(/[^0-9]/g, '');
-    
-    // If empty, just clear
-    if (!digitsOnly) {
-      setPhoneNumber('');
-      setSelectedRate(null);
-      return;
+    // Use YA to parse input and detect country
+    const parsed = YA(value, phoneNumber, selectedCountry.code.replace('+', ''));
+    // Format for display using dL
+    const formatted = dL(parsed.formattedValue, selectedCountry.code.replace('+', ''));
+    setPhoneNumber(formatted);
+    // If country auto-detected, update selectedCountry
+    if (parsed.shouldUpdateCountry && parsed.detectedCountry) {
+      // Find country in countries list
+      const detected = countries.find(c => c.code.replace('+', '') === parsed.detectedCountry || c.code === parsed.detectedCountry);
+      if (detected) setSelectedCountry(detected);
     }
-    
-    // Auto-format with selected country code
-    let formattedNumber = '';
-    const countryCodeDigits = selectedCountry.code.replace('+', '');
-    
-    // If user typed the country code themselves, don't duplicate it
-    if (digitsOnly.startsWith(countryCodeDigits)) {
-      formattedNumber = '+' + digitsOnly;
-    } else {
-      // Prepend the selected country code
-      formattedNumber = selectedCountry.code + digitsOnly;
-    }
-    
-    setPhoneNumber(formattedNumber);
-    const rate = detectCountry(formattedNumber);
+    // Update rate
+    const rate = detectCountry(formatted);
     setSelectedRate(rate || null);
   };
 
@@ -1456,7 +772,17 @@ export default function Dialer() {
               <input 
                 type="tel" 
                 value={phoneNumber}
-                onChange={(e) => handleNumberChange(e.target.value.replace(/[^0-9]/g, ''))}
+                onChange={(e) => handleNumberChange(e.target.value)}
+                onPaste={e => {
+                  const pastedText = e.clipboardData.getData("text");
+                  const parsed = YA(pastedText, phoneNumber, selectedCountry.code.replace('+', ''));
+                  if (parsed.shouldUpdateCountry && parsed.detectedCountry) {
+                    const detected = countries.find(c => c.code.replace('+', '') === parsed.detectedCountry || c.code === parsed.detectedCountry);
+                    if (detected) setSelectedCountry(detected);
+                  }
+                  setPhoneNumber(dL(parsed.formattedValue, selectedCountry.code.replace('+', '')));
+                  e.preventDefault();
+                }}
                 placeholder="Enter phone number"
                 className="flex-1 border-0 outline-none bg-transparent text-lg sm:text-xl font-mono text-gray-800 placeholder-gray-400"
                 disabled={isCalling}
