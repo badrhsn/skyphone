@@ -775,12 +775,17 @@ export default function Dialer() {
                 onChange={(e) => handleNumberChange(e.target.value)}
                 onPaste={e => {
                   const pastedText = e.clipboardData.getData("text");
+                  // Use the same logic as handleNumberChange for consistency
                   const parsed = YA(pastedText, phoneNumber, selectedCountry.code.replace('+', ''));
+                  const formatted = dL(parsed.formattedValue, selectedCountry.code.replace('+', ''));
+                  setPhoneNumber(formatted);
                   if (parsed.shouldUpdateCountry && parsed.detectedCountry) {
                     const detected = countries.find(c => c.code.replace('+', '') === parsed.detectedCountry || c.code === parsed.detectedCountry);
                     if (detected) setSelectedCountry(detected);
                   }
-                  setPhoneNumber(dL(parsed.formattedValue, selectedCountry.code.replace('+', '')));
+                  // Always update rate after paste
+                  const rate = detectCountry(formatted);
+                  setSelectedRate(rate || null);
                   e.preventDefault();
                 }}
                 placeholder="Enter phone number"
