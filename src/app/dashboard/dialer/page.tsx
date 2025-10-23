@@ -357,18 +357,16 @@ export default function Dialer() {
         const data = await response.json();
         
         // Create countries from rates using flags from database
-        const uniqueCountries = new Map<string, { name: string; flag: string; code: string }>();
-        data.forEach((rate: any) => {
+        const uniqueCountries = new Map();
+        data.forEach((rate) => {
           if (!uniqueCountries.has(rate.country)) {
-            const flag = rate.flag || "🌍"; // Use flag from database, fallback to earth emoji
-            
-            // Convert ISO country code to international dialing code
-            const dialingCode = rate.countryCode ? '+' + getCountryCallingCode(rate.countryCode as any) : '';
-            
+            const flag = rate.flag || "🌍";
+            const dialingCode = rate.countryCode ? '+' + getCountryCallingCode(rate.countryCode) : '';
             uniqueCountries.set(rate.country, {
               name: rate.country,
-              flag: flag,
-              code: rate.countryCode // Always store ISO code, let getDialingCodeFromCountry handle conversion
+              flag,
+              code: rate.countryCode, // ISO code
+              dialingCode // Store dialing code explicitly
             });
           }
         });
@@ -399,41 +397,35 @@ export default function Dialer() {
     setSelectedCountry(country);
     setShowCountryOptions(false);
     setCountrySearch("");
-    
-    // If phone number exists, update it with the new country code
+    // If phone number exists, update it with the new dialing code
     if (phoneNumber) {
       const cleanNumber = phoneNumber.replace(/\D/g, "");
       let newNumber = phoneNumber;
-      
-      // If number doesn't start with +, prepend the new country code
+      // If number doesn't start with +, prepend the new dialing code
       if (!phoneNumber.startsWith("+")) {
-        newNumber = country.code + cleanNumber;
+        newNumber = country.dialingCode + cleanNumber;
       } else {
-        // Replace existing country code with new one
+        // Replace existing dialing code with new one
         const currentIsoCode = detectCountryFromDialingCode(phoneNumber);
         if (currentIsoCode) {
-          // Find the current dialing code
-          const currentDialingCode = currentIsoCode ? '+' + getCountryCallingCode(currentIsoCode as any) : '';
+          const currentDialingCode = '+' + getCountryCallingCode(currentIsoCode);
           if (currentDialingCode) {
             const currentCodeDigits = currentDialingCode.replace("+", "");
             const nationalNumber = cleanNumber.substring(currentCodeDigits.length);
-            newNumber = country.code + nationalNumber;
+            newNumber = country.dialingCode + nationalNumber;
           } else {
-            // Fallback: just prepend new code to cleaned number
-            newNumber = country.code + cleanNumber;
+            newNumber = country.dialingCode + cleanNumber;
           }
         } else {
-          // Fallback: just prepend new code to cleaned number
-          newNumber = country.code + cleanNumber;
+          newNumber = country.dialingCode + cleanNumber;
         }
       }
-      
       setPhoneNumber(newNumber);
       const rate = detectCountry(newNumber);
       setSelectedRate(rate || null);
     } else {
       // No phone number yet, find the rate for this country using ISO code
-      const isoCode = country.code; // country.code is already ISO code
+      const isoCode = country.code;
       const rate = rates.find(r => r.countryCode === isoCode);
       setSelectedRate(rate || null);
     }
@@ -479,19 +471,66 @@ export default function Dialer() {
   // New: Use custom parser and formatter for input
   const handleNumberChange = (value: string) => {
     if (isCalling) return;
+    let inputValue = value;
+    let formatted = inputValue;
+    // Only auto-format if user has typed a local number for selected country
+    // Dynamic local number validation for all countries using libphonenumber-js
+    if (
+      selectedCountry &&
+      inputValue &&
+      !inputValue.startsWith("+")
+    ) {
+      // Use libphonenumber-js to validate local number for selected country
+      try {
+        const { isValidNumber, parsePhoneNumberFromString } = require('libphonenumber-js');
+        const parsed = parsePhoneNumberFromString(inputValue, selectedCountry.code);
+        if (!parsed || !parsed.isValid()) {
+          setPhoneNumber(value);
+          setSelectedRate(null);
+          return;
+        }
+      } catch (err) {
+        // Fallback: if validation fails, do not format
+        setPhoneNumber(value);
+        setSelectedRate(null);
+        return;
+      }
+    }
+    if (
+      selectedCountry &&
+      inputValue &&
+      !inputValue.startsWith("+") &&
+      inputValue.length >= 9 && inputValue.length <= 12 &&
+      selectedCountry.dialingCode
+    ) {
+      // Remove leading zero if present (common in Morocco and other countries)
+      if (inputValue.startsWith("0")) {
+        inputValue = inputValue.substring(1);
+      }
+      // Only prepend dialing code if not already present
+      if (!inputValue.startsWith(selectedCountry.dialingCode.replace("+", ""))) {
+        formatted = selectedCountry.dialingCode + inputValue;
+      } else {
+        formatted = "+" + inputValue;
+      }
+    }
+    // If not enough digits, just show raw input (no + or country code)
+    if (!formatted.startsWith("+") && formatted.replace(/\D/g, "").length < 9) {
+      setPhoneNumber(value);
+      setSelectedRate(null);
+      return;
+    }
     // Use YA to parse input and detect country
-    const parsed = YA(value, phoneNumber, selectedCountry.code.replace('+', ''));
-    // Format for display using dL
-    const formatted = dL(parsed.formattedValue, selectedCountry.code.replace('+', ''));
-    setPhoneNumber(formatted);
-    // If country auto-detected, update selectedCountry
-    if (parsed.shouldUpdateCountry && parsed.detectedCountry) {
-      // Find country in countries list
+    const parsed = YA(formatted, phoneNumber, selectedCountry.code.replace('+', ''));
+    const displayValue = dL(parsed.formattedValue, selectedCountry.code.replace('+', ''));
+    setPhoneNumber(displayValue);
+    // Only switch country if user types a different international code
+    if (parsed.shouldUpdateCountry && parsed.detectedCountry && displayValue.startsWith("+")) {
       const detected = countries.find(c => c.code.replace('+', '') === parsed.detectedCountry || c.code === parsed.detectedCountry);
-      if (detected) setSelectedCountry(detected);
+      if (detected && detected.code !== selectedCountry.code) setSelectedCountry(detected);
     }
     // Update rate
-    const rate = detectCountry(formatted);
+    const rate = detectCountry(displayValue);
     setSelectedRate(rate || null);
   };
 
