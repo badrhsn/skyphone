@@ -124,7 +124,8 @@ export default function Dialer() {
   const [user, setUser] = useState<User | null>(null);
   const [callerIdOption, setCallerIdOption] = useState<"public" | "bought" | "verified">("public");
   const [showCallerOptions, setShowCallerOptions] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState({ name: "United States", flag: "🇺🇸", code: "+1" });
+  // selectedCountry.code is the ISO (e.g. 'US') and dialingCode is the display dialing prefix (e.g. '+1')
+  const [selectedCountry, setSelectedCountry] = useState({ name: "United States", flag: "🇺🇸", code: "US", dialingCode: "+1" });
   const [showCountryOptions, setShowCountryOptions] = useState(false);
   const [availableNumbers, setAvailableNumbers] = useState<any[]>([]);
   const [selectedCallerId, setSelectedCallerId] = useState<string>("");
@@ -534,23 +535,20 @@ export default function Dialer() {
     setSelectedRate(rate || null);
   };
 
+  const stripFormatting = (s: string) => {
+    if (!s) return "";
+    // keep leading + if present, remove all other non-digits
+    if (s.startsWith("+")) return "+" + s.replace(/[^\d]/g, "").replace(/^\+/, "");
+    return s.replace(/[^\d]/g, "");
+  };
+
   const handleNumberInput = (digit: string) => {
     if (isCalling) return;
-    setPhoneNumber(prev => {
-      // If starting fresh or number doesn't have country code, add it
-      if (!prev || !prev.startsWith('+')) {
-        const newNumber = selectedCountry.code + digit;
-        const rate = detectCountry(newNumber);
-        setSelectedRate(rate || null);
-        return newNumber;
-      }
-      
-      // Otherwise just append the digit
-      const newNumber = prev + digit;
-      const rate = detectCountry(newNumber);
-      setSelectedRate(rate || null);
-      return newNumber;
-    });
+    // Build the new raw input by removing formatting from the current phoneNumber
+    const rawPrev = stripFormatting(phoneNumber || "");
+    const newRaw = rawPrev + digit;
+    // Delegate to the same formatter as keyboard input so behavior is identical
+    handleNumberChange(newRaw);
   };
 
   const handleContactSelect = (contact: any) => {
@@ -798,7 +796,7 @@ export default function Dialer() {
                 data-country-dropdown="button"
               >
                 <span className="text-xl sm:text-2xl">{selectedCountry.flag}</span>
-                <span className="text-sm sm:text-base font-bold text-gray-700">{selectedCountry.code}</span>
+                <span className="text-sm sm:text-base font-bold text-gray-700">{getDialingCodeFromCountry(selectedCountry)}</span>
                 <svg className={`w-4 h-4 text-gray-500 transition-transform ${showCountryOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
