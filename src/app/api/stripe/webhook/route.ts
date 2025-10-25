@@ -140,6 +140,11 @@ export async function POST(request: NextRequest) {
         } else {
           // Handle regular credit purchase
           const amount = parseFloat(session.metadata?.amount || "0");
+          const autoTopup = session.metadata?.autoTopup === "true";
+          const autoTopupThreshold = parseFloat(session.metadata?.autoTopupThreshold || "0") || null;
+          const autoTopupAmount = parseFloat(session.metadata?.autoTopupAmount || "0") || null;
+          const invoiceRequired = session.metadata?.invoiceRequired === "true";
+          const promoCode = session.metadata?.promoCode || null;
 
           if (userId && amount > 0) {
             // Update user balance
@@ -151,6 +156,18 @@ export async function POST(request: NextRequest) {
                 },
               },
             });
+
+            // Update auto-topup settings if requested
+            if (autoTopup) {
+              await prisma.user.update({
+                where: { id: userId },
+                data: {
+                  autoTopupEnabled: true,
+                  autoTopupThreshold: autoTopupThreshold || undefined,
+                  autoTopupAmount: autoTopupAmount || undefined,
+                },
+              });
+            }
 
             // Create payment record
             await prisma.payment.create({

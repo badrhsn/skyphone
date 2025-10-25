@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, autoTopUp } = await request.json();
+  const { name, autoTopUp, autoTopupEnabled, autoTopupThreshold, autoTopupAmount } = await request.json();
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -56,13 +56,15 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (autoTopupEnabled !== undefined) updateData.autoTopupEnabled = autoTopupEnabled;
+    if (autoTopupThreshold !== undefined) updateData.autoTopupThreshold = autoTopupThreshold;
+    if (autoTopupAmount !== undefined) updateData.autoTopupAmount = autoTopupAmount;
+
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
-      data: {
-        ...(name !== undefined && { name }),
-        // Note: autoTopUp would need to be added to the User model
-        // For now, we'll just ignore it
-      },
+      data: updateData,
       select: {
         id: true,
         name: true,
@@ -70,6 +72,9 @@ export async function PATCH(request: NextRequest) {
         balance: true,
         isAdmin: true,
         createdAt: true,
+        autoTopupEnabled: true,
+        autoTopupThreshold: true,
+        autoTopupAmount: true,
       },
     });
 

@@ -22,7 +22,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { amount } = await request.json();
+  const body = await request.json();
+  const amount = body.amount;
+  const autoTopup = body.autoTopup || false;
+  const autoTopupThreshold = body.autoTopupThreshold || null;
+  const autoTopupAmount = body.autoTopupAmount || null;
+  const invoiceRequired = body.invoiceRequired || false;
+  const promoCode = body.promoCode || null;
 
     if (!amount || amount < 5) {
       return NextResponse.json(
@@ -54,6 +60,12 @@ export async function POST(request: NextRequest) {
       metadata: {
         userId: user.id,
         amount: amount.toString(),
+        purchaseType: "credits",
+        autoTopup: autoTopup ? "true" : "false",
+        autoTopupThreshold: autoTopupThreshold ? autoTopupThreshold.toString() : "",
+        autoTopupAmount: autoTopupAmount ? autoTopupAmount.toString() : "",
+        invoiceRequired: invoiceRequired ? "true" : "false",
+        promoCode: promoCode || "",
       },
     });
 
