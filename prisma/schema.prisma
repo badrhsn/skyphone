@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
 }
 
 model Account {
@@ -16,15 +16,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  id_token          String? @db.Text
+  scope             String?
+  session_state     String?
   expires_at        Int?
   token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -38,27 +37,27 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  balance       Float     @default(0)
-  isAdmin       Boolean   @default(false)
-  autoTopupEnabled    Boolean @default(false)
-  autoTopupThreshold  Float   @default(2.0)
-  autoTopupAmount     Float   @default(10.0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts Account[]
-  sessions Session[]
-  calls    Call[]
-  payments Payment[]
-  phoneNumbers PhoneNumber[]
-  contacts Contact[]
-  callerIds CallerID[]
+  id                  String   @id @default(cuid())
+  name                String?
+  email               String   @unique
+  password            String?
+  emailVerified       DateTime?
+  image               String?
+  balance             Float    @default(0)
+  isAdmin             Boolean  @default(false)
+  autoTopupEnabled    Boolean  @default(false)
+  autoTopupThreshold  Float    @default(2.0)
+  autoTopupAmount     Float    @default(10.0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  accounts            Account[]
+  sessions            Session[]
+  calls               Call[]
+  payments            Payment[]
+  phoneNumbers        PhoneNumber[]
+  contacts            Contact[]
+  callerIDs           CallerID[]
   configurationAudits ConfigurationAudit[]
 }
 
@@ -71,22 +70,22 @@ model VerificationToken {
 }
 
 model Call {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fromNumber  String
-  toNumber    String
-  country     String
-  duration    Int      @default(0) // in seconds
-  cost        Float
-  status      CallStatus @default(INITIATED)
-  callerIdType String  @default("public") // public, custom, bought, verified
-  twilioSid   String?
-  recordingSid String?  // Twilio recording SID
-  recordingUrl String?  // URL to access recording
-  metadata    String?  // JSON metadata for caller ID info
-  createdAt   DateTime @default(now())
-  endedAt     DateTime?
+  id           String   @id @default(cuid())
+  userId       String
+  fromNumber   String
+  toNumber     String
+  country      String
+  duration     Int      @default(0)
+  cost         Float
+  status       String   @default("INITIATED")
+  callerIdType String   @default("public")
+  twilioSid    String?
+  recordingSid String?
+  recordingUrl String?
+  metadata     String?  @db.Text
+  createdAt    DateTime @default(now())
+  endedAt      DateTime?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt])
@@ -94,14 +93,14 @@ model Call {
 }
 
 model CallRate {
-  id              String  @id @default(cuid())
-  country         String  // Destination country
-  countryCode     String  // Destination country code
-  callerIdCountry String  // Caller ID country (e.g., "US", "UK", "DE", "FR")
-  flag            String? // Country flag emoji
-  rate            Float   // per minute
-  currency        String  @default("USD")
-  isActive        Boolean @default(true)
+  id              String   @id @default(cuid())
+  country         String
+  countryCode     String
+  callerIdCountry String
+  flag            String?
+  rate            Float
+  currency        String   @default("USD")
+  isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -110,18 +109,137 @@ model CallRate {
 }
 
 model Payment {
-  id            String        @id @default(cuid())
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount        Float
-  currency      String        @default("USD")
-  status        PaymentStatus @default(PENDING)
+  id              String        @id @default(cuid())
+  userId          String
+  amount          Float
+  currency        String        @default("USD")
+  status          PaymentStatus @default(PENDING)
   stripePaymentId String?
   stripeSessionId String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model CallAnalytics {
+  id            String              @id @default(cuid())
+  phoneNumber   String
+  countryCode   String?
+  provider      String
+  status        CallAnalyticsStatus
+  callSid       String?
+  failureReason String?
+  responseTime  Int?
+  createdAt     DateTime            @default(now())
+
+  @@index([provider])
+  @@index([countryCode])
+  @@index([createdAt])
+}
+
+model ProviderStatus {
+  id              String   @id @default(cuid())
+  provider        String   @unique
+  isActive        Boolean  @default(true)
+  successRate     Float    @default(100.0)
+  avgResponseTime Int      @default(0)
+  lastChecked     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PhoneNumber {
+  id           String          @id @default(cuid())
+  userId       String
+  phoneNumber  String          @unique
+  country      String
+  countryCode  String
+  city         String?
+  type         PhoneNumberType @default(LOCAL)
+  monthlyPrice Float
+  setupFee     Float
+  isActive     Boolean         @default(true)
+  twilioSid    String?
+  capabilities String
+  purchaseDate DateTime        @default(now())
+  nextBilling  DateTime
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  phoneNumber String
+  email       String?
+  country     String?
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([phoneNumber])
+}
+
+model CallerID {
+  id                     String         @id @default(cuid())
+  userId                 String
+  phoneNumber            String
+  country                String?
+  friendlyName           String?
+  status                 CallerIDStatus @default(PENDING)
+  verificationCode       String?
+  verificationCodeExpiry DateTime?
+  verificationAttempts   Int            @default(0)
+  verifiedAt             DateTime?
+  isActive               Boolean        @default(false)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  user                   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phoneNumber])
+  @@index([userId])
+  @@index([status])
+}
+
+model ApiConfiguration {
+  id          String    @id @default(cuid())
+  provider    String    @unique
+  configData  String    @db.Text
+  isActive    Boolean   @default(true)
+  environment String    @default("production")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastUsed    DateTime?
+  version     String    @default("1.0")
+  description String?
+
+  @@index([provider])
+  @@index([environment])
+}
+
+model ConfigurationAudit {
+  id              String   @id @default(cuid())
+  configurationId String
+  action          String
+  userId          String?
+  previousValue   String?  @db.Text
+  metadata        String?  @db.Text
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+  user            User?    @relation(fields: [userId], references: [id])
+
+  @@index([configurationId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 enum CallStatus {
@@ -133,32 +251,6 @@ enum CallStatus {
   CANCELLED
 }
 
-model CallAnalytics {
-  id            String   @id @default(cuid())
-  phoneNumber   String
-  countryCode   String?
-  provider      String   // twilio, telnyx, vonage
-  status        CallAnalyticsStatus
-  callSid       String?
-  failureReason String?
-  responseTime  Int?     // milliseconds
-  createdAt     DateTime @default(now())
-
-  @@index([provider])
-  @@index([countryCode])
-  @@index([createdAt])
-}
-
-model ProviderStatus {
-  id              String   @id @default(cuid())
-  provider        String   @unique
-  isActive        Boolean  @default(true)
-  successRate     Float    @default(100.0) // percentage
-  avgResponseTime Int      @default(0) // milliseconds
-  lastChecked     DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
 enum PaymentStatus {
   PENDING
   COMPLETED
@@ -168,32 +260,9 @@ enum PaymentStatus {
 
 enum CallAnalyticsStatus {
   SUCCESS
-  FAILOVER_SUCCESS  
+  FAILOVER_SUCCESS
   FAILOVER_FAILED
   FAILED
-}
-
-model PhoneNumber {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phoneNumber   String   @unique
-  country       String
-  countryCode   String
-  city          String?
-  type          PhoneNumberType @default(LOCAL)
-  monthlyPrice  Float
-  setupFee      Float
-  isActive      Boolean  @default(true)
-  twilioSid     String?  // Twilio phone number SID
-  capabilities  String   // JSON string of capabilities
-  purchaseDate  DateTime @default(now())
-  nextBilling   DateTime
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@index([userId])
-  @@index([isActive])
 }
 
 enum PhoneNumberType {
@@ -202,83 +271,10 @@ enum PhoneNumberType {
   MOBILE
 }
 
-model Contact {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  phoneNumber String
-  email       String?
-  country     String?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([userId])
-  @@index([phoneNumber])
-}
-
-model CallerID {
-  id              String          @id @default(cuid())
-  userId          String
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phoneNumber     String
-  country         String?
-  friendlyName    String?         // User-defined name for this caller ID
-  status          CallerIDStatus  @default(PENDING)
-  verificationCode String?        // SMS/Call verification code
-  verificationCodeExpiry DateTime? // Expiry time for verification code
-  verificationAttempts Int         @default(0)
-  verifiedAt      DateTime?
-  isActive        Boolean         @default(false)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  @@unique([userId, phoneNumber])
-  @@index([userId])
-  @@index([status])
-}
-
 enum CallerIDStatus {
   PENDING
   VERIFYING
   VERIFIED
   FAILED
   EXPIRED
-}
-
-model ApiConfiguration {
-  id          String   @id @default(cuid())
-  provider    String   @unique // "twilio", "stripe", "google_oauth", etc.
-  configData  String   // JSON string with encrypted sensitive data
-  isActive    Boolean  @default(true)
-  environment String   @default("production") // "development", "staging", "production"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  lastUsed    DateTime?
-  
-  // Metadata for configuration management
-  version     String   @default("1.0")
-  description String?
-  
-  @@index([provider])
-  @@index([environment])
-}
-
-model ConfigurationAudit {
-  id              String   @id @default(cuid())
-  configurationId String
-  action          String   // "created", "updated", "accessed", "rotated"
-  userId          String?  // Who made the change
-  previousValue   String?  // Encrypted previous value (for rollback)
-  metadata        String?  // JSON with additional context
-  ipAddress       String?
-  userAgent       String?
-  createdAt       DateTime @default(now())
-  
-  user User? @relation(fields: [userId], references: [id])
-  
-  @@index([configurationId])
-  @@index([action])
-  @@index([createdAt])
 }
