@@ -275,7 +275,7 @@ function PhoneDialer() {
             <div className="max-h-48 overflow-y-auto">
               {isLoadingCountries ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00aff0]"></div>
                   <span className="ml-2 text-sm text-gray-600">Loading countries...</span>
                 </div>
               ) : countries.length === 0 ? (

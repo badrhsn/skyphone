@@ -7,7 +7,6 @@ import {
   Settings as SettingsIcon, 
   User, 
   CreditCard, 
-  ArrowLeft, 
   Phone,
   Shield,
   Gift,
@@ -27,6 +26,7 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import AutoTopupComponent from "@/components/AutoTopupComponent";
 import CallerIDComponent from "@/components/CallerIDComponent";
+import LoadingSkeleton from '@/components/LoadingSkeleton';
 
 interface UserProfile {
   id: string;
@@ -50,11 +50,14 @@ export default function Settings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [profileLoading, setProfileLoading] = useState(true);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [availableNumbers, setAvailableNumbers] = useState<any[]>([]);
+  const [numbersLoading, setNumbersLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -77,6 +80,7 @@ export default function Settings() {
       console.error("Error fetching profile:", error);
     } finally {
       setIsLoading(false);
+      setProfileLoading(false);
     }
   };
 
@@ -101,11 +105,15 @@ export default function Settings() {
       }
     } catch (error) {
       console.error("Error fetching available numbers:", error);
+    } finally {
+      setNumbersLoading(false);
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && typeof (e as any).preventDefault === "function") {
+      (e as any).preventDefault();
+    }
     setIsSaving(true);
     setMessage("");
 
@@ -180,7 +188,7 @@ export default function Settings() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00aff0] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -192,32 +200,22 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-white">
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         {/* Modern Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard"
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors shadow-sm"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </Link>
-              <div>
+              <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                    <SettingsIcon className="h-6 w-6 text-white" />
+                    <SettingsIcon className="h-6 w-6 text-[#00aff0]" />
+                    <div>
+                      <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+                      <p className="text-sm text-gray-600">Manage your account and preferences</p>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-                    <p className="text-sm text-gray-600">Manage your account and preferences</p>
-                  </div>
-                </div>
               </div>
-            </div>
           </div>
         </div>
 
@@ -225,24 +223,42 @@ export default function Settings() {
         <div className="space-y-6">
           
           {/* Profile Card */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+              {profileLoading ? (
+                <LoadingSkeleton type="card" />
+              ) : (<>
+                <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <User className="h-6 w-6 text-white" />
+                  <div className="w-12 h-12 bg-[#e6fbff] rounded-xl flex items-center justify-center">
+                    <User className="h-6 w-6 text-[#00aff0]" />
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">Profile</h2>
                     <p className="text-gray-600 text-sm">Manage your account information</p>
                   </div>
                 </div>
-                <button className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                <button
+                  onClick={() => setShowEditProfile(!showEditProfile)}
+                  className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-white/50 transition-colors"
+                >
                   <Edit3 className="h-5 w-5" />
                 </button>
               </div>
-              
-              <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Name</label>
+                  {showEditProfile ? (
+                    <input
+                      type="text"
+                      value={profile?.name || ""}
+                      onChange={(e) => setProfile(prev => prev ? { ...prev, name: e.target.value } : prev)}
+                      className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0]"
+                    />
+                  ) : (
+                    <div className="mt-1 text-gray-900 font-medium">{profile?.name || "—"}</div>
+                  )}
+                </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Email</label>
                   <div className="mt-1 text-gray-900 font-medium">{profile?.email}</div>
@@ -254,7 +270,28 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
-              
+
+              {showEditProfile && (
+                <div className="mt-4 flex items-center space-x-3">
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-4 py-2 rounded-2xl font-medium disabled:opacity-50"
+                  >
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowEditProfile(false);
+                      fetchProfile();
+                    }}
+                    className="bg-gray-50 text-gray-700 px-4 py-2 rounded-2xl font-medium hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center space-x-3 mt-6 pt-6 border-t border-gray-200">
                 <button 
                   onClick={() => setShowChangePassword(!showChangePassword)}
@@ -285,14 +322,14 @@ export default function Settings() {
                         <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
                           New Password
                         </label>
-                        <input
-                          type="password"
-                          id="newPassword"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          required
-                        />
+                          <input
+                            type="password"
+                            id="newPassword"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0]"
+                            required
+                          />
                       </div>
                       <div>
                         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
@@ -303,7 +340,7 @@ export default function Settings() {
                           id="confirmPassword"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0]"
                           required
                         />
                       </div>
@@ -311,14 +348,14 @@ export default function Settings() {
                         <button
                           type="submit"
                           disabled={isSaving}
-                          className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                          className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-6 py-3 rounded-2xl font-medium disabled:opacity-50 transition-colors"
                         >
                           {isSaving ? "Saving..." : "Update Password"}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowChangePassword(false)}
-                          className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                          className="bg-gray-50 text-gray-700 px-6 py-3 rounded-2xl font-medium hover:bg-gray-100 transition-colors"
                         >
                           Cancel
                         </button>
@@ -326,16 +363,17 @@ export default function Settings() {
                     </div>
                   </form>
                 )}
+                </> )}
             </div>
           </div>
 
           {/* Balance Card */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-            <div className="p-6">
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="p-4">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Wallet className="h-6 w-6 text-white" />
+                  <div className="w-12 h-12 bg-[#e6fbff] rounded-xl flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-[#00aff0]" />
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">Balance</h2>
@@ -343,15 +381,14 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl mb-4 border border-green-100">
+              <div className="flex items-center justify-between p-4 bg-white rounded-xl mb-4 border border-gray-100">
                 <div>
-                  <p className="text-sm text-green-600 font-medium">Current Balance</p>
+                  <p className="text-sm text-gray-600 font-medium">Current Balance</p>
                   <p className="text-3xl font-bold text-gray-900">${profile?.balance?.toFixed(2) || "0.00"}</p>
                 </div>
                 <Link
                   href="/dashboard/add-credits"
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium flex items-center space-x-2 transition-all shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 transition-all"
                 >
                   <Plus className="h-4 w-4" />
                   <span>Add Credits</span>
@@ -363,7 +400,9 @@ export default function Settings() {
           </div>
 
           {/* Auto Top-up Settings */}
-          <AutoTopupComponent />
+          <div>
+            <AutoTopupComponent />
+          </div>
 
           {/* Caller ID Settings */}
           <CallerIDComponent />
@@ -372,41 +411,57 @@ export default function Settings() {
           <div className="grid md:grid-cols-2 gap-6">
             
             {/* Phone Numbers Card */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden md:col-span-2">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Phone className="h-6 w-6 text-white" />
-                    </div>
+                      <div className="w-10 h-10 bg-[#e6fbff] rounded-xl flex items-center justify-center">
+                        <Phone className="h-5 w-5 text-[#00aff0]" />
+                      </div>
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">Phone Numbers</h2>
                       <p className="text-gray-600 text-sm">Manage your phone numbers</p>
                     </div>
                   </div>
-                  <Link
-                    href="/dashboard/buy-number"
-                    className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-white/50 transition-colors"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </Link>
+                      <Link
+                        href="/dashboard/buy-number"
+                        className="text-[#00aff0] hover:text-[#008fcf] p-2 rounded-lg hover:bg-[#f3fbff] transition-colors inline-flex items-center"
+                      >
+                        <Plus className="h-5 w-5" />
+                      </Link>
                 </div>
                 
-                {availableNumbers.filter(num => num.type === 'premium').length > 0 ? (
-                  <div className="space-y-3">
-                    {availableNumbers.filter(num => num.type === 'premium').slice(0, 3).map((number) => (
-                      <div key={number.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <div className="font-medium text-gray-900">{number.phoneNumber}</div>
-                          <div className="text-sm text-gray-600">{number.country}</div>
+                {numbersLoading ? (
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-1/3 mb-3"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3 mb-4"></div>
+                    <div className="space-y-3">
+                      <div className="h-12 bg-gray-200 rounded"></div>
+                      <div className="h-12 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ) : availableNumbers.filter(num => num.type === 'premium').length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {availableNumbers.filter(num => num.type === 'premium').slice(0, 6).map((number) => (
+                      <div key={number.id} className="p-4 bg-gray-50 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                        <div className="min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{number.phoneNumber}</div>
+                          <div className="text-sm text-gray-600 truncate">{number.country}</div>
+                          <div className="text-xs text-gray-500">Added {number.createdAt ? new Date(number.createdAt).toLocaleDateString() : ''}</div>
                         </div>
-                        <div className="text-right">
+                        <div className="mt-3 sm:mt-0 flex items-center space-x-3">
                           <div className="text-sm font-medium text-gray-900">${number.monthlyFee}/mo</div>
                           <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
                             number.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
                           }`}>
                             {number.isActive ? "Active" : "Inactive"}
                           </div>
+                          <Link
+                            href={`/dashboard/buy-number`}
+                            className="bg-white border border-gray-200 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-50"
+                          >
+                            Manage
+                          </Link>
                         </div>
                       </div>
                     ))}
@@ -417,7 +472,7 @@ export default function Settings() {
                     <p className="text-gray-600 mb-4">No phone numbers</p>
                     <Link
                       href="/dashboard/buy-number"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center space-x-2 transition-colors"
+                      className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] hover:from-[#0099d6] hover:to-[#0086c2] text-white px-4 py-2 rounded-2xl font-medium inline-flex items-center space-x-2 transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                       <span>Buy Number</span>
@@ -427,51 +482,7 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Promo Codes Card */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Gift className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">Promo Codes</h2>
-                      <p className="text-gray-600 text-sm">Active discount codes</p>
-                    </div>
-                  </div>
-                </div>
-                {promoCodes.length > 0 ? (
-                  <div className="space-y-3">
-                    {promoCodes.slice(0, 3).map((promo) => (
-                      <div key={promo.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-100">
-                        <div>
-                          <div className="font-bold text-purple-800">{promo.code}</div>
-                          <div className="text-sm text-purple-600">{promo.discount}% discount</div>
-                        </div>
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          promo.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
-                        }`}>
-                          {promo.isActive ? "Active" : "Used"}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Gift className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600 mb-4">No promo codes</p>
-                    <Link
-                      href="/earn-credits"
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center space-x-2 transition-colors"
-                    >
-                      <Gift className="h-4 w-4" />
-                      <span>Earn Credits</span>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Promo Codes removed as requested */}
           </div>
 
           {/* Message Display */}

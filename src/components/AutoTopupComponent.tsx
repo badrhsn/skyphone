@@ -88,13 +88,13 @@ export default function AutoTopupComponent({ className = "" }: AutoTopupComponen
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-200 ${className}`}>
+      <div className={`bg-white rounded-2xl p-4 border border-gray-100 ${className}`}>
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3 mb-6"></div>
-          <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded"></div>
-            <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-5 bg-gray-200 rounded w-1/3 mb-3"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-8 bg-gray-200 rounded"></div>
+            <div className="h-8 bg-gray-200 rounded"></div>
           </div>
         </div>
       </div>
@@ -102,49 +102,49 @@ export default function AutoTopupComponent({ className = "" }: AutoTopupComponen
   }
 
   return (
-    <div className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-200 ${className}`}>
-      <div className="flex items-center space-x-3 mb-4">
-        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-          <Shield className="h-5 w-5 text-green-600" />
+    <div className={`bg-white rounded-2xl p-4 border border-gray-100 ${className}`}>
+      <div className="flex items-center space-x-3 mb-3">
+        <div className="w-9 h-9 bg-[#e6fbff] rounded-lg flex items-center justify-center">
+          <Shield className="h-4 w-4 text-[#00aff0]" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold text-gray-900">Auto Top-up</h3>
-          <p className="text-gray-600 text-sm">Avoid interrupting an important call</p>
+          <h4 className="text-lg font-semibold text-gray-900">Auto Top-up</h4>
+          <p className="text-sm text-gray-600">Automatically add credits when balance is low</p>
         </div>
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded-lg flex items-center space-x-2 ${
+        <div className={`mb-3 p-2 rounded-md flex items-center space-x-2 ${
           message.type === 'success' 
             ? 'bg-green-50 text-green-800 border border-green-200' 
             : 'bg-red-50 text-red-800 border border-red-200'
         }`}>
           {message.type === 'success' ? (
-            <CheckCircle className="h-4 w-4 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
           ) : (
-            <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+            <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-600" />
           )}
           <span className="text-sm">{message.text}</span>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Enable/Disable Toggle */}
         <div className="flex items-center justify-between">
           <div>
-            <label className="text-base font-medium text-gray-900">Enable Auto Top-up</label>
-            <p className="text-sm text-gray-600">Automatically add credits when balance gets low</p>
+            <label className="text-sm font-medium text-gray-900">Enable Auto Top-up</label>
+            <p className="text-xs text-gray-600">Avoid interrupting an important call</p>
           </div>
           <button
             onClick={() => handleToggle(!settings.autoTopupEnabled)}
             className={`${
-              settings.autoTopupEnabled ? 'bg-blue-600' : 'bg-gray-200'
-            } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+              settings.autoTopupEnabled ? 'bg-[#00aff0]' : 'bg-gray-200'
+            } relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#00aff0]`}
           >
             <span
               className={`${
-                settings.autoTopupEnabled ? 'translate-x-6' : 'translate-x-1'
-              } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                settings.autoTopupEnabled ? 'translate-x-4' : 'translate-x-1'
+              } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
             />
           </button>
         </div>
@@ -153,11 +153,11 @@ export default function AutoTopupComponent({ className = "" }: AutoTopupComponen
           <>
             {/* Threshold Setting */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Auto Top-up Threshold (recommended at least $2)
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Auto Top-up Threshold
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                   <DollarSign className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
@@ -167,22 +167,20 @@ export default function AutoTopupComponent({ className = "" }: AutoTopupComponen
                   step="0.50"
                   value={settings.autoTopupThreshold}
                   onChange={(e) => handleThresholdChange(e.target.value)}
-                  className="block w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="block w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-transparent transition-all duration-150"
                   placeholder="2.00"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Top-up will trigger when your balance falls below this amount
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Trigger when balance ≤ this amount</p>
             </div>
 
             {/* Amount Setting */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Auto Top-up Amount (recommended at least $10)
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Auto Top-up Amount
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                   <DollarSign className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
@@ -192,19 +190,17 @@ export default function AutoTopupComponent({ className = "" }: AutoTopupComponen
                   step="1"
                   value={settings.autoTopupAmount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  className="block w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="block w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-transparent transition-all duration-150"
                   placeholder="10.00"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                This amount will be added to your account when auto top-up triggers
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Amount added when auto top-up triggers</p>
             </div>
 
             {/* Preview */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <h4 className="text-sm font-medium text-blue-900 mb-2">How it works:</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
+            <div className="bg-[#f3fbff] border border-[#e6fbff] rounded-lg p-3">
+              <h4 className="text-sm font-medium text-[#0b7fb4] mb-1">How it works:</h4>
+              <ul className="text-sm text-[#0b7fb4] space-y-1">
                 <li>• When your balance drops below ${settings.autoTopupThreshold.toFixed(2)}</li>
                 <li>• We'll automatically add ${settings.autoTopupAmount.toFixed(2)} to your account</li>
                 <li>• Your calls won't be interrupted due to insufficient funds</li>
@@ -215,11 +211,11 @@ export default function AutoTopupComponent({ className = "" }: AutoTopupComponen
         )}
 
         {/* Save Button */}
-        <div className="pt-4 border-t border-gray-200">
+        <div className="pt-2 border-t border-gray-100">
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-4 py-2 rounded-2xl font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? (
               <div className="flex items-center justify-center space-x-2">
