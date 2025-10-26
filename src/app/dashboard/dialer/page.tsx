@@ -676,9 +676,9 @@ export default function Dialer() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#f3fbff] to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00aff0] mx-auto"></div>
           <p className="mt-4 text-gray-700">Loading...</p>
         </div>
       </div>
@@ -686,28 +686,28 @@ export default function Dialer() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+  <div className="min-h-screen bg-gradient-to-br from-[#f3fbff] to-white flex items-center justify-center p-4">
       {isCalling ? (
         // Full Screen Call Interface with iPhone shadows and Skype green  
-        <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white">
+  <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-[#f3fbff] to-[#e6fbff] rounded-lg sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white">
           {/* Call Status Header */}
           <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8">
             <div className="text-center mb-6 sm:mb-8 bg-white/20 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl border border-white/30">
-              <div className="text-xs sm:text-sm text-blue-800 mb-2 uppercase tracking-wide font-bold">
+              <div className="text-xs sm:text-sm text-gray-600 mb-2 uppercase tracking-wide font-bold">
                 {callStatus}
               </div>
-              <div className="text-2xl sm:text-3xl font-bold mb-2 text-blue-900">
+              <div className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900">
                 {phoneNumber}
               </div>
               {selectedRate && (
-                <div className="text-base sm:text-lg text-blue-700 font-medium">
+                <div className="text-base sm:text-lg text-gray-700 font-medium">
                   {selectedRate.country}
                 </div>
               )}
             </div>
 
             {/* Call Duration */}
-            <div className="text-4xl sm:text-6xl font-bold mb-8 sm:mb-12 text-blue-900 bg-blue-100/30 backdrop-blur-sm rounded-2xl px-6 sm:px-8 py-3 sm:py-4 shadow-2xl">
+            <div className="text-4xl sm:text-6xl font-bold mb-8 sm:mb-12 text-gray-900 bg-[#e6fbff]/60 backdrop-blur-sm rounded-2xl px-6 sm:px-8 py-3 sm:py-4 shadow-2xl">
               {callStatus === "answered" ? formatDuration(callDuration) : ""}
             </div>
 
@@ -732,10 +732,10 @@ export default function Dialer() {
             <div className="flex justify-center items-center space-x-8 sm:space-x-16">
               <button
                 onClick={toggleMute}
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 active:scale-95 border-2 sm:border-4 border-white touch-manipulation ${
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-95 border-2 sm:border-4 border-white touch-manipulation ${
                   isMuted 
                     ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700" 
-                    : "bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600"
+          : "bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white hover:from-[#0099d6] hover:to-[#0086c2]"
                 }`}
               >
                 {isMuted ? <MicOff className="h-6 w-6 sm:h-8 sm:w-8" /> : <Mic className="h-6 w-6 sm:h-8 sm:w-8" />}
@@ -750,10 +750,10 @@ export default function Dialer() {
 
               <button
                 onClick={toggleSpeaker}
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 active:scale-95 border-2 sm:border-4 border-white touch-manipulation ${
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-95 border-2 sm:border-4 border-white touch-manipulation ${
                   isSpeakerOn 
-                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800" 
-                    : "bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600"
+                    ? "bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white hover:from-[#0099d6] hover:to-[#0086c2]" 
+                    : "bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white hover:from-[#0099d6] hover:to-[#0086c2]"
                 }`}
               >
                 {isSpeakerOn ? <Volume2 className="h-6 w-6 sm:h-8 sm:w-8" /> : <VolumeX className="h-6 w-6 sm:h-8 sm:w-8" />}
@@ -763,21 +763,21 @@ export default function Dialer() {
         </div>
       ) : (
         // iPhone-style dialer with Skype blue colors and shadows
-        <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-white rounded-lg sm:rounded-3xl shadow-2xl border border-blue-200">
+  <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-[#f3fbff] to-white rounded-lg sm:rounded-3xl shadow-2xl border border-gray-200">
           {/* Status and Balance */}
           <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-3 sm:pb-4">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse shadow-lg shadow-blue-500/25"></div>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00aff0] rounded-full animate-pulse shadow-lg"></div>
               <button 
                 onClick={() => router.push("/dashboard/add-credits")}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation"
+                className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] hover:from-[#0099d6] hover:to-[#0086c2] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation"
               >
                 Balance: ${user ? user.balance.toFixed(2) : "0.00"} +
               </button>
             </div>
             
-            <div className="text-center">
-              <div className="flex items-center justify-center space-x-2 text-white mb-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full px-4 py-2 shadow-xl">
+              <div className="text-center">
+              <div className="flex items-center justify-center space-x-2 text-white mb-4 bg-gradient-to-r from-[#00aff0] to-[#0099d6] rounded-full px-4 py-2 shadow-xl">
                 <div className="text-white animate-bounce">✓</div>
                 <span className="text-sm font-medium">1 min test call available</span>
               </div>
@@ -791,7 +791,7 @@ export default function Dialer() {
               <button
                 type="button"
                 onClick={() => setShowCountryOptions(!showCountryOptions)}
-                className="flex items-center space-x-2 px-3 sm:px-4 py-3 sm:py-4 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-gray-200"
+                className="flex items-center space-x-2 px-3 sm:px-4 py-3 sm:py-4 bg-[#f3fbff] hover:bg-[#e6fbff] transition-colors border-r border-gray-200"
                 disabled={isCalling}
                 data-country-dropdown="button"
               >
@@ -848,7 +848,7 @@ export default function Dialer() {
               <button
                 type="button"
                 onClick={() => setShowContactsList(!showContactsList)}
-                className="p-1.5 mr-2 hover:bg-blue-50 rounded-full transition-colors text-blue-600 flex-shrink-0"
+                className="p-1.5 mr-2 hover:bg-[#f3fbff] rounded-full transition-colors text-[#00aff0] flex-shrink-0"
                 disabled={isCalling}
                 title="Select from contacts"
               >
@@ -860,13 +860,13 @@ export default function Dialer() {
             {showCountryOptions && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-72 overflow-hidden z-50" data-country-dropdown="menu">
                 {/* Search Input */}
-                <div className="p-3 border-b border-gray-100">
+                  <div className="p-3 border-b border-gray-100">
                   <input
                     type="text"
                     placeholder="Search countries..."
                     value={countrySearch}
                     onChange={(e) => setCountrySearch(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00aff0]"
                     autoFocus
                   />
                 </div>
@@ -875,7 +875,7 @@ export default function Dialer() {
                 <div className="max-h-48 overflow-y-auto">
                   {isLoadingCountries ? (
                     <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00aff0]"></div>
                       <span className="ml-2 text-sm text-gray-600">Loading countries...</span>
                     </div>
                   ) : countries.length === 0 ? (
@@ -887,13 +887,13 @@ export default function Dialer() {
                       <button
                         key={country.code + country.name}
                         onClick={() => handleCountrySelect(country)}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left ${
-                          selectedCountry.code === country.code ? "bg-blue-100 text-blue-700" : "text-gray-700"
+                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-[#f3fbff] transition-colors text-left ${
+                          selectedCountry.code === country.code ? "bg-[#e6fbff] text-[#00aff0]" : "text-gray-700"
                         }`}
                       >
                         <span className="text-xl">{country.flag}</span>
                         <span className="font-medium flex-1">{country.name}</span>
-                        <span className="text-blue-600 font-bold">{getDialingCodeFromCountry(country)}</span>
+                        <span className="text-[#00aff0] font-bold">{getDialingCodeFromCountry(country)}</span>
                       </button>
                     ))
                   )}
@@ -916,7 +916,7 @@ export default function Dialer() {
                     placeholder="Search contacts..."
                     value={contactSearch}
                     onChange={(e) => setContactSearch(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00aff0]"
                     autoFocus
                   />
                 </div>
@@ -929,7 +929,7 @@ export default function Dialer() {
                       <p className="text-gray-500 text-sm mb-3">No contacts yet</p>
                       <button
                         onClick={() => router.push("/dashboard/contacts")}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                        className="bg-[#00aff0] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0099d6] transition-colors"
                       >
                         Add your first contact
                       </button>
@@ -950,10 +950,10 @@ export default function Dialer() {
                           <button
                             key={contact.id}
                             onClick={() => handleContactSelect(contact)}
-                            className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                            className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-[#f3fbff] transition-colors text-left border-b border-gray-100 last:border-b-0"
                           >
-                            <div className="bg-blue-100 p-2 rounded-full">
-                              <Contact className="w-4 h-4 text-blue-600" />
+                            <div className="bg-[#e6fbff] p-2 rounded-full">
+                              <Contact className="w-4 h-4 text-[#00aff0]" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-gray-900 truncate">{contact.name}</p>
@@ -977,7 +977,7 @@ export default function Dialer() {
               <div className="relative">
                 <button 
                   onClick={() => setShowCallerOptions(!showCallerOptions)}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-4 py-2 text-sm shadow-xl hover:shadow-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white rounded-full px-4 py-2 text-sm shadow-xl hover:shadow-2xl hover:from-[#0099d6] hover:to-[#0086c2] transition-all duration-300"
                   data-caller-dropdown="button"
                 >
                   <Globe className="h-4 w-4 text-white" />
@@ -993,7 +993,7 @@ export default function Dialer() {
                 
                 {/* Dynamic Dropdown Menu */}
                 {showCallerOptions && (
-                  <div className="absolute right-0 mt-2 w-72 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl border border-blue-200 py-2 z-50 animate-in slide-in-from-top-2 max-h-96 overflow-y-auto" data-caller-dropdown="menu">
+                  <div className="absolute right-0 mt-2 w-72 bg-gradient-to-br from-[#f3fbff] to-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-50 animate-in slide-in-from-top-2 max-h-96 overflow-y-auto" data-caller-dropdown="menu">
                     
                     {/* Public Numbers Section - Always Available */}
                     <div className="px-4 py-2 text-xs text-gray-500 font-medium uppercase tracking-wide border-b border-gray-100">
@@ -1001,7 +1001,7 @@ export default function Dialer() {
                     </div>
                     
                     {/* Show available public numbers OR fallback option */}
-                    {availableNumbers.filter(num => num.type === 'public').length > 0 ? (
+                      {availableNumbers.filter(num => num.type === 'public').length > 0 ? (
                       availableNumbers.filter(num => num.type === 'public').map((number) => (
                         <button 
                           key={number.id}
@@ -1010,17 +1010,17 @@ export default function Dialer() {
                             setSelectedCallerId(number.phoneNumber);
                             setShowCallerOptions(false);
                           }}
-                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                            callerIdOption === "public" && selectedCallerId === number.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
+                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-[#f3fbff] transition-colors ${
+                            callerIdOption === "public" && selectedCallerId === number.phoneNumber ? "bg-[#e6fbff] border-r-2 border-[#00aff0]" : ""
                           }`}
                         >
-                          <Globe className="h-5 w-5 text-blue-600" />
+                          <Globe className="h-5 w-5 text-[#00aff0]" />
                           <div className="flex-1 text-left">
                             <div className="text-gray-900 font-medium">{number.phoneNumber}</div>
                             <div className="text-xs text-gray-500">{number.country}</div>
                           </div>
                           {callerIdOption === "public" && selectedCallerId === number.phoneNumber && 
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <div className="w-2 h-2 bg-[#00aff0] rounded-full"></div>
                           }
                         </button>
                       ))
@@ -1032,17 +1032,17 @@ export default function Dialer() {
                           setSelectedCallerId("+12293983710"); // Your default Twilio number
                           setShowCallerOptions(false);
                         }}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                          callerIdOption === "public" ? "bg-blue-100 border-r-2 border-blue-500" : ""
+                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-[#f3fbff] transition-colors ${
+                          callerIdOption === "public" ? "bg-[#e6fbff] border-r-2 border-[#00aff0]" : ""
                         }`}
                       >
-                        <Globe className="h-5 w-5 text-blue-600" />
+                        <Globe className="h-5 w-5 text-[#00aff0]" />
                         <div className="flex-1 text-left">
                           <div className="text-gray-900 font-medium">+12293983710</div>
                           <div className="text-xs text-gray-500">United States • Default</div>
                         </div>
                         {callerIdOption === "public" && 
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-[#00aff0] rounded-full"></div>
                         }
                       </button>
                     )}
@@ -1061,17 +1061,17 @@ export default function Dialer() {
                             setSelectedCallerId(number.phoneNumber);
                             setShowCallerOptions(false);
                           }}
-                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                            callerIdOption === "bought" && selectedCallerId === number.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
-                          }`}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-[#f3fbff] transition-colors ${
+                              callerIdOption === "bought" && selectedCallerId === number.phoneNumber ? "bg-[#e6fbff] border-r-2 border-[#00aff0]" : ""
+                            }`}
                         >
-                          <Phone className="h-5 w-5 text-green-600" />
+                            <Phone className="h-5 w-5 text-green-600" />
                           <div className="flex-1 text-left">
                             <div className="text-gray-900 font-medium">{number.phoneNumber}</div>
                             <div className="text-xs text-green-600">${number.monthlyFee}/month</div>
                           </div>
                           {callerIdOption === "bought" && selectedCallerId === number.phoneNumber && 
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <div className="w-2 h-2 bg-[#00aff0] rounded-full"></div>
                           }
                         </button>
                       ))
@@ -1108,9 +1108,9 @@ export default function Dialer() {
                             setSelectedCallerId(callerId.phoneNumber);
                             setShowCallerOptions(false);
                           }}
-                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 transition-colors ${
-                            callerIdOption === "verified" && selectedCallerId === callerId.phoneNumber ? "bg-blue-100 border-r-2 border-blue-500" : ""
-                          }`}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-[#f3fbff] transition-colors ${
+                              callerIdOption === "verified" && selectedCallerId === callerId.phoneNumber ? "bg-[#e6fbff] border-r-2 border-[#00aff0]" : ""
+                            }`}
                         >
                           <div className="h-5 w-5 bg-green-100 rounded-full flex items-center justify-center">
                             <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -1122,7 +1122,7 @@ export default function Dialer() {
                             <div className="text-xs text-green-600">✅ Verified • Custom rates may apply</div>
                           </div>
                           {callerIdOption === "verified" && selectedCallerId === callerId.phoneNumber && 
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <div className="w-2 h-2 bg-[#00aff0] rounded-full"></div>
                           }
                         </button>
                       ))
@@ -1137,12 +1137,12 @@ export default function Dialer() {
                           </div>
                           <span>No caller IDs verified yet</span>
                         </div>
-                        <button 
+                          <button 
                           onClick={() => {
                             router.push("/dashboard/settings");
                             setShowCallerOptions(false);
                           }}
-                          className="text-blue-600 hover:text-blue-700 text-xs font-medium"
+                          className="text-[#00aff0] hover:text-[#0099d6] text-xs font-medium"
                         >
                           → Verify your own number
                         </button>
@@ -1161,15 +1161,15 @@ export default function Dialer() {
                           router.push("/dashboard/settings");
                           setShowCallerOptions(false);
                         }}
-                        className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-blue-50 transition-colors border border-dashed border-blue-200 rounded-lg"
+                        className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-[#f3fbff] transition-colors border border-dashed border-gray-200 rounded-lg"
                       >
-                        <div className="h-4 w-4 bg-blue-100 rounded-full flex items-center justify-center">
-                          <svg className="h-2 w-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="h-4 w-4 bg-[#e6fbff] rounded-full flex items-center justify-center">
+                          <svg className="h-2 w-2 text-[#00aff0]" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
                         <span className="text-gray-700 text-sm font-medium">Verify your number</span>
-                        <span className="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium">FREE</span>
+                        <span className="ml-auto bg-[#e6fbff] text-[#00aff0] text-xs px-2 py-1 rounded-full font-medium">FREE</span>
                       </button>
                       
                       {/* Buy More Numbers */}
@@ -1198,9 +1198,9 @@ export default function Dialer() {
 
           {selectedRate && (
             <div className="px-6 mb-6">
-              <div className="bg-gradient-to-r from-blue-50 to-white rounded-xl px-4 py-3 border border-blue-200 shadow-sm">
+              <div className="bg-gradient-to-r from-[#f3fbff] to-white rounded-xl px-4 py-3 border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-center space-x-3">
-                  <Globe className="h-4 w-4 text-blue-600" />
+                  <Globe className="h-4 w-4 text-[#00aff0]" />
                   <span className="text-sm text-gray-700">
                     {selectedRate.country} - ${selectedRate.rate.toFixed(3)}/min
                   </span>
@@ -1306,47 +1306,15 @@ export default function Dialer() {
             </div>
           </div>
 
-          {/* Quick Contacts Section */}
-          {contacts.length > 0 && (
-            <div className="px-6 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-700 text-sm font-medium">Quick Contacts</h3>
-                <button
-                  onClick={() => router.push("/dashboard/contacts")}
-                  className="text-blue-600 text-xs hover:text-blue-700 transition-colors"
-                >
-                  View all
-                </button>
-              </div>
-              <div className="space-y-2">
-                {contacts.slice(0, 3).map((contact: any) => (
-                  <button
-                    key={contact.id}
-                    onClick={() => handleContactSelect(contact)}
-                    disabled={isCalling}
-                    className="w-full flex items-center space-x-3 p-3 bg-white hover:bg-gray-50 rounded-xl transition-colors shadow-sm border border-gray-100 disabled:opacity-50"
-                  >
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Contact className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <p className="font-medium text-gray-900 truncate text-sm">{contact.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{contact.phoneNumber}</p>
-                    </div>
-                    <Phone className="w-4 h-4 text-green-600 flex-shrink-0" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Quick Contacts removed as requested */}
 
           {/* Simple Call Button */}
           <div className="px-6 pb-6">
-            <div className="flex justify-center mb-6">
+              <div className="flex justify-center mb-6">
               <button
                 onClick={initiateCall}
                 disabled={!phoneNumber || isCalling}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white w-16 h-16 rounded-full hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 flex items-center justify-center transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-95 transform"
+                className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white w-16 h-16 rounded-full hover:from-[#0099d6] hover:to-[#0086c2] disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 flex items-center justify-center transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-95 transform"
               >
                 <Phone className="h-7 w-7" />
               </button>
