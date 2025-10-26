@@ -508,7 +508,7 @@ export default function ContactsPage() {
         {/* Floating Add button (mobile/quick access) */}
         <button
           onClick={() => setShowAddContact(true)}
-          className="fixed bottom-6 right-6 z-50 bg-[#00aff0] text-white p-3.5 rounded-full shadow-lg hover:bg-[#0099d6] lg:hidden"
+          className="fixed bottom-6 right-6 z-50 bg-[#00aff0] text-white p-3.5 rounded-full hover:bg-[#0099d6] lg:hidden"
           aria-label="Add contact"
         >
           <Plus className="h-5 w-5" />
@@ -517,7 +517,7 @@ export default function ContactsPage() {
         {/* Add / Edit Contact Modal (two-column layout similar to provided design, using our tokens) */}
         {showAddContact && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-10 max-w-2xl w-full shadow-2xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-10 max-w-2xl w-full border border-gray-100">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">{editingContact ? "Edit Contact" : "Add Contact"}</h2>
               </div>
@@ -615,7 +615,7 @@ export default function ContactsPage() {
                     type="submit"
                     disabled={isSaving}
                     aria-busy={isSaving}
-                    className={`flex items-center justify-center bg-[#00aff0] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#0099d6] transition-all shadow ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`flex items-center justify-center bg-[#00aff0] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#0099d6] transition-all ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
                     {isSaving ? (
                       <>
@@ -635,7 +635,7 @@ export default function ContactsPage() {
         {/* Delete Confirmation Modal */}
         {deleteModal.show && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-10 max-w-lg w-full border border-gray-100">
               <div className="text-center">
                 <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Trash2 className="h-9 w-9 text-red-600" />
@@ -652,7 +652,7 @@ export default function ContactsPage() {
                 <div className="flex items-center justify-center space-x-6">
                   <button
                     onClick={() => setDeleteModal({ show: false })}
-                    className="flex-1 max-w-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-8 py-4 rounded-full font-semibold transition-all shadow-sm"
+                    className="flex-1 max-w-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-8 py-4 rounded-full font-semibold transition-all"
                   >
                     Cancel
                   </button>
@@ -678,7 +678,7 @@ export default function ContactsPage() {
                         handleDeleteContact(deleteModal.contactId, true);
                       }
                     }}
-                    className="flex-1 max-w-xs bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-2xl"
+                    className="flex-1 max-w-xs bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold hover:from-red-600 hover:to-red-700 transition-all"
                   >
                     Delete
                   </button>
@@ -691,7 +691,7 @@ export default function ContactsPage() {
         {/* Error Modal */}
         {errorModal.show && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full border border-gray-100">
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-red-600 text-2xl">⚠️</span>
@@ -716,7 +716,7 @@ export default function ContactsPage() {
         {/* Info Modal */}
         {infoModal.show && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full border border-gray-100">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-blue-600 text-2xl">ℹ️</span>

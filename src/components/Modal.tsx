@@ -75,7 +75,7 @@ export default function Modal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+  <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full border border-white/20">
         <div className="text-center">
           <div className={`w-16 h-16 ${getIconBg()} rounded-full flex items-center justify-center mx-auto mb-6`}>
             {getIcon()}
@@ -98,8 +98,8 @@ export default function Modal({
             <button
               onClick={onConfirm || onClose}
               className={`${showConfirmButton ? 'flex-1' : 'w-full'} ${
-                confirmButtonClass || getDefaultConfirmButtonClass()
-              } text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl`}
+                  confirmButtonClass || getDefaultConfirmButtonClass()
+                } text-white px-6 py-3 rounded-xl font-semibold transition-all`}
             >
               {confirmText}
             </button>
