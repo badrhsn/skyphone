@@ -52,6 +52,9 @@ export default function ContactsPage() {
   });
   const [favoriteContacts, setFavoriteContacts] = useState<string[]>([]);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
   
   // Modal states
   const [deleteModal, setDeleteModal] = useState<{
@@ -80,6 +83,11 @@ export default function ContactsPage() {
     }
   }, [status, router]);
 
+  // Reset to first page when the search term or contacts list changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, contacts.length]);
+
   const fetchContacts = async () => {
     try {
       const response = await fetch("/api/user/contacts");
@@ -100,7 +108,7 @@ export default function ContactsPage() {
 
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setIsSaving(true);
     try {
       if (editingContact) {
         // Update existing contact
@@ -157,6 +165,8 @@ export default function ContactsPage() {
         title: "Save Failed",
         message: "Failed to save contact. Please try again."
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -217,7 +227,7 @@ export default function ContactsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00aff0] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -225,58 +235,76 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Modern Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/dashboard" 
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors shadow-sm"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </Link>
-              <div>
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                    <Users className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-                    <p className="text-sm text-gray-600">{contacts.length} contacts</p>
-                  </div>
-                </div>
-              </div>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Header (mirrors Add Credits structure) */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Users className="h-6 w-6 text-[#00aff0]" />
+              <h1 className="text-2xl font-semibold text-gray-900">Contacts</h1>
             </div>
-            <div className="flex items-center space-x-3">
+
+            <div>
               <button
                 onClick={() => setShowAddContact(true)}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-blue-700 hover:to-blue-800 flex items-center space-x-2 transition-all shadow-lg hover:shadow-xl"
+                className="bg-[#00aff0] text-white px-4 py-2 rounded-xl font-medium hover:bg-[#0099d6]"
               >
-                <Plus className="h-4 w-4" />
-                <span>Add Contact</span>
+                <Plus className="inline h-4 w-4 mr-2" /> Add Contact
               </button>
             </div>
           </div>
+
+          <div className="mt-4 p-4 rounded-lg border border-dashed flex items-center justify-between" style={{ borderColor: '#cfeeff', backgroundColor: '#f5fbff' }}>
+            <div className="text-gray-700">Need Yadaphone for the team?</div>
+            <Link href="/dashboard/enterprise" className="inline-flex items-center text-white px-4 py-2 rounded-full font-semibold" style={{ backgroundColor: '#00aff0' }}>
+              See enterprise plans
+            </Link>
+          </div>
+
+          <p className="mt-4 text-lg text-gray-700">Quickly call, edit and organize your contacts. Use search and filters to find someone fast.</p>
         </div>
 
-        {/* Enhanced Search & Controls */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+  {/* Search & Controls (styled like Add Credits panels) */}
+  <div className="bg-white p-6 rounded-2xl border border-gray-100 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:space-y-0">
             {/* Search */}
-            <div className="flex-1 max-w-md">
+            <div className="flex-1 lg:max-w-md">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#00aff0] h-5 w-5" />
                 <input
                   type="text"
                   placeholder="Search contacts by name, phone, or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full pl-14 pr-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all"
                 />
               </div>
             </div>
+
+            {/* Pagination */}
+            {filteredContacts.length > pageSize && (
+              <div className="flex items-center justify-between mt-4 px-3 py-2">
+                <div className="text-sm text-gray-600">Showing {Math.min((currentPage - 1) * pageSize + 1, filteredContacts.length)}-{Math.min(currentPage * pageSize, filteredContacts.length)} of {filteredContacts.length}</div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 rounded-md border border-gray-200 bg-white text-sm disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <div className="text-sm text-gray-700">Page {currentPage} of {Math.ceil(filteredContacts.length / pageSize)}</div>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredContacts.length / pageSize), p + 1))}
+                    disabled={currentPage === Math.ceil(filteredContacts.length / pageSize)}
+                    className="px-3 py-1 rounded-md border border-gray-200 bg-white text-sm disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Controls */}
             <div className="flex items-center space-x-3">
@@ -295,10 +323,10 @@ export default function ContactsPage() {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors"
+                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-lg transition-colors"
                   title={viewMode === 'list' ? 'Switch to Grid View' : 'Switch to List View'}
                 >
                   <Users className="h-4 w-4 text-gray-600" />
@@ -316,7 +344,7 @@ export default function ContactsPage() {
                     link.click();
                     document.body.removeChild(link);
                   }}
-                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors" 
+                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-lg transition-colors" 
                   title="Export Contacts"
                 >
                   <Download className="h-4 w-4 text-gray-600" />
@@ -327,7 +355,7 @@ export default function ContactsPage() {
                     title: "Import Contacts",
                     message: "Import feature coming soon! You can manually add contacts for now."
                   })}
-                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-xl transition-colors" 
+                  className="p-2.5 bg-white/80 hover:bg-white border border-gray-200 rounded-lg transition-colors" 
                   title="Import Contacts"
                 >
                   <Upload className="h-4 w-4 text-gray-600" />
@@ -336,74 +364,43 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          {/* Stats Row */}
+          {/* Stats Row (compact) */}
           {contacts.length > 0 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">
-                    {filteredContacts.length} of {contacts.length} contacts
-                  </span>
-                </div>
-                {selectedContacts.length > 0 && (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">
-                      {selectedContacts.length} selected
-                    </span>
-                  </div>
-                )}
+            <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100">
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-600">{filteredContacts.length} of {contacts.length} contacts</div>
+                {selectedContacts.length > 0 && <div className="text-sm text-gray-600">{selectedContacts.length} selected</div>}
               </div>
-              
+
               {selectedContacts.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => {
-                      setDeleteModal({
-                        show: true,
-                        isMultiple: true,
-                        count: selectedContacts.length
-                      });
-                    }}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium"
-                  >
-                    Delete Selected
-                  </button>
-                  <div className="w-px h-4 bg-gray-300"></div>
-                  <button 
-                    onClick={() => {
-                      const selectedContactsData = contacts.filter(c => selectedContacts.includes(c.id));
-                      const csvContent = "data:text/csv;charset=utf-8," 
-                        + "Name,Phone Number,Email,Notes\n"
-                        + selectedContactsData.map(c => `"${c.name}","${c.phoneNumber}","${c.email || ''}","${c.notes || ''}"`).join("\n");
-                      const encodedUri = encodeURI(csvContent);
-                      const link = document.createElement("a");
-                      link.setAttribute("href", encodedUri);
-                      link.setAttribute("download", "selected_contacts.csv");
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Export Selected
-                  </button>
+                <div className="flex items-center space-x-3">
+                  <button onClick={() => setDeleteModal({ show: true, isMultiple: true, count: selectedContacts.length })} className="text-sm text-red-600">Delete Selected</button>
+                  <button onClick={() => {
+                    const selectedContactsData = contacts.filter(c => selectedContacts.includes(c.id));
+                    const csvContent = "data:text/csv;charset=utf-8," + "Name,Phone Number,Email,Notes\n" + selectedContactsData.map(c => `"${c.name}","${c.phoneNumber}","${c.email || ''}","${c.notes || ''}"`).join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "selected_contacts.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }} className="text-sm text-[#00aff0]">Export Selected</button>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Modern Contacts Display */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+        {/* Contacts List (cards like Add Credits panels) */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           {filteredContacts.length === 0 ? (
             <div className="p-16 text-center">
               <div className="relative mb-8">
-                <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto">
-                  <Users className="h-10 w-10 text-blue-600" />
+                <div className="w-20 h-20 bg-[#e6fbff] rounded-full flex items-center justify-center mx-auto">
+                  <Users className="h-10 w-10 text-[#00aff0]" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#00aff0] rounded-full flex items-center justify-center">
                   <Plus className="h-4 w-4 text-white" />
                 </div>
               </div>
@@ -419,19 +416,19 @@ export default function ContactsPage() {
               {!searchTerm && (
                 <button
                   onClick={() => setShowAddContact(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-[#00aff0] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#0099d6] transition-all"
                 >
                   Add Your First Contact
                 </button>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
-              {filteredContacts.map((contact) => (
-                <div key={contact.id} className="group p-6 hover:bg-white/80 transition-all duration-200">
-                  <div className="flex items-center justify-between">
-                    {/* Contact Info */}
-                    <div className="flex items-center space-x-4 flex-1">
+            <div className="space-y-3 px-3 py-3">
+              {filteredContacts.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((contact) => (
+                  <div key={contact.id} className={`p-4 rounded-xl border ${selectedContacts.includes(contact.id) ? 'border-[#00aff0] bg-[#e6fbff]' : 'border-gray-100 bg-white'}`}>
+                    <div className="flex items-center justify-between">
+                      {/* Contact Info (compact single-line) */}
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
                       {/* Checkbox */}
                       <input
                         type="checkbox"
@@ -443,72 +440,37 @@ export default function ContactsPage() {
                             setSelectedContacts(selectedContacts.filter(id => id !== contact.id));
                           }
                         }}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        className="w-4 h-4 text-[#00aff0] bg-gray-100 border-gray-300 rounded focus:ring-[#00aff0] focus:ring-2"
                       />
-                      
-                      {/* Avatar */}
+
+                      {/* Avatar (circle, subtle border) */}
                       <div className="relative">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                          <span className="text-white font-semibold text-lg">
-                            {contact.name.charAt(0).toUpperCase()}
-                          </span>
+                        <div className="w-10 h-10 bg-[#00aff0] rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                          {contact.name.charAt(0).toUpperCase()}
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                        <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
                       </div>
 
-                      {/* Details */}
+                      {/* Details (single-line, truncating) */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-3">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">{contact.name}</h3>
-                          <Star 
-                            onClick={() => {
-                              if (favoriteContacts.includes(contact.id)) {
-                                setFavoriteContacts(favoriteContacts.filter(id => id !== contact.id));
-                              } else {
-                                setFavoriteContacts([...favoriteContacts, contact.id]);
-                              }
-                            }}
-                            className={`h-4 w-4 cursor-pointer transition-colors ${
-                              favoriteContacts.includes(contact.id) 
-                                ? 'text-yellow-500 fill-yellow-500' 
-                                : 'text-gray-300 hover:text-yellow-500'
-                            }`} 
-                          />
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 mt-1">
-                          <div className="flex items-center space-x-2 text-gray-600">
-                            <Phone className="h-4 w-4" />
-                            <span className="text-sm font-medium">{contact.phoneNumber}</span>
-                          </div>
+                          <h3 className="text-base font-semibold text-gray-900 truncate">{contact.name}</h3>
+                          <span className="text-sm text-gray-500 truncate max-w-xs">{contact.phoneNumber}</span>
                           {contact.email && (
-                            <div className="flex items-center space-x-2 text-gray-600">
-                              <Mail className="h-4 w-4" />
-                              <span className="text-sm truncate max-w-xs">{contact.email}</span>
-                            </div>
+                            <span className="text-sm text-gray-400 truncate max-w-xs">{contact.email}</span>
                           )}
-                        </div>
-
-                        {contact.notes && (
-                          <p className="text-sm text-gray-500 mt-2 line-clamp-1">{contact.notes}</p>
-                        )}
-
-                        {/* Last contacted */}
-                        <div className="flex items-center space-x-2 mt-2 text-xs text-gray-400">
-                          <Clock className="h-3 w-3" />
-                          <span>Added {new Date(contact.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Actions (always visible) */}
+                    <div className="flex items-center space-x-2 transition-opacity">
                       <button
                         onClick={() => handleCall(contact.phoneNumber, contact.country)}
-                        className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl group/call"
+                        className="bg-white/80 text-gray-600 p-2.5 rounded-lg border border-gray-200 hover:text-[#00aff0] transition-colors"
                         title="Call this contact"
                       >
-                        <PhoneCall className="h-4 w-4 group-hover/call:scale-110 transition-transform" />
+                        <PhoneCall className="h-4 w-4" />
                       </button>
                       
                       <button 
@@ -522,7 +484,7 @@ export default function ContactsPage() {
                           });
                           setShowAddContact(true);
                         }}
-                        className="bg-white/80 hover:bg-white text-gray-600 hover:text-blue-600 p-3 rounded-xl border border-gray-200 hover:border-blue-300 transition-all shadow-sm hover:shadow-md"
+                        className="bg-white/80 text-gray-600 p-2.5 rounded-lg border border-gray-200 hover:text-[#00aff0] transition-colors"
                         title="Edit contact"
                       >
                         <Edit className="h-4 w-4" />
@@ -530,7 +492,7 @@ export default function ContactsPage() {
                       
                       <button
                         onClick={() => handleDeleteContact(contact.id)}
-                        className="bg-white/80 hover:bg-red-50 text-gray-600 hover:text-red-600 p-3 rounded-xl border border-gray-200 hover:border-red-300 transition-all shadow-sm hover:shadow-md"
+                        className="bg-white/80 text-gray-600 p-2.5 rounded-lg border border-gray-200 hover:text-red-600 transition-colors"
                         title="Delete contact"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -543,117 +505,101 @@ export default function ContactsPage() {
           )}
         </div>
 
-        {/* Modern Add Contact Modal */}
+        {/* Floating Add button (mobile/quick access) */}
+        <button
+          onClick={() => setShowAddContact(true)}
+          className="fixed bottom-6 right-6 z-50 bg-[#00aff0] text-white p-3.5 rounded-full shadow-lg hover:bg-[#0099d6] lg:hidden"
+          aria-label="Add contact"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
+
+        {/* Add / Edit Contact Modal (two-column layout similar to provided design, using our tokens) */}
         {showAddContact && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-white/20">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      {editingContact ? "Edit Contact" : "Add New Contact"}
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      {editingContact ? "Update contact information" : "Create a new contact in your phone book"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowAddContact(false);
-                    setEditingContact(null);
-                    setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  <span className="text-gray-400 hover:text-gray-600 text-xl">✕</span>
-                </button>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl p-10 max-w-2xl w-full shadow-2xl border border-gray-100">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">{editingContact ? "Edit Contact" : "Add Contact"}</h2>
               </div>
-              
+
               <form onSubmit={handleAddContact} className="space-y-6">
-                <div className="grid grid-cols-1 gap-6">
-                  {/* Name Field */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Name */}
                   <div>
-                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-3">
-                      Full Name *
-                    </label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <input
                         type="text"
                         id="name"
                         value={newContact.name}
                         onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
-                        placeholder="Enter full name"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all"
+                        placeholder="Contact name"
                         required
                       />
                     </div>
                   </div>
-                  
-                  {/* Phone Field */}
+
+                  {/* Company (placeholder empty) */}
                   <div>
-                    <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-3">
-                      Phone Number *
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        value={newContact.phoneNumber}
-                        onChange={(e) => setNewContact({ ...newContact, phoneNumber: e.target.value })}
-                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
-                        placeholder="+1 (555) 123-4567"
-                        required
-                      />
-                    </div>
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                    <input type="text" id="company" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all" placeholder="Company name" />
                   </div>
-                  
-                  {/* Email Field */}
+
+                  {/* Phone */}
                   <div>
-                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-3">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <input
-                        type="email"
-                        id="email"
-                        value={newContact.email}
-                        onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
-                        placeholder="email@example.com"
-                      />
-                    </div>
+                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      value={newContact.phoneNumber}
+                      onChange={(e) => setNewContact({ ...newContact, phoneNumber: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all"
+                      placeholder="Phone number"
+                      required
+                    />
                   </div>
-                  
-                  {/* Notes Field */}
+
+                  {/* Email */}
                   <div>
-                    <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-3">
-                      Notes
-                    </label>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={newContact.email}
+                      onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all"
+                      placeholder="Email address"
+                    />
+                  </div>
+
+                  {/* Website */}
+                  <div>
+                    <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                    <input type="url" id="website" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all" placeholder="Website URL" />
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                    <input type="text" id="tags" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all" placeholder="Tags (comma separated)" />
+                  </div>
+
+                  {/* Notes spanning two columns */}
+                  <div className="md:col-span-2">
+                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">Note</label>
                     <textarea
                       id="notes"
                       value={newContact.notes}
                       onChange={(e) => setNewContact({ ...newContact, notes: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all resize-none"
-                      placeholder="Add notes about this contact..."
+                      rows={4}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] transition-all resize-none"
+                      placeholder="Additional notes"
                     />
                   </div>
                 </div>
-                
-                <div className="flex space-x-4 pt-6">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    {editingContact ? "Update Contact" : "Add Contact"}
-                  </button>
+
+                <div className="flex items-center justify-end space-x-4 pt-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -661,9 +607,24 @@ export default function ContactsPage() {
                       setEditingContact(null);
                       setNewContact({ name: "", phoneNumber: "", email: "", notes: "" });
                     }}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-4 rounded-xl font-semibold transition-all"
+                    className="bg-transparent text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-50"
                   >
                     Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    aria-busy={isSaving}
+                    className={`flex items-center justify-center bg-[#00aff0] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#0099d6] transition-all shadow ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    {isSaving ? (
+                      <>
+                        <span className="animate-spin inline-block h-4 w-4 mr-3 border-2 border-white border-t-transparent rounded-full" />
+                        Saving...
+                      </>
+                    ) : (
+                      (editingContact ? "Save changes" : "Save contact")
+                    )}
                   </button>
                 </div>
               </form>
@@ -673,25 +634,25 @@ export default function ContactsPage() {
 
         {/* Delete Confirmation Modal */}
         {deleteModal.show && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl border border-gray-100">
               <div className="text-center">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Trash2 className="h-8 w-8 text-red-600" />
+                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Trash2 className="h-9 w-9 text-red-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
                   {deleteModal.isMultiple ? "Delete Multiple Contacts" : "Delete Contact"}
                 </h3>
-                <p className="text-gray-600 mb-8">
+                <p className="text-lg text-gray-600 mb-8">
                   {deleteModal.isMultiple 
                     ? `Are you sure you want to delete ${deleteModal.count} selected contacts? This action cannot be undone.`
                     : `Are you sure you want to delete "${deleteModal.contactName}"? This action cannot be undone.`
                   }
                 </p>
-                <div className="flex space-x-4">
+                <div className="flex items-center justify-center space-x-6">
                   <button
                     onClick={() => setDeleteModal({ show: false })}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all"
+                    className="flex-1 max-w-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-8 py-4 rounded-full font-semibold transition-all shadow-sm"
                   >
                     Cancel
                   </button>
@@ -717,7 +678,7 @@ export default function ContactsPage() {
                         handleDeleteContact(deleteModal.contactId, true);
                       }
                     }}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl"
+                    className="flex-1 max-w-xs bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-2xl"
                   >
                     Delete
                   </button>
@@ -729,8 +690,8 @@ export default function ContactsPage() {
 
         {/* Error Modal */}
         {errorModal.show && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-red-600 text-2xl">⚠️</span>
@@ -743,7 +704,7 @@ export default function ContactsPage() {
                 </p>
                 <button
                   onClick={() => setErrorModal({ show: false, title: '', message: '' })}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                  className="w-full bg-[#00aff0] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#0099d6] transition-all"
                 >
                   OK
                 </button>
@@ -754,8 +715,8 @@ export default function ContactsPage() {
 
         {/* Info Modal */}
         {infoModal.show && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-blue-600 text-2xl">ℹ️</span>
@@ -768,7 +729,7 @@ export default function ContactsPage() {
                 </p>
                 <button
                   onClick={() => setInfoModal({ show: false, title: '', message: '' })}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                  className="w-full bg-[#00aff0] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#0099d6] transition-all"
                 >
                   OK
                 </button>

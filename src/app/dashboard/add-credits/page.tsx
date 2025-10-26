@@ -152,7 +152,7 @@ export default function AddCredits() {
             <button
               key={opt.amount}
               onClick={() => handleAmountSelect(opt.amount)}
-              className={`w-full text-left p-3 rounded-lg border ${selectedAmount === opt.amount && !customAmount ? 'border-[#00aff0] bg-[#e6fbff]' : 'border-gray-200 bg-white'} hover:shadow transition`}
+              className={`w-full text-left p-3 rounded-xl border ${selectedAmount === opt.amount && !customAmount ? 'border-[#00aff0] bg-[#e6fbff]' : 'border-gray-200 bg-white'} hover:shadow transition`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -177,13 +177,14 @@ export default function AddCredits() {
               min={5}
               step="0.01"
               className="flex-1 block w-full rounded-r-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00aff0]"
+              style={{ boxShadow: '0 0 0 3px rgba(0,175,240,0.06)' }}
               placeholder="Enter amount"
             />
           </div>
         </div>
 
         {/* Benefits */}
-        <div className="mb-6 p-4 rounded-md border border-gray-100" style={{ backgroundColor: '#f3fbff' }}>
+        <div className="mb-6 p-4 rounded-xl border border-gray-100" style={{ backgroundColor: '#f3fbff' }}>
           <ul className="space-y-2 text-sm text-gray-700">
             <li>• Instant activation — start calling immediately</li>
             <li>• Works in 190+ countries</li>
@@ -261,7 +262,7 @@ export default function AddCredits() {
         </div>
 
         {/* Summary & CTA */}
-        <div className="mb-6 p-4 rounded-md border border-gray-100 bg-white shadow-sm">
+        <div className="mb-6 p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm text-gray-600">Amount</div>
             <div className="text-lg font-semibold text-gray-900">${customAmount ? parseFloat(customAmount || '0').toFixed(2) : (selectedAmount || 0).toFixed(2)}</div>
@@ -275,7 +276,8 @@ export default function AddCredits() {
           <button
             onClick={handlePayment}
             disabled={isLoading || (selectedAmount === 0 && !customAmount)}
-            className="w-full inline-flex items-center justify-center px-4 py-3 bg-[#00aff0] text-white rounded-md hover:bg-[#0095d6] disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center px-4 py-3 bg-[#00aff0] text-white rounded-xl hover:bg-[#0095d6] disabled:opacity-50 shadow-md hover:shadow-lg transition-transform"
+            style={{ transform: 'translateZ(0)' }}
           >
             {isLoading ? (
               <span>Processing…</span>
