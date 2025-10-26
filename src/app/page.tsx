@@ -198,16 +198,16 @@ function PhoneDialer() {
   };
 
   return (
-    <div className="bg-blue-50 rounded-3xl p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md shadow-2xl border border-blue-200 backdrop-blur-lg">
+    <div className="bg-blue-50 rounded-3xl p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md border border-blue-200 backdrop-blur-lg">
       {/* Balance */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6 bg-white/60 rounded-2xl p-3 sm:p-4 shadow-lg backdrop-blur-sm">
+  <div className="flex items-center justify-between mb-4 sm:mb-6 bg-white/60 rounded-2xl p-3 sm:p-4 backdrop-blur-sm">
         <span className="text-xs sm:text-sm text-gray-600 font-medium">Balance:</span>
         <div className="flex items-center space-x-2">
           <span className="text-lg sm:text-xl font-bold text-gray-800">
             ${session ? userBalance.toFixed(2) : "0.00"}
           </span>
           <Link href="/dashboard/add-credits">
-            <button className="bg-blue-500 text-white rounded-full p-1.5 sm:p-2 hover:bg-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+            <button className="bg-blue-500 text-white rounded-full p-1.5 sm:p-2 hover:bg-blue-600 transition-all duration-300">
               <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
             </button>
           </Link>
@@ -216,7 +216,7 @@ function PhoneDialer() {
 
       {/* Integrated Country Selector and Phone Input */}
       <div className="mb-3 sm:mb-4 relative">
-        <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden">
+  <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden">
           {/* Country Selector Button */}
           <button
             type="button"
@@ -257,8 +257,8 @@ function PhoneDialer() {
         </div>
 
         {/* Country Dropdown */}
-        {showCountryDropdown && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-72 overflow-hidden z-50" data-country-dropdown="menu">
+          {showCountryDropdown && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-gray-200 max-h-72 overflow-hidden z-50" data-country-dropdown="menu">
             {/* Search Input */}
             <div className="p-3 border-b border-gray-100">
               <input
@@ -318,7 +318,7 @@ function PhoneDialer() {
       {/* Add Contact Button */}
       <Link href="/dashboard/contacts">
         <button 
-          className="w-full mb-4 sm:mb-6 text-xs sm:text-sm text-blue-600 font-medium bg-white/60 backdrop-blur-sm rounded-2xl py-2.5 sm:py-3 hover:bg-white/80 transition-all duration-300 shadow-lg disabled:opacity-50"
+          className="w-full mb-4 sm:mb-6 text-xs sm:text-sm text-blue-600 font-medium bg-white/60 backdrop-blur-sm rounded-2xl py-2.5 sm:py-3 hover:bg-white/80 transition-all duration-300 disabled:opacity-50"
           disabled={callStatus !== "idle"}
         >
           👤 Add contact
@@ -351,7 +351,7 @@ function PhoneDialer() {
           <button
             key={button.number}
             onClick={() => addDigit(button.number)}
-            className="bg-white/90 backdrop-blur-sm rounded-full w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 flex flex-col items-center justify-center hover:bg-white hover:scale-105 shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 border border-white/20 touch-manipulation"
+            className="bg-white/90 backdrop-blur-sm rounded-full w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 flex flex-col items-center justify-center hover:bg-white hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 border border-white/20 touch-manipulation"
             disabled={callStatus !== "idle"}
           >
             <div className="text-2xl sm:text-2xl md:text-3xl font-light text-gray-800">{button.number}</div>
@@ -374,7 +374,7 @@ function PhoneDialer() {
             <button 
               onClick={startCall}
               disabled={!phoneNumber}
-              className="bg-green-500 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center hover:bg-green-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl hover:shadow-green-200 hover:scale-110 active:scale-95 touch-manipulation"
+              className="bg-green-500 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center hover:bg-green-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 active:scale-95 touch-manipulation"
             >
               <Phone className="h-6 w-6 sm:h-7 sm:w-7" />
             </button>
@@ -391,14 +391,14 @@ function PhoneDialer() {
         {(callStatus === "dialing" || callStatus === "connected") && (
           <button 
             onClick={endCall}
-            className="bg-red-500 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center hover:bg-red-600 transition-all duration-300 shadow-2xl hover:shadow-red-200 hover:scale-110 active:scale-95 touch-manipulation"
+            className="bg-red-500 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center hover:bg-red-600 transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
           >
             <Phone className="h-6 w-6 sm:h-7 sm:w-7 rotate-[135deg]" />
           </button>
         )}
         
         {callStatus === "ended" && (
-          <div className="text-center text-gray-500 bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-4 shadow-lg">
+          <div className="text-center text-gray-500 bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-4">
             <div className="text-base sm:text-lg font-medium">Call completed</div>
             <div className="text-xs sm:text-sm">Duration: 1m 23s</div>
           </div>
@@ -407,7 +407,7 @@ function PhoneDialer() {
 
       {/* Call Cost Display */}
       {phoneNumber && callStatus === "idle" && (
-        <div className="mt-6 text-center p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-blue-100">
+        <div className="mt-6 text-center p-4 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-100">
           <div className="text-sm text-gray-600 font-medium">Estimated cost:</div>
           <div className="text-xl font-bold text-blue-600">$0.02/min</div>
         </div>
@@ -596,13 +596,13 @@ function RateCalculator() {
           {duration} minute{duration !== 1 ? 's' : ''} to {getCountryFlag(selectedCountry)} {selectedCountry}
         </div>
         
-        <Link href={getCallUrl()} className="bg-blue-500 text-white px-8 py-3 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-all duration-300 block shadow-lg hover:shadow-xl hover:scale-105">
+        <Link href={getCallUrl()} className="bg-blue-500 text-white px-8 py-3 rounded-xl text-lg font-semibold hover:bg-blue-600 transition-all duration-300 block hover:scale-105">
           Call {getCountryFlag(selectedCountry)} {selectedCountry} now
         </Link>
       </div>
 
       {/* Comparison with traditional carriers */}
-      <div className="mt-4 text-center p-3 bg-blue-100 rounded-lg shadow-md">
+      <div className="mt-4 text-center p-3 bg-blue-100 rounded-lg">
         <div className="text-sm text-gray-600">vs. traditional carrier:</div>
         <div className="text-lg font-bold text-green-600">
           Save ${((totalCost * 3) - totalCost).toFixed(2)} ({Math.round(66)}% less)
@@ -612,10 +612,10 @@ function RateCalculator() {
       {/* Enterprise Modal */}
       {showEnterpriseModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl border border-gray-100">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 border border-gray-100">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Plans</h3>
-            <div className="space-y-4 mb-6">
-              <div className="border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
+              <div className="space-y-4 mb-6">
+              <div className="border border-gray-200 rounded-lg p-4 transition-shadow">
                 <h4 className="font-semibold text-gray-900">Team Plan</h4>
                 <p className="text-gray-600 text-sm">Up to 50 users</p>
                 <p className="text-2xl font-bold text-blue-600">$99/month</p>
