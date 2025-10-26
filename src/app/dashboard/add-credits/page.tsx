@@ -300,16 +300,30 @@ export default function AddCredits() {
           <div className="text-xs text-gray-500 text-center">*VAT may be added depending on your country and payment method</div>
 
           <div className="pt-6 border-t border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Why Yadaphone</h3>
-            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 mb-4">
-              <li>International calls to any country without restrictions.</li>
-              <li>Our service works in all countries, no restrictions.</li>
-              <li>Privacy first. We don't store your payment information.</li>
-              <li>Credit based, no subscription. Pay only for what you use.</li>
-              <li>No phone number required. Start calling immediately.</li>
-            </ul>
+            <div className="bg-[#f3fbff] border border-[#e6fbff] rounded-2xl p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Frequently Asked Questions</h3>
+              <div className="space-y-4 text-sm text-gray-700">
+                <div>
+                  <div className="font-medium text-gray-900">How do credits work?</div>
+                  <p className="mt-1 text-gray-600">Credits are added to your account balance immediately and automatically used when you make calls.</p>
+                </div>
 
-            {/* Testimonial removed per request */}
+                <div>
+                  <div className="font-medium text-gray-900">Can I get a refund?</div>
+                  <p className="mt-1 text-gray-600">We offer full no-questions-asked refunds and make up credits for the calls that don't work as expected. Please contact our support team if you experience any issues. We aim to provide the best service possible.</p>
+                </div>
+
+                <div>
+                  <div className="font-medium text-gray-900">How are call rates calculated?</div>
+                  <p className="mt-1 text-gray-600">Rates vary by country. Check our rate calculator for specific pricing.</p>
+                </div>
+
+                <div>
+                  <div className="font-medium text-gray-900">Is there a minimum purchase?</div>
+                  <p className="mt-1 text-gray-600">Yes, the minimum purchase amount is $5 to cover processing fees.</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="text-xs text-gray-500 text-center">By continuing you agree to our <Link href="/terms" className="underline">Terms</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>.</div>

@@ -183,58 +183,36 @@ export default function BuyNumberPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div className="min-h-screen bg-white">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Modern Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/dashboard" 
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors shadow-sm"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </Link>
-              <div>
+            <div className="flex items-center gap-3">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                    <Phone className="h-6 w-6 text-white" />
-                  </div>
+                  <Phone className="h-6 w-6 text-[#00aff0]" />
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">Get Your Number</h1>
                     <p className="text-sm text-gray-600">Purchase a new phone number to make and receive calls</p>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border border-white/20">
-              <p className="text-sm text-gray-600 font-medium">Your Balance</p>
-              <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">${userBalance.toFixed(2)}</p>
             </div>
           </div>
         </div>
 
         {/* Info Message */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-2xl p-6 mb-6 backdrop-blur-sm">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-                <Phone className="h-4 w-4 text-white" />
+              <div className="bg-[#f3fbff] border border-[#e6fbff] rounded-2xl p-6 mb-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Important Information</h3>
+                  <p className="mt-2 text-sm text-slate-600">Supporting documents might be required by our customer support team.</p>
+                  <p className="mt-2 text-sm text-slate-600">Our team may contact you to verify your identity and intended use of the phone number for compliance purposes.</p>
+                </div>
               </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">Important Information</h3>
-              <p className="text-blue-800 mb-2">Supporting documents might be required by our customer support team.</p>
-              <p className="text-blue-700 text-sm">Our team may contact you to verify your identity and intended use of the phone number for compliance purposes.</p>
-            </div>
-          </div>
-        </div>
 
 
 
-        {/* Search and Filters */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 mb-6">
+  {/* Search and Filters */}
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
           <div className="space-y-4">
             {/* Search Bar */}
             <div className="flex items-center space-x-4">
@@ -245,13 +223,13 @@ export default function BuyNumberPage() {
                   placeholder="Search by number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#00aff0] focus:border-[#00aff0] focus:bg-white transition-all duration-200"
                 />
               </div>
               <button
                 onClick={fetchAvailableNumbers}
                 disabled={loading}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl"
+                className="flex items-center space-x-2 bg-gradient-to-r from-[#00aff0] to-[#0099d6] hover:from-[#0099d6] hover:to-[#0086c2] text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 disabled:opacity-50"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 <span>{loading ? 'Searching...' : 'Refresh'}</span>
@@ -259,10 +237,10 @@ export default function BuyNumberPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center flex-wrap gap-2">
                 <span className="text-sm font-medium text-gray-700">Filter by type:</span>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   {[
                     { value: "all", label: "All Numbers", icon: Globe },
                     { value: "local", label: "Local", icon: MapPin },
@@ -271,9 +249,9 @@ export default function BuyNumberPage() {
                     <button
                       key={value}
                       onClick={() => setNumberType(value as any)}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                         numberType === value
-                          ? "bg-blue-100 text-blue-700 border border-blue-200"
+                          ? "bg-[#e6fbff] text-[#00aff0] border border-[#e6fbff]"
                           : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
                       }`}
                     >
@@ -285,23 +263,23 @@ export default function BuyNumberPage() {
               </div>
 
               {/* Country Selection */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center flex-wrap gap-2">
                 <span className="text-sm font-medium text-gray-700">Region:</span>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   {countries.map((country) => (
                     <button
                       key={country.code}
                       onClick={() => setSelectedCountry(country.name)}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                         selectedCountry === country.name
-                          ? "bg-blue-100 text-blue-700 border border-blue-200"
+                          ? "bg-[#e6fbff] text-[#00aff0] border border-[#e6fbff]"
                           : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
                       }`}
                     >
                       <span>{country.flag}</span>
                       <span>{country.code}</span>
                       {selectedCountry === country.name && (
-                        <Check className="h-3 w-3 text-blue-600" />
+                        <Check className="h-3 w-3 text-[#00aff0]" />
                       )}
                     </button>
                   ))}
@@ -311,13 +289,13 @@ export default function BuyNumberPage() {
           </div>
         </div>
 
-        {/* Available Numbers */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+  {/* Available Numbers */}
+  <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Phone className="h-5 w-5 text-blue-600" />
+                <div className="w-10 h-10 bg-[#e6fbff] rounded-2xl flex items-center justify-center">
+                  <Phone className="h-5 w-5 text-[#00aff0]" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">
@@ -334,7 +312,7 @@ export default function BuyNumberPage() {
           <div className="p-6">
             {loading ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00aff0] mx-auto mb-4"></div>
                 <p className="text-gray-600 font-medium">Finding perfect numbers for you...</p>
                 <p className="text-gray-500 text-sm mt-1">This may take a few moments</p>
               </div>
@@ -355,7 +333,7 @@ export default function BuyNumberPage() {
                     setSearchQuery("");
                     fetchAvailableNumbers();
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200"
+                  className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] hover:from-[#0099d6] hover:to-[#0086c2] text-white px-6 py-3 rounded-2xl font-medium transition-colors duration-200"
                 >
                   Try Again
                 </button>
@@ -365,7 +343,7 @@ export default function BuyNumberPage() {
                 {paginatedNumbers.map((number: PhoneNumber, index: number) => (
                   <div
                     key={number.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                    className="flex items-center justify-between p-4 border border-gray-200 rounded-2xl hover:border-[#00aff0] hover:bg-[#f3fbff] transition-all duration-200"
                   >
                     <div className="flex items-center space-x-4">
                       <div className="flex-1">
@@ -375,8 +353,8 @@ export default function BuyNumberPage() {
                           </span>
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
                             number.type === "toll-free" 
-                              ? "bg-purple-100 text-purple-700" 
-                              : "bg-blue-100 text-blue-700"
+                              ? "bg-[#e6fbff] text-[#00aff0]" 
+                              : "bg-[#e6fbff] text-[#00aff0]"
                           }`}>
                             {number.type === "toll-free" ? "Toll-Free" : "Local"}
                           </span>
@@ -401,7 +379,7 @@ export default function BuyNumberPage() {
                     <button
                       onClick={() => purchaseNumber(number)}
                       disabled={purchasingNumber === number.id}
-                      className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 text-sm"
+                      className="ml-4 bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-4 py-2 rounded-2xl font-medium transition-colors duration-200 disabled:opacity-50 text-sm"
                     >
                       {purchasingNumber === number.id ? (
                         <div className="flex items-center space-x-2">
@@ -436,7 +414,7 @@ export default function BuyNumberPage() {
                             onClick={() => setCurrentPage(page)}
                             className={`px-3 py-2 text-sm font-medium rounded-lg ${
                               currentPage === page
-                                ? "bg-blue-600 text-white"
+                                  ? "bg-[#00aff0] text-white"
                                 : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
                             }`}
                           >
@@ -459,56 +437,56 @@ export default function BuyNumberPage() {
           </div>
         </div>
 
-        {/* Info Section */}
-        <div className="mt-8 bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+  {/* Info Section */}
+  <div className="mt-8 bg-white rounded-2xl p-6 border border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Why Choose Our Numbers?</h3>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-blue-600" />
-                </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="flex items-start space-x-3 p-4 rounded-xl border border-gray-100 bg-white">
+              <div className="w-10 h-10 bg-[#e6fbff] rounded-lg flex items-center justify-center">
+                <Zap className="h-5 w-5 text-[#00aff0]" />
+              </div>
+              <div>
                 <h4 className="font-semibold text-gray-900">Instant Setup</h4>
+                <p className="text-sm text-gray-600 mt-1">Ready to use immediately after purchase</p>
               </div>
-              <p className="text-gray-600 text-sm">Ready to use immediately after purchase</p>
             </div>
-            
-            <div className="bg-green-50 rounded-xl p-4 border border-green-100">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Phone className="h-4 w-4 text-green-600" />
-                </div>
+
+            <div className="flex items-start space-x-3 p-4 rounded-xl border border-gray-100 bg-white">
+              <div className="w-10 h-10 bg-[#e6fbff] rounded-lg flex items-center justify-center">
+                <Phone className="h-5 w-5 text-[#00aff0]" />
+              </div>
+              <div>
                 <h4 className="font-semibold text-gray-900">Global Reach</h4>
+                <p className="text-sm text-gray-600 mt-1">Make calls worldwide with crystal clear quality</p>
               </div>
-              <p className="text-gray-600 text-sm">Make calls worldwide with crystal clear quality</p>
             </div>
-            
-            <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Globe className="h-4 w-4 text-purple-600" />
-                </div>
+
+            <div className="flex items-start space-x-3 p-4 rounded-xl border border-gray-100 bg-white">
+              <div className="w-10 h-10 bg-[#e6fbff] rounded-lg flex items-center justify-center">
+                <Globe className="h-5 w-5 text-[#00aff0]" />
+              </div>
+              <div>
                 <h4 className="font-semibold text-gray-900">Enterprise Grade</h4>
+                <p className="text-sm text-gray-600 mt-1">99.9% uptime with enterprise reliability</p>
               </div>
-              <p className="text-gray-600 text-sm">99.9% uptime with enterprise reliability</p>
             </div>
-            
-            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Check className="h-4 w-4 text-orange-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900">No Contracts</h4>
+
+            <div className="flex items-start space-x-3 p-4 rounded-xl border border-gray-100 bg-white">
+              <div className="w-10 h-10 bg-[#e6fbff] rounded-lg flex items-center justify-center">
+                <Check className="h-5 w-5 text-[#00aff0]" />
               </div>
-              <p className="text-gray-600 text-sm">Cancel anytime, no commitments required</p>
+              <div>
+                <h4 className="font-semibold text-gray-900">No Contracts</h4>
+                <p className="text-sm text-gray-600 mt-1">Cancel anytime, no commitments required</p>
+              </div>
             </div>
           </div>
-          
-          <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-            <div className="flex items-center space-x-2 text-blue-700 font-medium">
-              <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
-                <Check className="h-3 w-3 text-blue-600" />
+
+          <div className="mt-6 p-4 bg-[#f3fbff] rounded-xl border border-[#e6fbff]">
+            <div className="flex items-center space-x-2 text-[#00aff0] font-medium">
+              <div className="w-5 h-5 bg-[#e6fbff] rounded-full flex items-center justify-center">
+                <Check className="h-3 w-3 text-[#00aff0]" />
               </div>
               <span>Numbers with sufficient balance are available for instant purchase!</span>
             </div>
