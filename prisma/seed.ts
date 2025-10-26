@@ -25,10 +25,28 @@ async function main() {
   ]
 
   for (const rate of rates) {
+    // Use composite unique (countryCode + callerIdCountry) per Prisma schema
     await prisma.callRate.upsert({
-      where: { countryCode: rate.countryCode },
-      update: rate,
-      create: rate,
+      where: {
+        countryCode_callerIdCountry: {
+          countryCode: rate.countryCode,
+          callerIdCountry: rate.countryCode,
+        }
+      },
+      update: {
+        country: rate.country,
+        rate: rate.rate,
+        currency: rate.currency,
+        updatedAt: new Date(),
+      },
+      create: {
+        country: rate.country,
+        countryCode: rate.countryCode,
+        callerIdCountry: rate.countryCode,
+        rate: rate.rate,
+        currency: rate.currency,
+        isActive: true,
+      },
     })
   }
 

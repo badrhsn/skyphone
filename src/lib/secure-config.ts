@@ -68,7 +68,7 @@ class SecureConfigManager {
   }
 
   // Store encrypted configuration
-  async setConfig(provider: string, config: ProviderConfig, userId?: number, environment?: string): Promise<void> {
+  async setConfig(provider: string, config: ProviderConfig, userId?: string, environment?: string): Promise<void> {
     const configString = JSON.stringify(config);
     const { encrypted, iv, tag } = this.encrypt(configString);
     
@@ -107,7 +107,7 @@ class SecureConfigManager {
   }
 
   // Get configuration for a specific provider
-  async getConfig(provider: string, userId?: number): Promise<ProviderConfig | null> {
+  async getConfig(provider: string, userId?: string): Promise<ProviderConfig | null> {
     const cacheKey = provider.toUpperCase();
     
     // Check cache first
@@ -151,20 +151,21 @@ class SecureConfigManager {
   }
 
   // Get specific configuration value
-  async getConfigValue(provider: string, key: string, userId?: number): Promise<string | null> {
+  async getConfigValue(provider: string, key: string, userId?: string): Promise<string | null> {
     const config = await this.getConfig(provider, userId);
     return config?.[key]?.toString() || null;
   }
 
   // Log audit trail
-  private async logAudit(action: string, provider: string, userId: number): Promise<void> {
+  private async logAudit(action: string, provider: string, userId?: string): Promise<void> {
     try {
+      // The ConfigurationAudit model stores a configurationId; use provider as identifier here
       await prisma.configurationAudit.create({
         data: {
-          provider,
+          configurationId: provider.toUpperCase(),
           action,
-          userId,
-          details: JSON.stringify({ 
+          userId: userId ? String(userId) : null,
+          previousValue: JSON.stringify({ 
             timestamp: new Date().toISOString(),
             environment: process.env.NODE_ENV 
           })
@@ -176,13 +177,13 @@ class SecureConfigManager {
   }
 
   // Rotate configuration (for security)
-  async rotateConfig(provider: string, newConfig: ProviderConfig, userId?: number): Promise<void> {
+  async rotateConfig(provider: string, newConfig: ProviderConfig, userId?: string): Promise<void> {
     // Get current config for backup
     const currentConfig = await this.getConfig(provider);
     
     if (currentConfig && userId) {
       // Store previous version in audit
-      await this.logAudit('ROTATE', provider.toUpperCase(), userId);
+      await this.logAudit('ROTATE', provider.toUpperCase(), String(userId));
     }
 
     await this.setConfig(provider, newConfig, userId);
@@ -199,7 +200,7 @@ class SecureConfigManager {
   }
 
   // Deactivate a configuration
-  async deactivateConfig(provider: string, userId?: number): Promise<void> {
+  async deactivateConfig(provider: string, userId?: string): Promise<void> {
     await prisma.apiConfiguration.update({
       where: { provider: provider.toUpperCase() },
       data: { isActive: false }
@@ -208,7 +209,7 @@ class SecureConfigManager {
     this.configCache.delete(provider.toUpperCase());
     
     if (userId) {
-      await this.logAudit('DEACTIVATE', provider.toUpperCase(), userId);
+      await this.logAudit('DEACTIVATE', provider.toUpperCase(), String(userId));
     }
   }
 }

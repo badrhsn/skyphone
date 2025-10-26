@@ -73,12 +73,12 @@ export async function GET(request: NextRequest) {
       : 0;
 
     // Provider statistics
-    const providerStatsFormatted = providerStats.map(provider => ({
-      provider: provider.name,
-      successRate: provider.successRate,
-      avgResponseTime: provider.avgResponseTime,
-      totalCalls: provider.totalCalls,
-      isActive: provider.isHealthy,
+    const providerStatsFormatted = providerStats.map(p => ({
+      provider: p.provider,
+      successRate: p.successRate,
+      avgResponseTime: p.avgResponseTime,
+      totalCalls: 0, // total calls not tracked on ProviderStatus; computed elsewhere if needed
+      isActive: p.isActive,
     }));
 
     // If no provider stats in DB, include current providers with default values
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     // Country statistics from call analytics
     const countryStats = callAnalytics.reduce((acc, call) => {
-      const country = call.country || 'Unknown';
+      const country = (call as any).countryCode || 'Unknown';
       if (!acc[country]) {
         acc[country] = { calls: 0, successful: 0 };
       }

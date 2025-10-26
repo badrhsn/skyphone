@@ -3,10 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { callSid: string; filename: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -14,7 +11,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { callSid, filename } = params
+    const { params } = context
+    const { callSid, filename } = params as { callSid: string; filename: string }
 
     // Validate call belongs to user
     const call = await prisma.call.findFirst({

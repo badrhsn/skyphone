@@ -84,8 +84,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Configuration for this provider already exists" }, { status: 409 });
     }
 
-    // Store configuration using secure config manager
-    await secureConfig.setConfig(provider, configData, user.id);
+  // Store configuration using secure config manager
+  const uid = user?.id ?? (session.user?.id as string) ?? undefined;
+  await secureConfig.setConfig(provider, configData, uid);
 
     // Update description if provided
     if (description) {

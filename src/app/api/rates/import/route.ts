@@ -97,8 +97,14 @@ export async function POST(request: NextRequest) {
         }
 
         // Create or update rate
+        // Use composite unique key (countryCode + callerIdCountry)
         await prisma.callRate.upsert({
-          where: { countryCode },
+          where: {
+            countryCode_callerIdCountry: {
+              countryCode,
+              callerIdCountry: countryCode,
+            }
+          },
           update: {
             country,
             rate,
@@ -108,6 +114,7 @@ export async function POST(request: NextRequest) {
           create: {
             country,
             countryCode,
+            callerIdCountry: countryCode,
             rate,
             currency,
             isActive: true

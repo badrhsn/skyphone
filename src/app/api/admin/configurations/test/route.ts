@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Provider and configData are required" }, { status: 400 });
     }
 
-    // Test the configuration based on provider
-    let testResult = { success: false, message: '', details: {} };
+  // Test the configuration based on provider
+  let testResult: { success: boolean; message: string; details?: any } = { success: false, message: '', details: {} };
 
     try {
       switch (provider.toUpperCase()) {

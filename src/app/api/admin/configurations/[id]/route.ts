@@ -33,8 +33,9 @@ export async function GET(
       return NextResponse.json({ error: "Configuration not found" }, { status: 404 });
     }
 
-    // Get decrypted configuration data
-    const configData = await secureConfig.getConfig(configuration.provider, user ? parseInt(user.id) : undefined);
+  // Get decrypted configuration data
+  const uid = user?.id ?? (session.user?.id as string) ?? undefined;
+  const configData = await secureConfig.getConfig(configuration.provider, uid);
 
     return NextResponse.json({
       ...configuration,
@@ -84,7 +85,8 @@ export async function PUT(
 
     // Update configuration data if provided
     if (configData && user) {
-      await secureConfig.setConfig(configuration.provider, configData, parseInt(user.id));
+      const uid2 = user?.id ?? (session.user?.id as string) ?? undefined;
+      await secureConfig.setConfig(configuration.provider, configData, uid2);
     }
 
     // Update metadata
@@ -140,7 +142,8 @@ export async function DELETE(
 
     // Deactivate configuration
     if (user) {
-      await secureConfig.deactivateConfig(configuration.provider, parseInt(user.id));
+      const uid3 = user?.id ?? (session.user?.id as string) ?? undefined;
+      await secureConfig.deactivateConfig(configuration.provider, uid3);
     }
 
     // Delete from database

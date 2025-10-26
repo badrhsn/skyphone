@@ -6,7 +6,7 @@ import { secureConfig } from './secure-config';
 
 interface ConfigOptions {
   fallbackToEnv?: boolean;
-  userId?: number;
+  userId?: string;
 }
 
 class ConfigHelper {
@@ -15,11 +15,11 @@ class ConfigHelper {
 
   // Get configuration with environment fallback
   async getConfig(provider: string, options: ConfigOptions = {}): Promise<Record<string, any> | null> {
-    const { fallbackToEnv = true, userId } = options;
+  const { fallbackToEnv = true, userId } = options;
     
     try {
       // First try to get from secure database
-      const secureConfigData = await secureConfig.getConfig(provider, userId);
+  const secureConfigData = await secureConfig.getConfig(provider, userId as any);
       
       if (secureConfigData) {
         console.log(`🔐 Using secure config for ${provider}`);

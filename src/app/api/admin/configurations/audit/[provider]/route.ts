@@ -25,18 +25,22 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get audit trail for the provider
+    // Resolve configuration by provider then fetch audits by configurationId
+    const apiConfig = await prisma.apiConfiguration.findUnique({ where: { provider: provider.toUpperCase() } });
+
+    if (!apiConfig) {
+      return NextResponse.json({ error: 'Provider configuration not found' }, { status: 404 });
+    }
+
     const auditRecords = await prisma.configurationAudit.findMany({
-      where: {
-        provider: provider.toUpperCase()
-      },
+      where: { configurationId: apiConfig.id },
       include: {
         user: {
           select: { email: true, name: true }
         }
       },
-      orderBy: { timestamp: 'desc' },
-      take: 50 // Limit to last 50 records
+      orderBy: { createdAt: 'desc' },
+      take: 50
     });
 
     return NextResponse.json(auditRecords);

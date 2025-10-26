@@ -99,7 +99,8 @@ export async function POST(request: NextRequest) {
           });
 
           if (!existingConfig) {
-            await secureConfig.setConfig(provider, configData, user.id, 'production');
+            const uid = user?.id ?? (session.user?.id as string) ?? undefined;
+            await secureConfig.setConfig(provider, configData, uid, 'production');
             migratedConfigs.push(provider);
           } else {
             console.log(`Configuration for ${provider} already exists, skipping...`);
