@@ -147,7 +147,7 @@ export default function Header() {
                         <span>History</span>
                       </Link>
                       <Link 
-                        href="/faq" 
+                        href="/contact" 
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                         onClick={() => setUserMenuOpen(false)}
                       >
@@ -290,7 +290,7 @@ export default function Header() {
                   </Link>
                   
                   <Link 
-                    href="/faq" 
+                    href="/contact" 
                     className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >

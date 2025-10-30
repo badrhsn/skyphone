@@ -26,12 +26,14 @@ export default function PageLayout({
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link 
-                href={backHref}
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </Link>
+                {backHref ? (
+                  <Link 
+                    href={backHref}
+                    className="p-2 hover:bg-white/80 rounded-xl transition-colors"
+                  >
+                    <ArrowLeft className="h-5 w-5 text-gray-600" />
+                  </Link>
+                ) : null}
               <div>
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
@@ -65,7 +67,7 @@ interface CardProps {
 
 export function Card({ children, className = "" }: CardProps) {
   return (
-    <div className={`bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 ${className}`}>
+    <div className={`bg-white rounded-3xl border border-[#e6fbff] ${className}`}>
       {children}
     </div>
   );
@@ -89,12 +91,12 @@ export function Button({
   disabled = false,
   className = ""
 }: ButtonProps) {
-  const baseClasses = "font-medium rounded-xl transition-all duration-200 flex items-center justify-center space-x-2";
+  const baseClasses = "font-medium rounded-2xl transition-all duration-200 flex items-center justify-center space-x-2";
   
   const variants = {
-  primary: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white",
-  secondary: "bg-white/80 hover:bg-white text-gray-700 border border-gray-200 hover:border-gray-300",
-    ghost: "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+    primary: "bg-gradient-to-r from-[#00aff0] to-[#0099d6] hover:from-[#0099d6] hover:to-[#0086c2] text-white",
+    secondary: "bg-white border border-[#e6fbff] text-gray-900 hover:bg-[#f3fbff]",
+    ghost: "text-[#00aff0] hover:text-[#0086c2] hover:bg-white/50"
   };
   
   const sizes = {

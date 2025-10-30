@@ -767,43 +767,43 @@ export default function Home() {
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-400 rounded-full blur-3xl"></div>
-        </div>
+    </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
               <span className="mr-2">✨</span>
               Get Started in Minutes
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
               How to Make International Calls<br />
-              <span className="text-blue-600">in 3 Simple Steps</span>
+              <span className="text-[#00aff0]">in 3 Simple Steps</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               No complex setup, no lengthy verification process. Start calling worldwide in under 2 minutes.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-16">
+            <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-16">
             {/* Step 1 */}
             <div className="relative group">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-blue-200/50">
-                <div className="absolute -top-4 left-8 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+              <div className="bg-white rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 border border-[#e6fbff]">
+                <div className="absolute -top-4 left-8 bg-[#f3fbff] text-[#00aff0] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                   1
                 </div>
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-xl">
-                  <FileText className="h-10 w-10 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <FileText className="h-10 w-10 text-[#00aff0]" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Sign Up</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">Sign up in seconds with just your email - no phone verification needed</p>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
-                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div className="flex items-center space-x-3 bg-white rounded-xl p-3 border border-[#e6fbff]">
+                    <CheckCircle className="h-5 w-5 text-[#00aff0] flex-shrink-0" />
                     <span className="text-sm text-gray-700 font-medium">No authentication required</span>
                   </div>
-                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
-                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div className="flex items-center space-x-3 bg-white rounded-xl p-3 border border-[#e6fbff]">
+                    <CheckCircle className="h-5 w-5 text-[#00aff0] flex-shrink-0" />
                     <span className="text-sm text-gray-700 font-medium">No phone numbers required</span>
                   </div>
                 </div>
@@ -812,23 +812,23 @@ export default function Home() {
             
             {/* Step 2 */}
             <div className="relative group">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-blue-200/50">
-                <div className="absolute -top-4 left-8 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+              <div className="bg-white rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 border border-[#e6fbff]">
+                <div className="absolute -top-4 left-8 bg-[#f3fbff] text-[#00aff0] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                   2
                 </div>
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-xl">
-                  <CreditCard className="h-10 w-10 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <CreditCard className="h-10 w-10 text-[#00aff0]" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Add Credits</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">Purchase credits and only pay for the minutes you actually use</p>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
-                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div className="flex items-center space-x-3 bg-white rounded-xl p-3 border border-[#e6fbff]">
+                    <CheckCircle className="h-5 w-5 text-[#00aff0] flex-shrink-0" />
                     <span className="text-sm text-gray-700 font-medium">No subscriptions or recurring fees</span>
                   </div>
-                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
-                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div className="flex items-center space-x-3 bg-white rounded-xl p-3 border border-[#e6fbff]">
+                    <CheckCircle className="h-5 w-5 text-[#00aff0] flex-shrink-0" />
                     <span className="text-sm text-gray-700 font-medium">Pay only for minutes you use</span>
                   </div>
                 </div>
@@ -837,23 +837,23 @@ export default function Home() {
             
             {/* Step 3 */}
             <div className="relative group">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-blue-200/50">
-                <div className="absolute -top-4 left-8 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+              <div className="bg-white rounded-3xl p-8 text-center transform group-hover:scale-105 transition-all duration-300 border border-[#e6fbff]">
+                <div className="absolute -top-4 left-8 bg-[#f3fbff] text-[#00aff0] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                   3
                 </div>
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-xl">
-                  <Phone className="h-10 w-10 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-4 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <Phone className="h-10 w-10 text-[#00aff0]" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Call Anywhere</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">Call any landline or institution worldwide directly from your browser</p>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
-                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div className="flex items-center space-x-3 bg-white rounded-xl p-3 border border-[#e6fbff]">
+                    <CheckCircle className="h-5 w-5 text-[#00aff0] flex-shrink-0" />
                     <span className="text-sm text-gray-700 font-medium">Available in all countries</span>
                   </div>
-                  <div className="flex items-center space-x-3 bg-white/60 rounded-xl p-3">
-                    <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <div className="flex items-center space-x-3 bg-white rounded-xl p-3 border border-[#e6fbff]">
+                    <CheckCircle className="h-5 w-5 text-[#00aff0] flex-shrink-0" />
                     <span className="text-sm text-gray-700 font-medium">Calls routed through a secure system</span>
                   </div>
                 </div>
@@ -861,10 +861,10 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="text-center">
+            <div className="text-center">
             <Link 
               href={getCallUrl()} 
-              className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-8 py-3 rounded-2xl text-lg font-semibold hover:from-[#0099d6] hover:to-[#0086c2] transition-all duration-300 transform hover:scale-105"
             >
               <span>{session ? "Go to Dialer" : "Get started"}</span>
               <ArrowRight className="h-5 w-5" />
@@ -882,92 +882,90 @@ export default function Home() {
           <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-2000"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16 md:mb-20">
-            <div className="inline-flex items-center justify-center space-x-3 mb-6">
-              <div className="bg-blue-500 rounded-full p-2 shadow-lg">
-                <Building className="h-6 w-6 text-white" />
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-blue-600">Yadaphone for business</h2>
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-12 md:mb-16">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <Building className="h-8 w-8 text-[#00aff0]" />
+              <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900">Yadaphone for Business</h2>
             </div>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Scale your global communications with enterprise-grade features and unbeatable rates to 180+ countries
+            <p className="text-lg md:text-xl text-gray-700 max-w-6xl mx-auto">
+              Enterprise-ready calling at a fraction of the cost — secure, reliable, and easy to scale.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-16">
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-12">
+              <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="flex items-start space-x-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Mic className="h-6 w-6 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-3">
+                  <Mic className="h-6 w-6 text-[#00aff0]" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Record calls</h3>
-                  <p className="text-gray-600">and access AI transcripts for better business insights and compliance</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Record calls</h3>
+                  <p className="text-gray-600">Access AI transcripts and searchable recordings for compliance and insights.</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+              <div className="flex items-center space-x-2 text-sm text-[#00aff0] font-medium">
                 <span>Learn more</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-4 w-4 text-[#00aff0]" />
               </div>
             </div>
             
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="flex items-start space-x-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Users className="h-6 w-6 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-3">
+                  <Users className="h-6 w-6 text-[#00aff0]" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Add free unlimited members</h3>
                   <p className="text-gray-600">in one account and one corporate wallet for seamless team collaboration</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+              <div className="flex items-center space-x-2 text-sm text-[#00aff0] font-medium">
                 <span>Learn more</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-4 w-4 text-[#00aff0]" />
               </div>
             </div>
             
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="flex items-start space-x-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Headphones className="h-6 w-6 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-3">
+                  <Headphones className="h-6 w-6 text-[#00aff0]" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Get priority support</h3>
                   <p className="text-gray-600">we're just a message away — 24/7 dedicated enterprise support</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+              <div className="flex items-center space-x-2 text-sm text-[#00aff0] font-medium">
                 <span>Learn more</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-4 w-4 text-[#00aff0]" />
               </div>
             </div>
             
-            <div className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="flex items-start space-x-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Settings className="h-6 w-6 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-3">
+                  <Settings className="h-6 w-6 text-[#00aff0]" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Customize your setup</h3>
                   <p className="text-gray-600">with features your business needs including API integration and custom branding</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium">
+              <div className="flex items-center space-x-2 text-sm text-[#00aff0] font-medium">
                 <span>Learn more</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-4 w-4 text-[#00aff0]" />
               </div>
             </div>
           </div>
           
           <div className="text-center">
             <div className="inline-flex flex-col sm:flex-row items-center gap-4">
-              <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+              <button className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-[#0099d6] hover:to-[#0086c2] transition-transform duration-200 transform hover:scale-105">
                 See enterprise plans
               </button>
               <span className="text-gray-500 text-sm">or</span>
-              <Link href="/contact" className="text-blue-600 font-semibold hover:text-blue-700 underline underline-offset-4">
+              <Link href="/contact" className="text-[#00aff0] font-semibold hover:text-[#0086c2] underline underline-offset-4">
                 Contact our sales team
               </Link>
             </div>
@@ -985,27 +983,27 @@ export default function Home() {
           }}></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <div className="mb-12">
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
               <Eye className="h-4 w-4 mr-2" />
               Live Demo
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              See It In <span className="text-blue-600">Action</span>
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+              See It In <span className="text-[#00aff0]">Action</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 max-w-6xl mx-auto leading-relaxed">
               Watch how Yadaphone works and see real international calls being made directly from your browser with crystal-clear quality.
             </p>
           </div>
           
           {/* Video Preview Placeholder */}
-          <div className="relative max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl p-8 md:p-12 shadow-2xl border border-blue-300/50">
-              <div className="bg-white rounded-2xl p-8 md:p-12 shadow-lg">
+          <div className="relative max-w-6xl mx-auto">
+            <div className="bg-white rounded-3xl p-8 md:p-12 border border-[#e6fbff]">
+              <div className="bg-white rounded-2xl p-8 md:p-12">
                 <div className="flex items-center justify-center space-x-4 mb-8">
-                  <div className="bg-blue-500 rounded-full p-4 shadow-lg">
-                    <Phone className="h-8 w-8 text-white" />
+                  <div className="bg-[#f3fbff] rounded-full p-4">
+                    <Phone className="h-8 w-8 text-[#00aff0]" />
                   </div>
                   <div className="text-left">
                     <h3 className="text-xl font-bold text-gray-900">Live International Call Demo</h3>
@@ -1038,7 +1036,7 @@ export default function Home() {
                 {/* Play Button */}
                 <div className="relative">
                   <div className="bg-gray-100 rounded-2xl h-64 md:h-80 flex items-center justify-center group cursor-pointer hover:bg-gray-200 transition-colors">
-                    <div className="bg-blue-500 rounded-full p-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                    <div className="bg-[#00aff0] rounded-full p-6 group-hover:scale-110 transition-transform duration-300">
                       <svg className="h-12 w-12 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                       </svg>
@@ -1064,25 +1062,24 @@ export default function Home() {
           <div className="absolute top-3/4 right-10 w-32 h-32 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-bounce delay-1000"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 md:mb-20">
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
               <Star className="h-4 w-4 mr-2" />
               Premium Features
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Why Choose <span className="text-blue-600">Yadaphone</span><br />
-              for International Calls?
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+              Why Choose <span className="text-[#00aff0]">Yadaphone</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the next generation of international calling with advanced features designed for modern communication needs.
+            <p className="text-xl text-gray-600 max-w-6xl mx-auto">
+              Experience a new generation of international calling — faster setup, clearer audio, and enterprise features that scale.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            <div className="md:col-span-2 bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Globe className="h-8 w-8 text-white" />
+            <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <Globe className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Call Anywhere, From Anywhere</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">Make international calls to any country without restrictions, directly from your browser with enterprise-grade quality.</p>
@@ -1092,50 +1089,50 @@ export default function Home() {
               </Link>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Phone className="h-8 w-8 text-white" />
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <Phone className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">No Country Restrictions</h3>
               <p className="text-gray-600">Our service works globally, connecting you with people and institutions worldwide.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Zap className="h-8 w-8 text-white" />
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <Zap className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">No Apps or Subscriptions</h3>
               <p className="text-gray-600">Start calling in 2 minutes directly from your browser without installing apps or subscriptions.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <CreditCard className="h-8 w-8 text-white" />
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <CreditCard className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Credit Based, No Subscription</h3>
               <p className="text-gray-600">Pay only for what you use with our flexible credit system - no recurring fees or contracts.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <DollarSign className="h-8 w-8 text-white" />
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <DollarSign className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Buy Phone Numbers</h3>
               <p className="text-gray-600">Purchase virtual phone numbers from various countries for your business needs.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <User className="h-8 w-8 text-white" />
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <User className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Custom Caller ID</h3>
               <p className="text-gray-600">Set your own caller ID for outgoing calls to maintain professional identity.</p>
             </div>
             
-            <div className="md:col-span-2 bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group">
+            <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="flex items-start space-x-6">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                  <Lock className="h-8 w-8 text-white" />
+                <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 flex items-center justify-center flex-shrink-0">
+                  <Lock className="h-8 w-8 text-[#00aff0]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">Secure and Private</h3>
@@ -1148,9 +1145,9 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-blue-50/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-blue-100/50 group hover:-translate-y-2">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Radio className="h-8 w-8 text-white" />
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
+              <div className="bg-[#f3fbff] rounded-2xl p-4 w-16 h-16 mb-6 flex items-center justify-center">
+                <Radio className="h-8 w-8 text-[#00aff0]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Receive Calls In Browser</h3>
               <p className="text-gray-600">Accept incoming calls directly in your browser with seamless call management.</p>
@@ -1167,7 +1164,7 @@ export default function Home() {
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
         </div>
         
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <div className="mb-8">
             <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6">
               <Zap className="h-4 w-4 mr-2" />
@@ -1214,21 +1211,21 @@ export default function Home() {
           <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 md:mb-20">
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
               <Phone className="h-4 w-4 mr-2" />
               Ready to Start?
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Ready to make your <span className="text-blue-600">first call?</span>
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+              Ready to make your <span className="text-[#00aff0]">first call?</span>
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 max-w-6xl mx-auto leading-relaxed">
               Experience the simplicity of browser-based calling with crystal-clear audio quality and affordable international rates.
             </p>
             <Link 
               href={getCallUrl()} 
-              className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-[#0099d6] hover:to-[#0086c2] transition-transform duration-200 transform hover:scale-105"
             >
               <span>{session ? "Start Calling" : "Start calling"}</span>
               <ArrowRight className="h-5 w-5" />
@@ -1244,7 +1241,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="bg-gradient-to-br from-white to-blue-50/30 rounded-3xl shadow-2xl overflow-hidden border border-blue-100/50">
+          <div className="bg-white rounded-3xl overflow-hidden border border-[#e6fbff]">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-blue-50 to-blue-100">
@@ -1452,7 +1449,7 @@ export default function Home() {
       </div>
 
       {/* Ready to Experience Section - Redesigned */}
-      <div className="py-20 md:py-24 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 relative overflow-hidden">
+  <div className="py-20 md:py-24 bg-white relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-32 h-32 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-bounce"></div>
@@ -1460,18 +1457,18 @@ export default function Home() {
           <div className="absolute bottom-20 left-1/3 w-20 h-20 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-bounce"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl border border-blue-200/50">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <div className="bg-white rounded-3xl p-8 md:p-12 border border-[#e6fbff]">
             <div className="mb-8">
               <div className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium mb-6">
                 <Zap className="h-4 w-4 mr-2" />
                 Experience the Difference
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
                 Ready to experience the<br />
-                <span className="text-blue-600">Yadaphone difference?</span>
+                <span className="text-[#00aff0]">Yadaphone difference?</span>
               </h2>
-              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-gray-600 mb-8 max-w-6xl mx-auto leading-relaxed">
                 Start making cheap international calls today with no setup, no subscriptions, and no restrictions. Join thousands of satisfied users worldwide.
               </p>
             </div>
@@ -1479,7 +1476,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
               <Link 
                 href={getCallUrl()} 
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                className="inline-flex items-center space-x-3 bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:from-[#0099d6] hover:to-[#0086c2] transition-all duration-300"
               >
                 <Phone className="h-5 w-5" />
                 <span>{session ? "Go to Dialer" : "Try Yadaphone Now"}</span>
@@ -1522,22 +1519,22 @@ export default function Home() {
           }}></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
               <BarChart3 className="h-4 w-4 mr-2" />
               Pricing Calculator
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Calculate Your <span className="text-blue-600">Call Cost</span>
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+              Calculate Your <span className="text-[#00aff0]">Call Cost</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-6xl mx-auto">
               Get instant pricing for international calls to any destination with our transparent rate calculator.
             </p>
           </div>
           
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-2 shadow-2xl border border-blue-200/50">
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg">
+          <div className="rounded-3xl p-2 border border-[#e6fbff] bg-white">
+            <div className="bg-white rounded-2xl p-6 md:p-8">
               <RateCalculator />
             </div>
           </div>
@@ -1552,7 +1549,7 @@ export default function Home() {
           <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-700 text-sm font-medium mb-6">
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -1658,22 +1655,22 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse delay-2000"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 md:mb-20">
             <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-blue-700 text-sm font-medium mb-6 shadow-lg">
               <Star className="h-4 w-4 mr-2 text-yellow-500" />
               Customer Stories
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              What Our <span className="text-blue-600">Users Say</span>
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+              What Our <span className="text-[#00aff0]">Users Say</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-6xl mx-auto">
               Join thousands of satisfied customers who've revolutionized their international calling experience with Yadaphone.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -1688,8 +1685,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">N</span>
+                <div className="bg-[#f3fbff] rounded-full w-12 h-12 flex items-center justify-center">
+                  <span className="text-[#00aff0] font-bold text-lg">N</span>
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Nicolas P.</div>
@@ -1700,7 +1697,7 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -1715,8 +1712,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">M</span>
+                <div className="bg-[#f3fbff] rounded-full w-12 h-12 flex items-center justify-center">
+                  <span className="text-[#00aff0] font-bold text-lg">M</span>
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Miguel R.</div>
@@ -1727,7 +1724,7 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -1742,8 +1739,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">J</span>
+                <div className="bg-[#f3fbff] rounded-full w-12 h-12 flex items-center justify-center">
+                  <span className="text-[#00aff0] font-bold text-lg">J</span>
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">James M.</div>
@@ -1754,7 +1751,7 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-blue-200/50 hover:border-blue-300 transform hover:-translate-y-2">
+            <div className="bg-white rounded-3xl p-8 border border-[#e6fbff]">
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -1769,8 +1766,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">T</span>
+                <div className="bg-[#f3fbff] rounded-full w-12 h-12 flex items-center justify-center">
+                  <span className="text-[#00aff0] font-bold text-lg">T</span>
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Thomas L.</div>
@@ -1784,7 +1781,7 @@ export default function Home() {
           
           {/* Trust indicators */}
           <div className="mt-16 text-center">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-200/50 inline-block">
+            <div className="bg-white rounded-2xl p-6 border border-[#e6fbff] inline-block">
               <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <Users className="h-5 w-5 text-blue-500" />
