@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -81,9 +81,9 @@ export default function SignIn() {
   // Show loading while checking authentication
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7fbff] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#00aff0' }}></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -96,25 +96,24 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Main Sign In Form */}
+        <div className="rounded-2xl border border-[#e6fbff] bg-white p-4 sm:p-6">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Welcome back to Skyphone! 👋
-            </h1>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Sign in to your account</h2>
             <div className="space-y-1 text-sm text-gray-600">
               <div className="flex items-center justify-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-blue-500" />
+                <CheckCircle className="h-4 w-4 text-[#00aff0]" />
                 <span>Access your call history</span>
               </div>
               <div className="flex items-center justify-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-blue-500" />
+                <CheckCircle className="h-4 w-4 text-[#00aff0]" />
                 <span>Manage your credits</span>
               </div>
               <div className="flex items-center justify-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-blue-500" />
+                <CheckCircle className="h-4 w-4 text-[#00aff0]" />
                 <span>Continue calling worldwide</span>
               </div>
             </div>
@@ -124,7 +123,7 @@ export default function SignIn() {
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full mb-6 bg-white border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-center space-x-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="w-full mb-6 bg-white border border-[#e6fbff] rounded-xl px-4 py-3 flex items-center justify-center space-x-3 hover:bg-[#f3fbff] transition-colors disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -149,7 +148,7 @@ export default function SignIn() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                className="w-full border border-[#e6fbff] rounded-xl px-3 py-2 text-sm bg-white focus:border-[#00aff0] focus:ring-1 focus:ring-[#00aff0]"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -167,7 +166,7 @@ export default function SignIn() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  className="w-full border border-[#e6fbff] rounded-xl px-3 py-2 pr-12 text-sm bg-white focus:border-[#00aff0] focus:ring-1 focus:ring-[#00aff0]"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -182,7 +181,7 @@ export default function SignIn() {
               </div>
               <div className="flex justify-between items-center mt-1">
                 <span className="text-xs text-gray-500">Minimum 6 characters</span>
-                <Link href="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700">
+                <Link href="/forgot-password" className="text-xs text-[#00aff0] hover:text-[#0099d6]">
                   Forgot password?
                 </Link>
               </div>
@@ -195,7 +194,7 @@ export default function SignIn() {
                 type="checkbox"
                 checked={staySignedIn}
                 onChange={(e) => setStaySignedIn(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-[#00aff0] focus:ring-[#00aff0] border-[#e6fbff] rounded"
               />
               <label htmlFor="stay-signed-in" className="ml-2 block text-sm text-gray-700">
                 Stay signed in
@@ -203,28 +202,17 @@ export default function SignIn() {
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-50 p-4">
+              <div className="rounded-xl bg-red-50 p-4 border border-red-200">
                 <div className="text-sm text-red-700">{error}</div>
               </div>
             )}
 
-            {/* CAPTCHA placeholder */}
-            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-blue-500" />
-                <span className="text-sm text-gray-700">Success!</span>
-              </div>
-              <div className="text-xs text-gray-500">
-                <span className="font-mono bg-white px-2 py-1 rounded border">CLOUDFLARE</span>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-gradient-to-r from-[#00aff0] to-[#0099d6] text-white py-3 px-4 rounded-xl text-sm font-semibold transition-colors inline-flex items-center justify-center space-x-2"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              <span>{isLoading ? "Signing in..." : "Sign in"}</span>
             </button>
           </form>
 
@@ -232,17 +220,17 @@ export default function SignIn() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
-              <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href="/auth/signup" className="text-[#00aff0] hover:text-[#0099d6] font-medium">
                 Sign up
               </Link>
             </p>
             <p className="text-xs text-gray-500 mt-4">
               By signing in you agree to our{" "}
-              <Link href="/terms-and-conditions" className="text-blue-600 hover:text-blue-700">
+              <Link href="/terms-and-conditions" className="text-[#00aff0] hover:text-[#0099d6]">
                 Terms and Conditions
               </Link>
               {" "}and{" "}
-              <Link href="/privacy-policy" className="text-blue-600 hover:text-blue-700">
+              <Link href="/privacy-policy" className="text-[#00aff0] hover:text-[#0099d6]">
                 Privacy Policy
               </Link>
             </p>
