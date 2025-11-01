@@ -15,7 +15,7 @@ export default function Header() {
   // Handle loading state to prevent hydration mismatch
   if (status === "loading") {
     return (
-      <nav className="bg-white border-b border-gray-200 shadow-sm">
+      <nav className="bg-gradient-to-r from-[#f3fbff] to-[#f7fbff] border-b border-[#e6fbff] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
@@ -41,16 +41,18 @@ export default function Header() {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm">
+    <nav className="bg-gradient-to-r from-[#f3fbff] to-[#f7fbff] border-b border-[#e6fbff] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs sm:text-sm">ya</span>
-            </div>
-            <span className="text-lg sm:text-xl font-semibold text-gray-900">Yadaphone</span>
-          </Link>
+          {/* Logo and Navigation */}
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs sm:text-sm">ya</span>
+              </div>
+              <span className="text-lg sm:text-xl font-semibold text-gray-900">Yadaphone</span>
+            </Link>
+          </div>
 
           {session ? (
             <>
@@ -58,23 +60,15 @@ export default function Header() {
               <div className="hidden md:flex items-center space-x-8">
                 <Link 
                   href="/dashboard/dialer" 
-                  className="bg-blue-500 text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                  className="bg-[#00aff0] text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-[#0099d6] transition-colors flex items-center space-x-2"
                 >
                   <Phone className="h-4 w-4" />
-                  <span>Phone</span>
-                </Link>
-                
-                <Link 
-                  href="/earn-credits" 
-                  className="text-gray-700 hover:text-gray-900 font-medium flex items-center space-x-2"
-                >
-                  <DollarSign className="h-4 w-4" />
-                  <span>Earn Free Credits</span>
+                  <span>Make a Call</span>
                 </Link>
                 
                 <Link 
                   href="/dashboard/contacts" 
-                  className="text-gray-700 hover:text-gray-900 font-medium flex items-center space-x-2"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2"
                 >
                   <MessageCircle className="h-4 w-4" />
                   <span>Contacts</span>
@@ -82,7 +76,7 @@ export default function Header() {
                 
                 <Link 
                   href="/dashboard/add-credits" 
-                  className="text-gray-700 hover:text-gray-900 font-medium flex items-center space-x-2"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2"
                 >
                   <DollarSign className="h-4 w-4" />
                   <span>Buy Credits</span>
@@ -90,7 +84,7 @@ export default function Header() {
                 
                 <Link 
                   href="/dashboard/buy-number" 
-                  className="text-gray-700 hover:text-gray-900 font-medium flex items-center space-x-2"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2"
                 >
                   <Phone className="h-4 w-4" />
                   <span>Buy Number</span>
@@ -171,26 +165,24 @@ export default function Header() {
             </>
           ) : (
             <>
-              {/* Not logged in navigation */}
-              <div className="hidden md:flex items-center space-x-8">
-                <Link href="/rates" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Rates
-                </Link>
-                <Link href="/faq" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Support
-                </Link>
-              </div>
-
+              {/* Auth buttons and Rates */}
               <div className="flex items-center space-x-4">
                 <Link 
+                  href="/rates" 
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  <span>Rates</span>
+                </Link>
+                <Link 
                   href="/auth/signin" 
-                  className="text-gray-700 hover:text-gray-900 font-medium"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium"
                 >
                   Sign In
                 </Link>
                 <Link 
                   href="/auth/signup" 
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-medium transition-colors"
+                  className="bg-[#00aff0] hover:bg-[#0099d6] text-white px-6 py-2 rounded-full font-medium transition-colors"
                 >
                   Sign Up
                 </Link>
@@ -202,7 +194,7 @@ export default function Header() {
           <div className="md:hidden">
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="text-gray-700 p-2 hover:bg-[#f7fbff] rounded-lg transition-colors"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -212,22 +204,22 @@ export default function Header() {
       
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
+        <div className="md:hidden border-t border-[#e6fbff] bg-white">
           <div className="px-4 py-3 space-y-1">
             {session ? (
               <>
                 <Link 
                   href="/dashboard/dialer" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Phone className="h-4 w-4" />
-                  <span>Phone</span>
+                  <span>Make a Call</span>
                 </Link>
                 
                 <Link 
                   href="/dashboard/contacts" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -236,7 +228,7 @@ export default function Header() {
                 
                 <Link 
                   href="/dashboard/add-credits" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <DollarSign className="h-4 w-4" />
@@ -244,27 +236,18 @@ export default function Header() {
                 </Link>
                 
                 <Link 
-                  href="/earn-credits" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <DollarSign className="h-4 w-4" />
-                  <span>Earn Free Credits</span>
-                </Link>
-                
-                <Link 
                   href="/dashboard/buy-number" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Phone className="h-4 w-4" />
                   <span>Buy Number</span>
                 </Link>
                 
-                <div className="border-t border-gray-200 mt-3 pt-3">
+                <div className="border-t border-[#e6fbff] mt-3 pt-3">
                   <Link 
                     href="/dashboard/settings" 
-                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Settings className="h-4 w-4" />
@@ -273,7 +256,7 @@ export default function Header() {
                   
                   <Link 
                     href="/rates" 
-                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <DollarSign className="h-4 w-4" />
@@ -282,7 +265,7 @@ export default function Header() {
                   
                   <Link 
                     href="/dashboard/history" 
-                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <MessageCircle className="h-4 w-4" />
@@ -291,7 +274,7 @@ export default function Header() {
                   
                   <Link 
                     href="/contact" 
-                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <HelpCircle className="h-4 w-4" />
@@ -314,26 +297,17 @@ export default function Header() {
               <>
                 <Link 
                   href="/rates" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <DollarSign className="h-4 w-4" />
                   <span>Rates</span>
                 </Link>
                 
-                <Link 
-                  href="/faq" 
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <HelpCircle className="h-4 w-4" />
-                  <span>Support</span>
-                </Link>
-                
-                <div className="border-t border-gray-200 mt-3 pt-3">
+                <div className="border-t border-[#e6fbff] mt-3 pt-3">
                   <Link 
                     href="/auth/signin" 
-                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] hover:underline transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4" />
@@ -342,7 +316,7 @@ export default function Header() {
                   
                   <Link 
                     href="/auth/signup" 
-                    className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors mt-2"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-[#00aff0] text-white hover:bg-[#0099d6] transition-colors mt-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4" />
