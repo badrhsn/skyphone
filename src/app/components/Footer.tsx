@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, Mail, Twitter, MessageCircle, Linkedin, Phone, Globe, Star, Shield, Zap, Users, Award, ArrowUpRight } from "lucide-react";
+import { MapPin, Mail, Twitter, MessageCircle, Linkedin, Phone, Globe, Star, Shield, Zap, Users, Award, ArrowUpRight, CreditCard, Gift } from "lucide-react";
 
 interface Stats {
   users: { total: number; recent: number; display: string };
@@ -112,75 +112,75 @@ export default function Footer() {
   const currentStats = stats || defaultStats;
 
   return (
-    <footer className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden">
-      {/* Subtle Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-500 rounded-full mix-blend-multiply filter blur-2xl opacity-10"></div>
-        <div className="absolute bottom-20 right-20 w-24 h-24 bg-purple-500 rounded-full mix-blend-multiply filter blur-2xl opacity-10"></div>
-        
-        <div className="absolute inset-0 opacity-3">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
-        </div>
+    <footer className="bg-[#f7fbff] border-t border-[#e6fbff] relative">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300aff0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
       </div>
 
-      {/* Compact Main Footer Content */}
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Main Footer Content */}
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-2">
+              <div className="bg-gradient-to-br from-[#00aff0] to-[#0099d6] rounded-xl p-2">
                 <Phone className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-white">Yadaphone</h3>
+              <h3 className="text-xl font-bold text-gray-900">Yadaphone</h3>
             </div>
-            <p className="text-blue-200 text-sm mb-6 leading-relaxed">
+            <p className="text-gray-600 text-sm mb-6 leading-relaxed">
               International calling with crystal-clear quality and unbeatable rates.
             </p>
             
-            {/* Compact Trust Badges */}
-            <div className="space-y-2 mb-6">
+            {/* Trust Badges */}
+            <div className="space-y-3 mb-6">
               <div className="flex items-center space-x-2 text-sm">
-                <Shield className="h-4 w-4 text-green-400" />
-                <span className="text-blue-200">Bank-grade security</span>
+                <div className="bg-[#f3fbff] rounded-full p-1">
+                  <Shield className="h-4 w-4 text-[#00aff0]" />
+                </div>
+                <span className="text-gray-700">Bank-grade security</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
-                <Zap className="h-4 w-4 text-yellow-400" />
-                <span className="text-blue-200">{currentStats.successRate.display} success rate</span>
+                <div className="bg-[#f3fbff] rounded-full p-1">
+                  <Zap className="h-4 w-4 text-[#00aff0]" />
+                </div>
+                <span className="text-gray-700">{currentStats.successRate.display} success rate</span>
               </div>
             </div>
 
             {/* Social Links */}
             <div className="flex space-x-3">
-              <a href="https://twitter.com/yadaphone" className="bg-slate-800/50 hover:bg-slate-700/70 p-2 rounded-lg transition-all duration-300">
-                <Twitter className="h-4 w-4 text-blue-400" />
+              <a href="https://twitter.com/yadaphone" className="bg-white border border-[#e6fbff] hover:bg-[#f3fbff] p-2 rounded-xl transition-colors">
+                <Twitter className="h-4 w-4 text-[#00aff0]" />
               </a>
-              <a href="https://linkedin.com/company/yadaphone" className="bg-slate-800/50 hover:bg-slate-700/70 p-2 rounded-lg transition-all duration-300">
-                <Linkedin className="h-4 w-4 text-blue-400" />
+              <a href="https://linkedin.com/company/yadaphone" className="bg-white border border-[#e6fbff] hover:bg-[#f3fbff] p-2 rounded-xl transition-colors">
+                <Linkedin className="h-4 w-4 text-[#00aff0]" />
               </a>
-              <a href="https://reddit.com/r/yadaphone" className="bg-slate-800/50 hover:bg-slate-700/70 p-2 rounded-lg transition-all duration-300">
-                <MessageCircle className="h-4 w-4 text-blue-400" />
+              <a href="https://reddit.com/r/yadaphone" className="bg-white border border-[#e6fbff] hover:bg-[#f3fbff] p-2 rounded-xl transition-colors">
+                <MessageCircle className="h-4 w-4 text-[#00aff0]" />
               </a>
             </div>
           </div>
 
           {/* Services */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Services</h4>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Services</h4>
             <ul className="space-y-3">
               {[
-                { href: "/dashboard/dialer", label: "Voice Calling" },
-                { href: "/dashboard/add-credits", label: "Credit Plans" },
-                { href: "/dashboard/buy-number", label: "Virtual Numbers" },
-                { href: "/rates", label: "Global Rates" },
-                { href: "/earn-credits", label: "Affiliate Program" },
+                { href: "/dashboard/dialer", label: "Voice Calling", icon: Phone },
+                { href: "/dashboard/add-credits", label: "Credit Plans", icon: CreditCard },
+                { href: "/dashboard/buy-number", label: "Virtual Numbers", icon: Globe },
+                { href: "/rates", label: "Global Rates", icon: Star },
+                { href: "/earn-credits", label: "Affiliate Program", icon: Gift },
               ].map((item, index) => (
                 <li key={index}>
-                  <Link href={item.href} className="text-blue-200 hover:text-white transition-colors text-sm">
-                    {item.label}
+                  <Link href={item.href} className="flex items-center space-x-2 text-gray-600 hover:text-[#00aff0] transition-colors text-sm group">
+                    <item.icon className="h-4 w-4 text-gray-400 group-hover:text-[#00aff0] transition-colors" />
+                    <span>{item.label}</span>
                   </Link>
                 </li>
               ))}
@@ -189,46 +189,73 @@ export default function Footer() {
 
           {/* Popular Destinations */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Popular Destinations</h4>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Popular Destinations</h4>
             <div className="space-y-2">
-              {popularCountries.length > 0 ? (
-                popularCountries.slice(0, 5).map((country, index) => (
-                  <Link key={index} href={`/rates?country=${country.name}`} className="flex items-center justify-between text-sm hover:bg-slate-800/30 rounded-lg p-2 transition-all duration-300">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-base">{country.flag}</span>
-                      <span className="text-blue-200">{country.name}</span>
-                    </div>
-                    <span className="text-green-400 font-medium">{country.formattedRate}</span>
-                  </Link>
-                ))
-              ) : (
-                <div className="text-blue-300 text-sm">Loading destinations...</div>
-              )}
+              <Link href="/rates?country=UAE" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇦🇪</span>
+                <span className="text-gray-600">UAE</span>
+              </Link>
+              <Link href="/rates?country=USA" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇺🇸</span>
+                <span className="text-gray-600">USA</span>
+              </Link>
+              <Link href="/rates?country=India" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇮🇳</span>
+                <span className="text-gray-600">India</span>
+              </Link>
+              <Link href="/rates?country=UK" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇬🇧</span>
+                <span className="text-gray-600">UK</span>
+              </Link>
+              <Link href="/rates?country=Philippines" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇵🇭</span>
+                <span className="text-gray-600">Philippines</span>
+              </Link>
+              <Link href="/rates?country=Pakistan" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇵🇰</span>
+                <span className="text-gray-600">Pakistan</span>
+              </Link>
+              <Link href="/rates?country=Nigeria" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇳🇬</span>
+                <span className="text-gray-600">Nigeria</span>
+              </Link>
+              <Link href="/rates?country=Mexico" className="flex items-center space-x-2 text-sm hover:bg-[#f3fbff] rounded-xl p-2 transition-all duration-300 border border-transparent hover:border-[#e6fbff]">
+                <span className="text-base">🇲🇽</span>
+                <span className="text-gray-600">Mexico</span>
+              </Link>
             </div>
-            <Link href="/rates" className="inline-flex items-center space-x-1 text-blue-400 hover:text-blue-300 text-sm mt-3">
-              <span>View all countries</span>
+            <Link href="/rates" className="inline-flex items-center space-x-1 text-[#00aff0] hover:text-[#0099d6] text-sm mt-3 bg-white border border-[#e6fbff] hover:bg-[#f3fbff] px-3 py-2 rounded-xl transition-colors">
+              <span>View All Rates</span>
               <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
 
           {/* Support */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Support</h4>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Support</h4>
             <div className="space-y-3 mb-6">
-              <div className="flex items-start space-x-2">
-                <Mail className="h-4 w-4 text-blue-400 mt-0.5" />
-                <div>
-                  <div className="text-blue-200 text-xs">Email Support</div>
-                  <a href="mailto:info@yadaphone.com" className="text-white hover:text-blue-300 text-sm transition-colors">
-                    info@yadaphone.com
-                  </a>
+              <div className="bg-white border border-[#e6fbff] rounded-xl p-3">
+                <div className="flex items-start space-x-2">
+                  <div className="bg-[#f3fbff] rounded-full p-1">
+                    <Mail className="h-4 w-4 text-[#00aff0]" />
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs">Email Support</div>
+                    <a href="mailto:info@yadaphone.com" className="text-gray-900 hover:text-[#00aff0] text-sm transition-colors">
+                      info@yadaphone.com
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start space-x-2">
-                <MapPin className="h-4 w-4 text-blue-400 mt-0.5" />
-                <div>
-                  <div className="text-blue-200 text-xs">Location</div>
-                  <span className="text-white text-sm">Vienna, Austria</span>
+              <div className="bg-white border border-[#e6fbff] rounded-xl p-3">
+                <div className="flex items-start space-x-2">
+                  <div className="bg-[#f3fbff] rounded-full p-1">
+                    <MapPin className="h-4 w-4 text-[#00aff0]" />
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs">Location</div>
+                    <span className="text-gray-900 text-sm">Vienna, Austria</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -240,7 +267,7 @@ export default function Footer() {
                 { href: "/privacy-policy", label: "Privacy" },
                 { href: "/terms-and-conditions", label: "Terms" },
               ].map((item, index) => (
-                <Link key={index} href={item.href} className="block text-blue-200 hover:text-white text-sm transition-colors">
+                <Link key={index} href={item.href} className="block text-gray-600 hover:text-[#00aff0] text-sm transition-colors">
                   {item.label}
                 </Link>
               ))}
@@ -249,39 +276,12 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Compact Bottom Section */}
-      <div className="relative border-t border-blue-800/30 bg-slate-900/50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <div className="text-blue-200 text-sm">
-                © {new Date().getFullYear()} Yadaphone. All rights reserved.
-              </div>
-              <div className="flex items-center space-x-4 text-xs text-blue-300">
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${systemStatus === 'operational' ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
-                  <span>System {systemStatus}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                  <span>{isOnline ? 'Online' : 'Offline'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-xs text-blue-300">
-                Built with ❤️ in Vienna
-              </div>
-              <div className="flex space-x-2">
-                <a href="#" className="bg-slate-800/50 hover:bg-slate-700/70 rounded-lg px-3 py-2 text-xs text-white transition-all duration-300">
-                  iOS App
-                </a>
-                <a href="#" className="bg-slate-800/50 hover:bg-slate-700/70 rounded-lg px-3 py-2 text-xs text-white transition-all duration-300">
-                  Android App
-                </a>
-              </div>
+      {/* Bottom Section */}
+      <div className="relative border-t border-[#e6fbff] bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="text-center">
+            <div className="text-gray-600 text-sm">
+              © {new Date().getFullYear()} Yadaphone. All rights reserved.
             </div>
           </div>
         </div>

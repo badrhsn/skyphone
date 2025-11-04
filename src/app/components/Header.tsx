@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Phone, MessageCircle, HelpCircle, Download, Menu, X, ChevronDown, DollarSign, Globe, Settings, Sun, Moon, User } from "lucide-react";
 
 export default function Header() {
@@ -11,6 +11,25 @@ export default function Header() {
   const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      // Close mobile menu when clicking outside
+      if (mobileMenuOpen && !(event.target as Element).closest('[data-mobile-menu]')) {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
 
   // Handle loading state to prevent hydration mismatch
   if (status === "loading") {
@@ -41,7 +60,7 @@ export default function Header() {
   }
 
   return (
-    <nav className="bg-gradient-to-r from-[#f3fbff] to-[#f7fbff] border-b border-[#e6fbff] shadow-sm">
+    <nav className="bg-gradient-to-r from-[#f3fbff] to-[#f7fbff] border-b border-[#e6fbff] shadow-sm relative z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo and Navigation */}
@@ -60,7 +79,7 @@ export default function Header() {
               <div className="hidden md:flex items-center space-x-8">
                 <Link 
                   href="/dashboard/dialer" 
-                  className="bg-[#00aff0] text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-[#0099d6] transition-colors flex items-center space-x-2"
+                  className="bg-[#00aff0] text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-[#0099d6] transition-colors flex items-center space-x-2 cursor-pointer"
                 >
                   <Phone className="h-4 w-4" />
                   <span>Make a Call</span>
@@ -68,7 +87,7 @@ export default function Header() {
                 
                 <Link 
                   href="/dashboard/contacts" 
-                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2 cursor-pointer"
                 >
                   <MessageCircle className="h-4 w-4" />
                   <span>Contacts</span>
@@ -76,7 +95,7 @@ export default function Header() {
                 
                 <Link 
                   href="/dashboard/add-credits" 
-                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2 cursor-pointer"
                 >
                   <DollarSign className="h-4 w-4" />
                   <span>Buy Credits</span>
@@ -84,7 +103,7 @@ export default function Header() {
                 
                 <Link 
                   href="/dashboard/buy-number" 
-                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2 cursor-pointer"
                 >
                   <Phone className="h-4 w-4" />
                   <span>Buy Number</span>
@@ -93,10 +112,10 @@ export default function Header() {
 
               {/* User menu */}
               <div className="flex items-center space-x-4">
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 relative z-50"
                   >
                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                       {session.user?.image ? (
@@ -115,7 +134,7 @@ export default function Header() {
                   </button>
                   
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[60]">
                       <Link 
                         href="/dashboard/settings" 
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
@@ -169,20 +188,20 @@ export default function Header() {
               <div className="flex items-center space-x-4">
                 <Link 
                   href="/rates" 
-                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center cursor-pointer"
                 >
                   <DollarSign className="h-4 w-4" />
                   <span>Rates</span>
                 </Link>
                 <Link 
                   href="/auth/signin" 
-                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium"
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium cursor-pointer"
                 >
                   Sign In
                 </Link>
                 <Link 
                   href="/auth/signup" 
-                  className="bg-[#00aff0] hover:bg-[#0099d6] text-white px-6 py-2 rounded-full font-medium transition-colors"
+                  className="bg-[#00aff0] hover:bg-[#0099d6] text-white px-6 py-2 rounded-full font-medium transition-colors cursor-pointer"
                 >
                   Sign Up
                 </Link>
@@ -191,10 +210,10 @@ export default function Header() {
           )}
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden" data-mobile-menu>
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 p-2 hover:bg-[#f7fbff] rounded-lg transition-colors"
+              className="text-gray-700 p-2 hover:bg-[#f7fbff] rounded-lg transition-colors relative z-50"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -204,7 +223,7 @@ export default function Header() {
       
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#e6fbff] bg-white">
+        <div className="md:hidden border-t border-[#e6fbff] bg-white relative z-50" data-mobile-menu>
           <div className="px-4 py-3 space-y-1">
             {session ? (
               <>
