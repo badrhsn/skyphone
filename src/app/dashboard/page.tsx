@@ -31,30 +31,18 @@ export default function Dashboard() {
         // Redirect admin users to admin panel
         router.push("/admin");
       } else {
-        // Redirect regular users to dialer
-        router.push("/dashboard/dialer");
+        // For regular users, set user data from session instead of redirecting
+        setUser({
+          id: session.user.id || '',
+          name: session.user.name || '',
+          email: session.user.email || '',
+          balance: session.user.balance || 0,
+          isAdmin: false
+        });
+        setIsLoading(false);
       }
     }
   }, [status, session, router]);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/user/profile");
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    await fetch("/api/auth/signout", { method: "POST" });
-    router.push("/");
-  };
 
   if (status === "loading" || isLoading) {
     return (
