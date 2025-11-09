@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Phone, Globe, HelpCircle, Calculator, Smartphone, ChevronDown, Headphones } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,7 +26,7 @@ const CALLER_ID_COUNTRIES = [
   { code: 'TH', name: 'Thailand', flag: '��' }
 ];
 
-export default function RatesPage() {
+function RatesContent() {
   const [rates, setRates] = useState<Rate[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("United States");
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null);
@@ -238,4 +238,19 @@ export default function RatesPage() {
             </div>
         </div>
       );
+}
+
+export default function RatesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#00aff0' }}></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <RatesContent />
+    </Suspense>
+  );
 }
