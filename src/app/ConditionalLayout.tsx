@@ -11,30 +11,15 @@ export default function ConditionalLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const [isHydrated, setIsHydrated] = useState(false)
+  const [mounted, setMounted] = useState(false)
   
-  // Prevent hydration mismatch by only checking pathname after hydration
+  // Prevent hydration mismatch by only checking pathname after component mounts
   useEffect(() => {
-    setIsHydrated(true)
+    setMounted(true)
   }, [])
   
-  // During SSR and before hydration, check for dialer page
-  if (!isHydrated) {
-    // Check for dialer page during SSR
-    const isDialerPageSSR = typeof window === 'undefined' && pathname === '/dashboard/dialer'
-    
-    if (isDialerPageSSR) {
-      return (
-        <div className="min-h-screen bg-white flex flex-col">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-        </div>
-      )
-    }
-    
-    // Default: render with header/footer (most common case)
+  // Before mounting, render default layout to match SSR
+  if (!mounted) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         <Header />
@@ -46,7 +31,7 @@ export default function ConditionalLayout({
     )
   }
   
-  // After hydration, check if we're on an admin page or dialer page
+  // After mounting, apply conditional logic
   const isAdminPage = pathname?.startsWith('/admin')
   const isDialerPage = pathname === '/dashboard/dialer'
   
