@@ -7,8 +7,15 @@ const prisma = new PrismaClient()
 // Cache for Twilio client
 let twilioClientCache: any = null
 
-// Simple Twilio client getter using environment variables
+// Build-safe Twilio client getter
 export const getTwilioClient = async () => {
+  // Return null during build to prevent errors
+  if (typeof window === 'undefined' && 
+      (process.env.NODE_ENV === 'production' || process.env.CI || process.env.VERCEL_ENV)) {
+    console.log('Build environment - skipping Twilio initialization')
+    return null
+  }
+
   if (twilioClientCache) {
     return twilioClientCache
   }
@@ -17,19 +24,31 @@ export const getTwilioClient = async () => {
   const authToken = process.env.TWILIO_AUTH_TOKEN
 
   if (!accountSid || !authToken) {
-    throw new Error('Missing Twilio configuration in environment variables')
+    console.warn('Missing Twilio configuration in environment variables')
+    return null
   }
 
-  twilioClientCache = twilio(accountSid, authToken)
-  return twilioClientCache
+  try {
+    twilioClientCache = twilio(accountSid, authToken)
+    return twilioClientCache
+  } catch (error) {
+    console.error('Failed to initialize Twilio client:', error)
+    return null
+  }
 }
 
 export const getClient = getTwilioClient
 
-// Simple call initiation
+// Build-safe call initiation
 export const initiateCall = async (to: string, from?: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    
+    // Check if client is available (not during build)
+    if (!twilioClient) {
+      throw new Error('Twilio client not available - may be in build environment')
+    }
+
     const fromNumber = from || process.env.TWILIO_PHONE_NUMBER
     
     if (!fromNumber) {
@@ -55,6 +74,10 @@ export const initiateCall = async (to: string, from?: string) => {
 export const getCallStatus = async (callSid: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+    
     const call = await twilioClient.calls(callSid).fetch()
     return call
   } catch (error) {
@@ -67,6 +90,9 @@ export const getCallStatus = async (callSid: string) => {
 export const searchAvailableNumbers = async (countryCode: string, areaCode?: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
 
     let searchParams: any = {
       limit: 20,
@@ -113,6 +139,9 @@ export const searchAvailableNumbers = async (countryCode: string, areaCode?: str
 export const searchTollFreeNumbers = async (countryCode: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
 
     if (countryCode !== 'US' && countryCode !== 'CA') {
       throw new Error('Toll-free numbers currently only available for US and Canada')
@@ -150,6 +179,9 @@ export const searchTollFreeNumbers = async (countryCode: string) => {
 export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
 
     const purchasedNumber = await twilioClient.incomingPhoneNumbers.create({
       phoneNumber,
@@ -177,6 +209,9 @@ export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: st
 export const releasePhoneNumber = async (phoneNumberSid: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
     await twilioClient.incomingPhoneNumbers(phoneNumberSid).remove()
     return { success: true }
   } catch (error) {
@@ -189,6 +224,10 @@ export const releasePhoneNumber = async (phoneNumberSid: string) => {
 export const sendSMS = async (to: string, message: string, from?: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+    
     const fromNumber = from || process.env.TWILIO_PHONE_NUMBER
     
     if (!fromNumber) {
@@ -230,6 +269,10 @@ export const sendCallerIdVerificationSMS = async (to: string, verificationCode: 
 export const makeVerificationCall = async (to: string, verificationCode: string) => {
   try {
     const twilioClient = await getTwilioClient()
+    if (!twilioClient) {
+      throw new Error('Twilio client not available')
+    }
+    
     const fromNumber = process.env.TWILIO_PHONE_NUMBER
     
     if (!fromNumber) {

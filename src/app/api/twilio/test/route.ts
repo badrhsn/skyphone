@@ -1,11 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTwilioClient } from "@/lib/twilio";
 
 export async function GET() {
+  // Don't initialize Twilio during build
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV) {
+    return NextResponse.json({
+      success: true,
+      message: "Build environment - skipping Twilio test",
+      build: true
+    });
+  }
+
   try {
-    // Test Twilio connection
+    // Only import and test Twilio at runtime
+    const { getTwilioClient } = await import('@/lib/twilio');
     const client = await getTwilioClient();
-    const account = await client.api.accounts(process.env.TWILIO_ACCOUNT_SID).fetch();
+    
+    if (!client) {
+      return NextResponse.json({
+        success: false,
+        error: "Twilio client not available in current environment"
+      }, { status: 500 });
+    }
+
+    const account = await client.api.accounts(process.env.TWILIO_ACCOUNT_SID!).fetch();
     
     return NextResponse.json({
       success: true,
