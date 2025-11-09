@@ -43,7 +43,6 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@stripe/stripe-js": "^8.1.0",
     "@types/twilio": "^3.19.2",
-    "@vonage/server-sdk": "^3.25.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -59,7 +58,6 @@
     "react-dom": "19.1.0",
     "stripe": "^19.1.0",
     "tailwind-merge": "^3.3.1",
-    "telnyx": "^3.6.0",
     "tsx": "^4.19.2",
     "twilio": "^5.10.3"
   },
