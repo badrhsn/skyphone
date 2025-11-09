@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { client } from "@/lib/twilio";
+import { getTwilioClient } from "@/lib/twilio";
 
 export async function GET() {
   try {
     // Test Twilio connection
+    const client = await getTwilioClient();
     const account = await client.api.accounts(process.env.TWILIO_ACCOUNT_SID).fetch();
     
     return NextResponse.json({
