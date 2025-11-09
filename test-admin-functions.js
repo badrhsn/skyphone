@@ -27,7 +27,7 @@ async function testAdminFunctionalities() {
       console.log('   ⚠️  No provider status data found - this will cause 404 errors');
       console.log('   Creating default provider status entries...');
       
-      const providers = ['twilio', 'telnyx', 'vonage'];
+  const providers = ['twilio'];
       for (const provider of providers) {
         await prisma.providerStatus.create({
           data: {

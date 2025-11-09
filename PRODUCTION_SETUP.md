@@ -42,19 +42,9 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 ENTERPRISE_API_KEY="ent_production_secure_api_key"
 ```
 
-### Optional Multi-Provider Variables
+### Provider Strategy
 
-```bash
-# Telnyx (Secondary Provider)
-TELNYX_API_KEY="your-telnyx-api-key"
-TELNYX_PHONE_NUMBER="+1234567890"
-TELNYX_CONNECTION_ID="your-connection-id"
-
-# Vonage (Fallback Provider)
-VONAGE_API_KEY="your-vonage-api-key"
-VONAGE_API_SECRET="your-vonage-api-secret"
-VONAGE_PHONE_NUMBER="+1234567890"
-```
+This deployment uses Twilio only. Telnyx and Vonage are not supported in this build.
 
 ### Optional Enhancement Variables
 
@@ -129,7 +119,7 @@ npm run create-admin
 
 2. **Configure Environment Variables**
    - Go to Vercel Dashboard → Project Settings → Environment Variables
-   - Add all required variables from the list above
+  - Add all required variables from the list above (Twilio, Stripe, Google, NextAuth, Database)
 
 3. **Database Connection**
    - Use Vercel Postgres, PlanetScale, or external PostgreSQL
