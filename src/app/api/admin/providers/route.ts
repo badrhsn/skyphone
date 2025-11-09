@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     // Get or create provider status entries
-    const providers = ['twilio', 'telnyx', 'vonage']
+    const providers = ['twilio']
     
     // Ensure all providers exist in the database
     for (const providerName of providers) {

@@ -64,16 +64,7 @@ export async function POST(request: NextRequest) {
         GOOGLE_CLIENT_ID: 'clientId',
         GOOGLE_CLIENT_SECRET: 'clientSecret'
       },
-      TELNYX: {
-        TELNYX_API_KEY: 'apiKey',
-        TELNYX_PUBLIC_KEY: 'publicKey'
-      },
-      VONAGE: {
-        VONAGE_API_KEY: 'apiKey',
-        VONAGE_API_SECRET: 'apiSecret',
-        VONAGE_APPLICATION_ID: 'applicationId',
-        VONAGE_PRIVATE_KEY: 'privateKey'
-      }
+
     };
 
     const migratedConfigs: string[] = [];

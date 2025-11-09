@@ -39,9 +39,7 @@ export async function GET(request: NextRequest) {
     
     // Check provider availability
     const providers = {
-      twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN),
-      telnyx: !!process.env.TELNYX_API_KEY,
-      vonage: !!(process.env.VONAGE_API_KEY && process.env.VONAGE_API_SECRET)
+      twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN)
     }
     
     return NextResponse.json({
@@ -53,7 +51,7 @@ export async function GET(request: NextRequest) {
       system: systemInfo,
       features: {
         callRecording: !!process.env.AWS_ACCESS_KEY_ID,
-        multiProvider: providers.telnyx || providers.vonage,
+        multiProvider: false,
         enterpriseAPI: !!process.env.ENTERPRISE_API_KEY,
         payments: !!process.env.STRIPE_SECRET_KEY
       }

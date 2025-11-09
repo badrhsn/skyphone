@@ -41,12 +41,7 @@ export async function POST(request: NextRequest) {
         case 'GOOGLE_OAUTH':
           testResult = await testGoogleOAuthConfig(configData);
           break;
-        case 'TELNYX':
-          testResult = await testTelnyxConfig(configData);
-          break;
-        case 'VONAGE':
-          testResult = await testVonageConfig(configData);
-          break;
+
         default:
           testResult.message = `Testing not implemented for provider: ${provider}`;
       }
@@ -160,37 +155,7 @@ async function testGoogleOAuthConfig(config: any) {
   }
 }
 
-async function testTelnyxConfig(config: any) {
-  try {
-    const { apiKey } = config;
 
-    if (!apiKey) {
-      return { success: false, message: 'Missing Telnyx API key' };
-    }
-
-    // Test Telnyx API
-    const response = await fetch('https://api.telnyx.com/v2/phone_numbers', {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (response.ok) {
-      return {
-        success: true,
-        message: 'Telnyx configuration is valid',
-        details: {
-          status: 'Connected to Telnyx API'
-        }
-      };
-    } else {
-      return { success: false, message: `Telnyx API error: ${response.status}` };
-    }
-  } catch (error) {
-    return { success: false, message: `Telnyx test failed: ${error}` };
-  }
-}
 
 async function testVonageConfig(config: any) {
   try {

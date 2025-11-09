@@ -81,19 +81,7 @@ class ConfigHelper {
           clientSecret: process.env.GOOGLE_CLIENT_SECRET
         };
 
-      case 'TELNYX':
-        return {
-          apiKey: process.env.TELNYX_API_KEY,
-          publicKey: process.env.TELNYX_PUBLIC_KEY
-        };
 
-      case 'VONAGE':
-        return {
-          apiKey: process.env.VONAGE_API_KEY,
-          apiSecret: process.env.VONAGE_API_SECRET,
-          applicationId: process.env.VONAGE_APPLICATION_ID,
-          privateKey: process.env.VONAGE_PRIVATE_KEY
-        };
 
       default:
         return null;
@@ -107,7 +95,7 @@ class ConfigHelper {
     hasEnvConfig: boolean;
     status: 'secure' | 'env' | 'missing';
   }[]> {
-    const providers = ['TWILIO', 'STRIPE', 'GOOGLE_OAUTH', 'TELNYX', 'VONAGE'];
+    const providers = ['TWILIO', 'STRIPE', 'GOOGLE_OAUTH'];
     const status = [];
 
     for (const provider of providers) {
@@ -142,18 +130,3 @@ export const configHelper = new ConfigHelper();
 export const getTwilioConfig = (options?: ConfigOptions) => configHelper.getConfig('TWILIO', options);
 export const getStripeConfig = (options?: ConfigOptions) => configHelper.getConfig('STRIPE', options);
 export const getGoogleOAuthConfig = (options?: ConfigOptions) => configHelper.getConfig('GOOGLE_OAUTH', options);
-export const getTelnyxConfig = (options?: ConfigOptions) => {
-  // Skip during build to avoid initialization errors
-  if (process.env.CI === 'true' || process.env.VERCEL_ENV === 'preview') {
-    return Promise.resolve(null);
-  }
-  return configHelper.getConfig('TELNYX', options);
-};
-
-export const getVonageConfig = (options?: ConfigOptions) => {
-  // Skip during build to avoid initialization errors
-  if (process.env.CI === 'true' || process.env.VERCEL_ENV === 'preview') {
-    return Promise.resolve(null);
-  }
-  return configHelper.getConfig('VONAGE', options);
-};
