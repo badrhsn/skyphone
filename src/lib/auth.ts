@@ -4,18 +4,19 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "./db"
 import bcrypt from "bcryptjs"
-import { getGoogleOAuthConfig } from "./config-helper"
+// Use environment variables directly for Google OAuth
 
 // Function to get auth options with dynamic configuration
 export async function getAuthOptions(): Promise<NextAuthOptions> {
-  const googleConfig = await getGoogleOAuthConfig();
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   
   return {
     providers: [
-      ...(googleConfig?.clientId && googleConfig?.clientSecret ? [
+      ...(googleClientId && googleClientSecret ? [
         GoogleProvider({
-          clientId: googleConfig.clientId,
-          clientSecret: googleConfig.clientSecret,
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
         })
       ] : []),
     CredentialsProvider({

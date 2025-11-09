@@ -1,8 +1,6 @@
-// Configuration Helper with Environment Fallback
-// This helper allows gradual migration from env vars to secure config
-// src/lib/config-helper.ts
-
-import { secureConfig } from './secure-config';
+// Environment-only Configuration Helper
+// This helper now reads provider configuration exclusively from environment variables.
+// No database-backed configuration is used anymore.
 
 interface ConfigOptions {
   fallbackToEnv?: boolean;
@@ -13,43 +11,10 @@ class ConfigHelper {
   private cache = new Map<string, { data: any; timestamp: number }>();
   private readonly CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
-  // Get configuration with environment fallback
-  async getConfig(provider: string, options: ConfigOptions = {}): Promise<Record<string, any> | null> {
-  const { fallbackToEnv = true, userId } = options;
-    
-    try {
-      // First try to get from secure database
-  const secureConfigData = await secureConfig.getConfig(provider, userId as any);
-      
-      if (secureConfigData) {
-        console.log(`🔐 Using secure config for ${provider}`);
-        return secureConfigData;
-      }
-
-      // Fallback to environment variables
-      if (fallbackToEnv) {
-        const envConfig = this.getEnvConfig(provider);
-        if (envConfig && Object.keys(envConfig).length > 0) {
-          console.log(`⚠️  Using environment variables for ${provider} (consider migrating to secure config)`);
-          return envConfig;
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.error(`Error getting config for ${provider}:`, error);
-      
-      // Fallback to environment variables on error
-      if (fallbackToEnv) {
-        const envConfig = this.getEnvConfig(provider);
-        if (envConfig && Object.keys(envConfig).length > 0) {
-          console.log(`⚠️  Fallback to environment variables for ${provider} due to error`);
-          return envConfig;
-        }
-      }
-      
-      return null;
-    }
+  // Get configuration from environment variables only
+  async getConfig(provider: string, _options: ConfigOptions = {}): Promise<Record<string, any> | null> {
+    const envConfig = this.getEnvConfig(provider);
+    return envConfig && Object.values(envConfig).some(Boolean) ? envConfig : null;
   }
 
   // Get specific configuration value
@@ -88,33 +53,23 @@ class ConfigHelper {
     }
   }
 
-  // Check configuration status
+  // Check configuration status (env-based only)
   async getConfigStatus(): Promise<{
     provider: string;
-    hasSecureConfig: boolean;
     hasEnvConfig: boolean;
-    status: 'secure' | 'env' | 'missing';
+    status: 'env' | 'missing';
   }[]> {
     const providers = ['TWILIO', 'STRIPE', 'GOOGLE_OAUTH'];
     const status = [];
 
     for (const provider of providers) {
-      const secureConfigData = await secureConfig.getConfig(provider);
       const envConfig = this.getEnvConfig(provider);
-
-      const hasSecureConfig = !!secureConfigData;
       const hasEnvConfig = !!(envConfig && Object.values(envConfig).some(v => v));
 
-      let configStatus: 'secure' | 'env' | 'missing' = 'missing';
-      if (hasSecureConfig) {
-        configStatus = 'secure';
-      } else if (hasEnvConfig) {
-        configStatus = 'env';
-      }
+      const configStatus: 'env' | 'missing' = hasEnvConfig ? 'env' : 'missing';
 
       status.push({
         provider,
-        hasSecureConfig,
         hasEnvConfig,
         status: configStatus
       });

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { isBuildTime } from "@/lib/build-guard";
-import { getStripeConfig } from "@/lib/config-helper";
 import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
 
@@ -23,17 +22,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const stripe = await getStripe();
-    const config = await getStripeConfig();
-    
-    if (!config?.webhookSecret) {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
       return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
-    
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      config.webhookSecret
-    );
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
