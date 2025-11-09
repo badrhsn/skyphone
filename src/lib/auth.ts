@@ -1,24 +1,21 @@
 import { NextAuthOptions } from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "./db"
 import bcrypt from "bcryptjs"
-// Use environment variables directly for Google OAuth
 
-// Function to get auth options with dynamic configuration
-export async function getAuthOptions(): Promise<NextAuthOptions> {
-  const googleClientId = process.env.GOOGLE_CLIENT_ID;
-  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  
-  return {
-    providers: [
-      ...(googleClientId && googleClientSecret ? [
-        GoogleProvider({
-          clientId: googleClientId,
-          clientSecret: googleClientSecret,
-        })
-      ] : []),
+// Main auth options export
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
+  providers: [
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
+      })
+    ] : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -34,13 +31,13 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
           where: { email: credentials.email }
         })
 
-        if (!user) {
+        if (!user || !user.password) {
           return null
         }
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password || ""
+          user.password
         )
 
         if (!isPasswordValid) {
@@ -62,7 +59,6 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
       if (session?.user && token?.sub) {
         session.user.id = token.sub
         
-        // Get fresh user data from database
         const user = await prisma.user.findUnique({
           where: { id: token.sub },
           select: { balance: true, isAdmin: true, email: true }
@@ -71,7 +67,6 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
         if (user) {
           session.user.balance = user.balance
           session.user.isAdmin = user.isAdmin
-          // Also check by email for admin access
           if (user.email === 'admin@yadaphone.com') {
             session.user.isAdmin = true
           }
@@ -90,7 +85,6 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
     signIn: async ({ user, account, profile }) => {
       if (account?.provider === "google") {
         try {
-          // Check if user exists, if not create them
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! }
           })
@@ -102,136 +96,9 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
                 email: user.email!,
                 name: user.name || '',
                 image: user.image,
-                balance: 0, // Give new Google users $5 credit
-                isAdmin: false,
-              }
-            })
-            // Update the user object with the new ID and admin status
-            user.id = newUser.id
-            user.isAdmin = newUser.isAdmin
-          } else {
-            // Use existing user ID and check admin status
-            user.id = existingUser.id
-            user.isAdmin = existingUser.isAdmin
-          }
-          
-          return true
-        } catch (error) {
-          console.error('Error in Google sign-in callback:', error)
-          return false
-        }
-      }
-      return true
-    },
-    redirect: async ({ url, baseUrl }) => {
-      // Allow any valid callback URL to proceed
-      if (url.startsWith(baseUrl)) {
-        return url;
-      }
-      
-      // Default redirect to dashboard for successful logins
-      return `${baseUrl}/dashboard`;
-    },
-  },
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/auth/signin",
-  },
-  };
-}
-
-// Legacy export for backward compatibility
-export const authOptions: NextAuthOptions = {
-  providers: [
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    ] : []),
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        })
-
-        if (!user) {
-          return null
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password || ""
-        )
-
-        if (!isPasswordValid) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          balance: user.balance,
-          isAdmin: user.isAdmin,
-        }
-      }
-    }),
-  ],
-  callbacks: {
-    session: async ({ session, token }) => {
-      if (session?.user && token?.sub) {
-        session.user.id = token.sub
-        
-        const user = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { balance: true, isAdmin: true, email: true }
-        })
-        
-        if (user) {
-          session.user.balance = user.balance
-          session.user.isAdmin = user.isAdmin
-          if (user.email === 'admin@yadaphone.com') {
-            session.user.isAdmin = true
-          }
-        }
-      }
-      return session
-    },
-    jwt: async ({ user, token }) => {
-      if (user) {
-        token.uid = user.id
-        token.isAdmin = user.isAdmin
-        token.email = user.email
-      }
-      return token
-    },
-    signIn: async ({ user, account }) => {
-      if (account?.provider === "google") {
-        try {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! }
-          })
-          
-          if (!existingUser) {
-            const newUser = await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name || '',
-                image: user.image,
                 balance: 0,
                 isAdmin: false,
+                // Don't set password for OAuth users
               }
             })
             user.id = newUser.id
@@ -248,12 +115,6 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return true
-    },
-    redirect: async ({ url, baseUrl }) => {
-      if (url.startsWith(baseUrl)) {
-        return url;
-      }
-      return `${baseUrl}/dashboard`;
     },
   },
   session: {

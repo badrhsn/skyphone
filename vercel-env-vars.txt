@@ -1,20 +1,101 @@
-# Vercel Environment Variables Setup
-# Copy these values to your Vercel project dashboard
+===============================================
+VERCEL ENVIRONMENT VARIABLES - COMPLETE LIST
+===============================================
 
-# Required for basic app functionality
-NEXTAUTH_URL=https://your-app-url.vercel.app
-NEXTAUTH_SECRET=your-secure-secret-key-here
-NEXT_PUBLIC_APP_URL=https://your-app-url.vercel.app
+Copy and paste these into Vercel Dashboard → Settings → Environment Variables
+Set all for "Production, Preview, and Development" environments
 
-# Database (use your Supabase connection string)
+-------------------
+CORE APPLICATION
+-------------------
+
+NEXTAUTH_URL=https://skyphone-51qw2kmof-badrhsn96-8179s-projects.vercel.app
+NEXTAUTH_SECRET=qQ9Wir4LLwnnS1fzIP5fiyfmdyGa9sItruOFH3hPUwY=
+NEXT_PUBLIC_APP_URL=https://skyphone-51qw2kmof-badrhsn96-8179s-projects.vercel.app
+NODE_ENV=production
+
+-------------------
+DATABASE (SUPABASE)
+-------------------
+
 DATABASE_URL=postgresql://postgres.talrdruhvrxuzpcnwzry:1a0Rmgu9IE5Eljrv@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require
-
-# Configuration encryption key
-CONFIG_ENCRYPTION_KEY=default-dev-key-change-in-prod
-
-# Supabase (if needed)
 SUPABASE_URL=https://talrdruhvrxuzpcnwzry.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhbHJkcnVodnJ4dXpwY253enJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyNTQ5MDcsImV4cCI6MjA3NjgzMDkwN30.L19vFBtgJWCi1rQsHB0emU4eKx37_zjDgqateky7eEc
 
-# Optional - Cloudflare Turnstile
+-------------------
+GOOGLE OAUTH
+-------------------
+
+GOOGLE_CLIENT_ID=[your-google-client-id].apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-[your-google-client-secret]
+
+-------------------
+TWILIO (TELEPHONY)
+-------------------
+
+TWILIO_ACCOUNT_SID=AC[your-twilio-account-sid]
+TWILIO_AUTH_TOKEN=[your-twilio-auth-token]
+TWILIO_PHONE_NUMBER=+1[your-twilio-number]
+
+-------------------
+STRIPE (PAYMENTS)
+-------------------
+
+⚠️  IMPORTANT: You need to add your Stripe credentials!
+Replace these placeholder values with your actual Stripe keys:
+
+STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_KEY_HERE
+STRIPE_SECRET_KEY=sk_test_YOUR_KEY_HERE
+STRIPE_WEBHOOK_SECRET=whsec_YOUR_SECRET_HERE
+
+Get these from: https://dashboard.stripe.com/test/apikeys
+
+-------------------
+OPTIONAL (CAPTCHA)
+-------------------
+
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+
+-------------------
+LEGACY/DEPRECATED
+-------------------
+
+CONFIG_ENCRYPTION_KEY=default-dev-key-change-in-prod
+
+===============================================
+GOOGLE CLOUD CONSOLE SETUP
+===============================================
+
+⚠️  CRITICAL: Add this redirect URI to Google Cloud Console
+
+1. Go to: https://console.cloud.google.com/apis/credentials
+2. Select your OAuth Client ID: 585140322735-8nhnejk0ciasa9hhej7mb4ntq7tf9ele
+3. Add to "Authorized redirect URIs":
+
+   https://skyphone-51qw2kmof-badrhsn96-8179s-projects.vercel.app/api/auth/callback/google
+
+4. Click SAVE
+
+===============================================
+STRIPE WEBHOOK SETUP (if using Stripe)
+===============================================
+
+1. Go to: https://dashboard.stripe.com/test/webhooks
+2. Click "Add endpoint"
+3. Enter URL: https://skyphone-51qw2kmof-badrhsn96-8179s-projects.vercel.app/api/stripe/webhook
+4. Select events:
+   - payment_intent.succeeded
+   - payment_intent.payment_failed
+   - checkout.session.completed
+5. Copy the webhook signing secret → use for STRIPE_WEBHOOK_SECRET
+
+===============================================
+AFTER SETTING ENVIRONMENT VARIABLES
+===============================================
+
+1. ✅ Trigger a new deployment in Vercel (or it will auto-deploy)
+2. ✅ Test Google OAuth sign-in
+3. ✅ Test Stripe payment flow (if configured)
+4. ✅ Check Vercel logs if anything fails
+
+===============================================
