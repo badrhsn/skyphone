@@ -16,8 +16,6 @@
     "add-balance": "tsx prisma/add-balance.ts",
     "check-balance": "tsx prisma/check-balance.ts",
     "create-test-user": "tsx prisma/create-test-user.ts",
-    "check-api-config": "tsx scripts/check-api-config.ts",
-    "test-twilio-config": "tsx scripts/test-twilio-config.ts",
     "debug-call": "tsx scripts/debug-call.ts",
     "test": "jest",
     "test:watch": "jest --watch",
