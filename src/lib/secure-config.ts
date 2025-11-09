@@ -108,6 +108,16 @@ class SecureConfigManager {
 
   // Get configuration for a specific provider
   async getConfig(provider: string, userId?: string): Promise<ProviderConfig | null> {
+    // Skip database access during build/CI
+    if (
+      process.env.CI === 'true' ||
+      process.env.VERCEL_ENV === 'preview' ||
+      (typeof window === 'undefined' && !process.env.DATABASE_URL)
+    ) {
+      console.log(`Skipping secure config for ${provider} during build`)
+      return null;
+    }
+
     const cacheKey = provider.toUpperCase();
     
     // Check cache first
