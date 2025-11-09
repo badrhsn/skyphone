@@ -1,13 +1,24 @@
-import Stripe from 'stripe'
 import { getStripeConfig } from './config-helper'
+import { isBuildTime } from './build-guard'
 
 // Initialize Stripe - will be set up properly when config is loaded
-let stripe: Stripe | null = null;
+// Use 'any' here to avoid referencing Stripe type before dynamic import
+let stripe: any | null = null;
 
 // Function to get or create Stripe instance
-export async function getStripe(): Promise<Stripe> {
+export async function getStripe(): Promise<any> {
   if (stripe) {
     return stripe;
+  }
+
+  // Avoid initializing Stripe during build/compile time
+  if (isBuildTime()) {
+    // Return a lightweight proxy that throws only if actually used at build
+    return new Proxy({}, {
+      get() {
+        throw new Error('Stripe SDK is not available during build');
+      }
+    });
   }
 
   const config = await getStripeConfig();
@@ -15,6 +26,7 @@ export async function getStripe(): Promise<Stripe> {
     throw new Error('Stripe configuration not found. Please configure Stripe in the admin dashboard.');
   }
 
+  const { default: Stripe } = await import('stripe');
   stripe = new Stripe(config.secretKey, {
     apiVersion: '2025-09-30.clover',
   });
@@ -24,9 +36,6 @@ export async function getStripe(): Promise<Stripe> {
 
 // Export config helper
 export { getStripeConfig } from './config-helper';
-
-// For backward compatibility - deprecated, use getStripe() instead
-export { stripe } from './stripe-legacy';
 
 export const formatAmountForStripe = (amount: number, currency: string): number => {
   const numberFormat = new Intl.NumberFormat(['en-US'], {

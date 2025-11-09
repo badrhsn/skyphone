@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { isBuildTime } from "@/lib/build-guard";
 import { getStripeConfig } from "@/lib/config-helper";
 import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
@@ -14,6 +15,11 @@ export async function POST(request: NextRequest) {
   }
 
   let event;
+
+  // Avoid Stripe verification during build time
+  if (isBuildTime()) {
+    return NextResponse.json({ buildSafe: true, skipped: 'webhook processing during build' });
+  }
 
   try {
     const stripe = await getStripe();
@@ -60,7 +66,7 @@ export async function POST(request: NextRequest) {
               const twilioNumber = await purchasePhoneNumber(phoneNumber, `${userId} - ${phoneNumber}`);
 
               // Use transaction to ensure data consistency
-              await prisma.$transaction(async (tx) => {
+              await prisma.$transaction(async (tx: typeof prisma) => {
                 // Create phone number record in database
                 await tx.phoneNumber.create({
                   data: {
@@ -99,7 +105,7 @@ export async function POST(request: NextRequest) {
               
               // Create a payment record but mark the phone number as failed
               try {
-                await prisma.$transaction(async (tx) => {
+                await prisma.$transaction(async (tx: typeof prisma) => {
                   // Create phone number record but mark as inactive due to Twilio failure
                   await tx.phoneNumber.create({
                     data: {

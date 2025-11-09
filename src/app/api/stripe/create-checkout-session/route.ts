@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getStripe } from "@/lib/stripe";
+import { isBuildTime } from "@/lib/build-guard";
 import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
@@ -37,7 +38,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Stripe checkout session
+    // Skip Stripe session creation during build (deployment) to avoid SDK initialization
+    if (isBuildTime()) {
+      return NextResponse.json({
+        sessionId: "build-time-placeholder",
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://app"}/dashboard/add-credits/success?session_id=build`,
+        buildSafe: true
+      });
+    }
+
     const stripe = await getStripe();
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
