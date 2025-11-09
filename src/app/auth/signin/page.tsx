@@ -14,7 +14,21 @@ export default function SignIn() {
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const router = useRouter();
+
+  // Add loading timeout protection
+  useEffect(() => {
+    if (status === "loading") {
+      const timer = setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 10000); // 10 seconds timeout
+      
+      return () => clearTimeout(timer);
+    } else {
+      setLoadingTimeout(false);
+    }
+  }, [status]);
 
   // Redirect authenticated users
   useEffect(() => {
@@ -22,11 +36,14 @@ export default function SignIn() {
       // Check if user is admin
       const isAdmin = session.user?.isAdmin || session.user?.email === 'admin@yadaphone.com';
       
-      if (isAdmin) {
-        router.replace('/admin');
-      } else {
-        router.replace('/dashboard');
-      }
+      const targetPath = isAdmin ? '/admin' : '/dashboard';
+      
+      // Add a small delay to ensure session is fully loaded
+      const redirectTimer = setTimeout(() => {
+        router.replace(targetPath);
+      }, 100);
+      
+      return () => clearTimeout(redirectTimer);
     }
   }, [session, status, router]);
 
@@ -79,15 +96,20 @@ export default function SignIn() {
   };
 
   // Show loading while checking authentication
-  if (status === "loading") {
+  if (status === "loading" && !loadingTimeout) {
     return (
       <div className="min-h-screen bg-[#f7fbff] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#00aff0' }}></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#00aff0' }}></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
+  }
+
+  // If loading times out, show signin form anyway
+  if (loadingTimeout && status === "loading") {
+    console.warn("Session loading timeout - showing signin form");
   }
 
   // Don't render if authenticated (will redirect)

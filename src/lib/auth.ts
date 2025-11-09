@@ -58,28 +58,43 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
         session.user.id = token.sub
-        
-        const user = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { balance: true, isAdmin: true, email: true }
-        })
-        
-        if (user) {
-          session.user.balance = user.balance
-          session.user.isAdmin = user.isAdmin
-          if (user.email === 'admin@yadaphone.com') {
-            session.user.isAdmin = true
-          }
+        // Get user data from token instead of database query
+        session.user.balance = token.balance as number || 0
+        session.user.isAdmin = token.isAdmin as boolean || false
+        if (token.email === 'admin@yadaphone.com') {
+          session.user.isAdmin = true
         }
       }
       return session
     },
-    jwt: async ({ user, token, account }) => {
+    jwt: async ({ user, token, account, trigger }) => {
+      // On sign-in, fetch fresh user data
       if (user) {
         token.uid = user.id
+        token.balance = user.balance
         token.isAdmin = user.isAdmin
         token.email = user.email
       }
+      
+      // Optionally refresh user data on update trigger
+      if (trigger === "update" && token.sub) {
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: token.sub as string },
+            select: { balance: true, isAdmin: true, email: true }
+          })
+          
+          if (freshUser) {
+            token.balance = freshUser.balance
+            token.isAdmin = freshUser.isAdmin
+            token.email = freshUser.email
+          }
+        } catch (error) {
+          console.error('Error refreshing user data:', error)
+          // Keep existing token data on error
+        }
+      }
+      
       return token
     },
     signIn: async ({ user, account, profile }) => {
