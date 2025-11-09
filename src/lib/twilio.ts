@@ -1,293 +1,60 @@
 import twilio from 'twilio'
-import Telnyx from 'telnyx'
-import { Vonage } from '@vonage/server-sdk'
-import { getTwilioConfig, getTelnyxConfig, getVonageConfig } from './config-helper'
+import { PrismaClient } from '@prisma/client'
 
-// Provider type definitions
-interface Provider {
-  name: string
-  client: any
-  phoneNumber: string
-  priority: number
-  regions: string[]
-}
+// Initialize Prisma client
+const prisma = new PrismaClient()
 
-// Cache for initialized clients
-let providersCache: any = null
+// Cache for Twilio client
+let twilioClientCache: any = null
 
-// Get providers with secure configuration - COMPLETELY LAZY
-const getProviders = async (): Promise<any> => {
-  if (providersCache) {
-    return providersCache
-  }
-
-  // For build time, return empty clients
-  if (typeof window === 'undefined' && 
-      (process.env.NODE_ENV === 'production' || process.env.CI || process.env.VERCEL_ENV)) {
-    console.log('Build environment - returning empty providers')
-    providersCache = {
-      twilio: { client: null, phoneNumber: '', priority: 1, regions: [] },
-      telnyx: { client: null, phoneNumber: '', priority: 2, regions: [] },
-      vonage: { client: null, phoneNumber: '', priority: 3, regions: [] }
-    }
-    return providersCache
-  }
-
-  try {
-    const [twilioConfig, telnyxConfig, vonageConfig] = await Promise.all([
-      getTwilioConfig(),
-      getTelnyxConfig(),
-      getVonageConfig()
-    ])
-
-    // Initialize Twilio client only if config exists
-    let twilioClient = null
-    if (twilioConfig?.apiKey && twilioConfig?.apiSecret) {
-      twilioClient = twilio(twilioConfig.apiKey, twilioConfig.apiSecret, {
-        accountSid: twilioConfig.accountSid
-      })
-    } else if (twilioConfig?.accountSid && twilioConfig?.authToken) {
-      twilioClient = twilio(twilioConfig.accountSid, twilioConfig.authToken)
-    }
-
-    providersCache = {
-      twilio: {
-        client: twilioClient,
-        phoneNumber: twilioConfig?.phoneNumber || '',
-        priority: 1,
-        regions: ['US', 'CA', 'GB', 'AU'],
-      },
-      telnyx: {
-        client: null, // Initialize only when needed
-        phoneNumber: telnyxConfig?.phoneNumber || '',
-        priority: 2,
-        regions: ['EU', 'AS', 'US'],
-      },
-      vonage: {
-        client: null, // Initialize only when needed
-        phoneNumber: vonageConfig?.phoneNumber || '',
-        priority: 3,
-        regions: ['GLOBAL'],
-      }
-    }
-
-    return providersCache
-  } catch (error) {
-    console.error('Error initializing providers with secure config:', error)
-    
-    // Fallback that doesn't throw - just returns empty clients
-    providersCache = {
-      twilio: { client: null, phoneNumber: '', priority: 1, regions: [] },
-      telnyx: { client: null, phoneNumber: '', priority: 2, regions: [] },
-      vonage: { client: null, phoneNumber: '', priority: 3, regions: [] }
-    }
-    return providersCache
-  }
-}
-
-// COMPLETELY LAZY client export - no initialization at import time
+// Simple Twilio client getter using environment variables
 export const getTwilioClient = async () => {
-  const providers = await getProviders()
-  return providers.twilio.client
+  if (twilioClientCache) {
+    return twilioClientCache
+  }
+
+  const accountSid = process.env.TWILIO_ACCOUNT_SID
+  const authToken = process.env.TWILIO_AUTH_TOKEN
+
+  if (!accountSid || !authToken) {
+    throw new Error('Missing Twilio configuration in environment variables')
+  }
+
+  twilioClientCache = twilio(accountSid, authToken)
+  return twilioClientCache
 }
 
 export const getClient = getTwilioClient
 
-// Remove the problematic synchronous client export
-// Instead, provide a safe client getter
-export const client = {
-  get: getTwilioClient
-}
-
-// Enhanced call routing with provider failover
+// Simple call initiation
 export const initiateCall = async (to: string, from?: string) => {
-  const providers = await getProviders()
-  
-  // Check if we have any configured providers
-  if (!providers.twilio.client && !providers.telnyx.client && !providers.vonage.client) {
-    throw new Error('No telephony providers configured. Please check your database configuration.')
-  }
-
-  const destinationCountry = getCountryFromNumber(to)
-  const bestProvider = await selectBestProvider(destinationCountry)
-  
   try {
-    const call = await attemptCallWithProvider(bestProvider, to, from)
+    const twilioClient = await getTwilioClient()
+    const fromNumber = from || process.env.TWILIO_PHONE_NUMBER
     
-    // Log successful call for analytics
-    await logCallAttempt(to, bestProvider.name, 'SUCCESS', call.sid)
-    
-    return call
-  } catch (error) {
-    console.error(`Call failed with ${bestProvider.name}:`, error)
-    
-    // Try failover providers
-    const failoverProviders = await getFailoverProviders(bestProvider.name)
-    
-    for (const provider of failoverProviders) {
-      try {
-        console.log(`Attempting failover with ${provider.name}`)
-        const call = await attemptCallWithProvider(provider, to, from)
-        
-        // Log successful failover
-        await logCallAttempt(to, provider.name, 'FAILOVER_SUCCESS', call.sid)
-        
-        return call
-      } catch (failoverError) {
-        console.error(`Failover failed with ${provider.name}:`, failoverError)
-        await logCallAttempt(to, provider.name, 'FAILOVER_FAILED')
-      }
+    if (!fromNumber) {
+      throw new Error('No Twilio phone number configured')
     }
-    
-    // All providers failed
-    await logCallAttempt(to, 'ALL_PROVIDERS', 'FAILED')
-    throw new Error('All providers failed to initiate call')
-  }
-}
 
-// Helper function to attempt call with specific provider
-const attemptCallWithProvider = async (provider: any, to: string, from?: string) => {
-  const fromNumber = from || provider.phoneNumber
-  
-  if (provider.name === 'twilio') {
-    return await provider.client.calls.create({
+    const call = await twilioClient.calls.create({
       to,
       from: fromNumber,
       url: `${process.env.NEXT_PUBLIC_APP_URL}/api/twilio/voice`,
     })
-  }
-  
-  if (provider.name === 'telnyx') {
-    if (!provider.client) {
-      throw new Error('Telnyx client not configured')
-    }
-    const telnyxConfig = await getTelnyxConfig()
-    return await provider.client.calls.create({
-      to,
-      from: fromNumber,
-      connection_id: telnyxConfig?.connectionId || process.env.TELNYX_CONNECTION_ID,
-      webhook_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/telnyx/voice`,
-    })
-  }
-  
-  if (provider.name === 'vonage') {
-    if (!provider.client) {
-      throw new Error('Vonage client not configured')
-    }
-    return await provider.client.voice.createOutboundCall({
-      to: [{ type: 'phone', number: to }],
-      from: { type: 'phone', number: fromNumber },
-      answer_url: [`${process.env.NEXT_PUBLIC_APP_URL}/api/vonage/voice`],
-    })
-  }
-  
-  throw new Error(`Provider ${provider.name} not implemented`)
-}
 
-// Select best provider based on destination and performance
-const selectBestProvider = async (countryCode: string) => {
-  const providers = await getProviders()
-  
-  // Get available providers (only those with configured clients)
-  const availableProviders = Object.entries(providers)
-    .filter(([_, config]: [string, any]) => config.client !== null)
-    .map(([name, config]: [string, any]) => ({ name, ...config }))
-    .sort((a: any, b: any) => a.priority - b.priority)
-  
-  if (availableProviders.length === 0) {
-    throw new Error('No providers configured. Please check your telephony provider settings.')
-  }
-  
-  // Regional optimization
-  for (const provider of availableProviders) {
-    if (provider.regions.includes(countryCode) || provider.regions.includes('GLOBAL')) {
-      return {
-        name: provider.name,
-        client: provider.client,
-        phoneNumber: provider.phoneNumber,
-        priority: provider.priority
-      }
-    }
-  }
-  
-  // Fallback to primary provider
-  const primaryProvider = availableProviders[0]
-  return {
-    name: primaryProvider.name,
-    client: primaryProvider.client,
-    phoneNumber: primaryProvider.phoneNumber,
-    priority: primaryProvider.priority
-  }
-}
-
-// Get failover providers in priority order
-const getFailoverProviders = async (primaryProvider: string): Promise<Provider[]> => {
-  const providers = await getProviders()
-  
-  // Return other available providers as failover
-  return Object.entries(providers)
-    .filter(([name, config]: [string, any]) => name !== primaryProvider && config.client !== null)
-    .map(([name, config]: [string, any]) => ({ name, ...config }))
-    .sort((a: any, b: any) => a.priority - b.priority)
-}
-
-// Extract country code from phone number
-const getCountryFromNumber = (phoneNumber: string): string => {
-  const cleaned = phoneNumber.replace(/\D/g, '')
-  
-  // Common country code mappings
-  if (cleaned.startsWith('1')) return 'US' // US/Canada
-  if (cleaned.startsWith('44')) return 'GB' // UK
-  if (cleaned.startsWith('49')) return 'DE' // Germany
-  if (cleaned.startsWith('33')) return 'FR' // France
-  if (cleaned.startsWith('81')) return 'JP' // Japan
-  if (cleaned.startsWith('86')) return 'CN' // China
-  if (cleaned.startsWith('91')) return 'IN' // India
-  
-  return 'UNKNOWN'
-}
-
-// Log call attempts for analytics
-const logCallAttempt = async (
-  to: string, 
-  provider: string, 
-  status: 'SUCCESS' | 'FAILOVER_SUCCESS' | 'FAILOVER_FAILED' | 'FAILED',
-  callSid?: string,
-  responseTime?: number,
-  failureReason?: string
-) => {
-  try {
-    console.log(`Call Analytics: ${to} via ${provider} - ${status}`, { callSid, responseTime })
-    
-    // TODO: Store in database for analytics once Prisma client is updated
-    // This will be implemented after restarting the dev server
-    
-    /*
-    const { prisma } = await import('@/lib/db')
-    await prisma.callAnalytics.create({
-      data: {
-        phoneNumber: to,
-        countryCode: getCountryFromNumber(to),
-        provider,
-        status,
-        callSid,
-        responseTime,
-        failureReason,
-      }
-    })
-    */
-    
+    console.log('✅ Call initiated successfully:', call.sid)
+    return call
   } catch (error) {
-    console.error('Failed to log call attempt:', error)
+    console.error('❌ Call initiation failed:', error)
+    throw error
   }
 }
+
+
 
 export const getCallStatus = async (callSid: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
-    }
     const call = await twilioClient.calls(callSid).fetch()
     return call
   } catch (error) {
@@ -300,9 +67,6 @@ export const getCallStatus = async (callSid: string) => {
 export const searchAvailableNumbers = async (countryCode: string, areaCode?: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
-    }
 
     let searchParams: any = {
       limit: 20,
@@ -349,9 +113,6 @@ export const searchAvailableNumbers = async (countryCode: string, areaCode?: str
 export const searchTollFreeNumbers = async (countryCode: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
-    }
 
     if (countryCode !== 'US' && countryCode !== 'CA') {
       throw new Error('Toll-free numbers currently only available for US and Canada')
@@ -389,9 +150,6 @@ export const searchTollFreeNumbers = async (countryCode: string) => {
 export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
-    }
 
     const purchasedNumber = await twilioClient.incomingPhoneNumbers.create({
       phoneNumber,
@@ -419,9 +177,6 @@ export const purchasePhoneNumber = async (phoneNumber: string, friendlyName?: st
 export const releasePhoneNumber = async (phoneNumberSid: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
-    }
     await twilioClient.incomingPhoneNumbers(phoneNumberSid).remove()
     return { success: true }
   } catch (error) {
@@ -434,12 +189,11 @@ export const releasePhoneNumber = async (phoneNumberSid: string) => {
 export const sendSMS = async (to: string, message: string, from?: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
+    const fromNumber = from || process.env.TWILIO_PHONE_NUMBER
+    
+    if (!fromNumber) {
+      throw new Error('No Twilio phone number configured')
     }
-
-    const providers = await getProviders()
-    const fromNumber = from || providers.twilio.phoneNumber
     
     const sms = await twilioClient.messages.create({
       to,
@@ -476,14 +230,15 @@ export const sendCallerIdVerificationSMS = async (to: string, verificationCode: 
 export const makeVerificationCall = async (to: string, verificationCode: string) => {
   try {
     const twilioClient = await getTwilioClient()
-    if (!twilioClient) {
-      throw new Error('Twilio client not available. Please check your configuration.')
+    const fromNumber = process.env.TWILIO_PHONE_NUMBER
+    
+    if (!fromNumber) {
+      throw new Error('No Twilio phone number configured')
     }
 
-    const providers = await getProviders()
     const call = await twilioClient.calls.create({
       to,
-      from: providers.twilio.phoneNumber,
+      from: fromNumber,
       twiml: `
         <Response>
           <Say voice="alice" language="en-US">
