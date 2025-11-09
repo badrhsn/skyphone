@@ -12,7 +12,7 @@ export async function GET() {
 
   try {
     // Only import and test Twilio at runtime
-    const { getTwilioClient } = await import('@/lib/twilio');
+    const { getTwilioClient } = await import('@/lib/twilio-simple');
     const client = await getTwilioClient();
     
     if (!client) {

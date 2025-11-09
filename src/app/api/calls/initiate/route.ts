@@ -4,11 +4,11 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
-  // During build, return a simple response
+  // Build-time guard - return immediately during build
   if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV) {
     return NextResponse.json({ 
       success: true,
-      message: "API route available - call functionality ready"
+      message: "API ready - call functionality available at runtime"
     });
   }
 
@@ -19,11 +19,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // For now, just return a success message without actual call logic
-    return NextResponse.json({
-      message: "Call initiation temporarily disabled during build fixes",
-      status: "pending"
-    });
+    const { to, from } = await request.json();
+
+    if (!to) {
+      return NextResponse.json(
+        { error: "Phone number is required" },
+        { status: 400 }
+      );
+    }
+
+    // Dynamic import to avoid build issues
+    const { makeCall } = await import('@/lib/twilio-simple');
+    
+    try {
+      const call = await makeCall(to);
+      
+      // Create call record in database
+      await prisma.call.create({
+        data: {
+          userId: session.user.id,
+          fromNumber: from || process.env.TWILIO_PHONE_NUMBER || '',
+          toNumber: to,
+          twilioSid: call.sid,
+          status: "INITIATED",
+          cost: 0,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Call initiated successfully",
+        callSid: call.sid,
+        status: call.status
+      });
+    } catch (twilioError: any) {
+      console.error('Twilio call error:', twilioError);
+      return NextResponse.json(
+        { error: twilioError.message || 'Failed to initiate call' },
+        { status: 500 }
+      );
+    }
 
   } catch (error) {
     console.error("Call initiation error:", error);
