@@ -71,19 +71,19 @@ export function useCall() {
       let Twilio: any = null;
       try {
         log('Loading Twilio Voice SDK...');
-        // Common package name used historically
-        const mod = await import('twilio-client');
+        // Try new package name first
+        const mod = await import('@twilio/voice-sdk');
         Twilio = (mod && (mod.default || mod));
-        logSuccess('Loaded twilio-client SDK');
+        logSuccess('Loaded @twilio/voice-sdk SDK');
       } catch (e) {
-        // try new package name
+        // Fallback to old package name
         try {
-          log('twilio-client not found, trying @twilio/voice-sdk...');
-          const mod2 = await import('@twilio/voice-sdk');
+          log('Trying twilio-client...');
+          const mod2 = await import('twilio-client');
           Twilio = (mod2 && (mod2.default || mod2));
-          logSuccess('Loaded @twilio/voice-sdk SDK');
+          logSuccess('Loaded twilio-client SDK');
         } catch (e2) {
-          logError('Twilio SDK not found. Please install twilio-client or @twilio/voice-sdk');
+          logError('Twilio SDK not found. Please install @twilio/voice-sdk');
           throw new Error('Twilio client SDK not installed');
         }
       }

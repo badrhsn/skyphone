@@ -234,11 +234,11 @@ export function useCall() {
       setLoadingStep('Loading WebRTC SDK...');
       let Twilio: any = null;
       try {
-        const mod = await import('twilio-client');
+        const mod = await import('@twilio/voice-sdk');
         Twilio = mod && (mod.default || mod);
       } catch (e) {
         try {
-          const mod2 = await import('@twilio/voice-sdk');
+          const mod2 = await import('twilio-client');
           Twilio = mod2 && (mod2.default || mod2);
         } catch (e2) {
           throw new Error('Twilio SDK not found. Please refresh the page.');
