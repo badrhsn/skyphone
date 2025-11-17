@@ -26,6 +26,7 @@ import {
   Globe
 } from "lucide-react";
 import { useModal } from "@/components/Modal";
+import useCall from '@/lib/useCall';
 
 
 interface CallRate {
@@ -119,6 +120,7 @@ export default function Dialer() {
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [rates, setRates] = useState<CallRate[]>([]);
   const [selectedRate, setSelectedRate] = useState<CallRate | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -149,6 +151,10 @@ export default function Dialer() {
       fetchContacts();
     }
   }, [status, router]);
+
+  // Initialize call hook
+  const callHook = useCall();
+  const { handleCall: hookHandleCall, handleHangUp: hookHangUp, toggleMute: hookToggleMute, acceptIncomingCall, rejectIncomingCall, callStatus: hookCallStatus, isIncomingCallRinging: hookIncomingRinging, isMuted: hookIsMuted, handleDigitInput: hookSendDigits, toggleRecording: hookToggleRecording, call: hookCall, CALL_STATUS } = callHook;
 
   // Handle phone number from URL params (e.g., from contacts)
   useEffect(() => {
@@ -263,6 +269,139 @@ export default function Dialer() {
     }
     return () => clearInterval(interval);
   }, [isCalling, callStatus]);
+
+  // SYNC: Real-time status sync from WebRTC hook to UI
+  useEffect(() => {
+    if (!hookCallStatus) return;
+
+    // Map hook statuses to UI statuses
+    const statusMap: { [key: string]: string } = {
+      'pending': 'initiating',
+      'ringing': 'calling',
+      'early': 'calling',
+      'established': 'answered',
+      'connected': 'answered',
+      'disconnected': 'ended',
+      'failed': 'failed',
+      'rejected': 'ended',
+      'busy': 'failed',
+    };
+
+    const mappedStatus = statusMap[hookCallStatus] || hookCallStatus;
+    setCallStatus(mappedStatus);
+
+    // Update isCalling based on call status
+    if (hookCallStatus === 'established' || hookCallStatus === 'connected') {
+      setIsCalling(true);
+    } else if (['disconnected', 'failed', 'rejected', 'busy'].includes(hookCallStatus)) {
+      setIsCalling(false);
+      setCallDuration(0);
+    }
+  }, [hookCallStatus]);
+
+  // BALANCE: Poll balance every 2 seconds during active calls
+  useEffect(() => {
+    let balanceInterval: NodeJS.Timeout;
+
+    if (isCalling && callStatus === "answered") {
+      balanceInterval = setInterval(async () => {
+        try {
+          const response = await fetch("/api/user/profile");
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error("Error fetching balance during call:", error);
+        }
+      }, 2000); // Poll every 2 seconds
+    }
+
+    return () => clearInterval(balanceInterval);
+  }, [isCalling, callStatus]);
+
+  // CONTACT: Auto-detect contact during calls
+  useEffect(() => {
+    const detectContact = async () => {
+      if (!isCalling || !phoneNumber) return;
+
+      try {
+        const response = await fetch(`/api/user/contacts/lookup?phone=${encodeURIComponent(phoneNumber)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.found) {
+            // Store contact info but don't change UI - contact name could be shown optionally
+            console.log('Contact detected during call:', data.contact);
+          }
+        }
+      } catch (error) {
+        console.error("Error detecting contact:", error);
+      }
+    };
+
+    detectContact();
+  }, [isCalling, phoneNumber]);
+
+  // RECORD: Save call history when call ends
+  useEffect(() => {
+    const recordCall = async () => {
+      // Record when: call was active, is now not active, and we have necessary data
+      if (!isCalling && callStatus === "ended" && phoneNumber && selectedRate && user) {
+        try {
+          const cost = (callDuration / 60) * selectedRate.rate;
+
+          // Try to detect contact
+          let contactId = null;
+          try {
+            const contactResponse = await fetch(`/api/user/contacts/lookup?phone=${encodeURIComponent(phoneNumber)}`);
+            if (contactResponse.ok) {
+              const contactData = await contactResponse.json();
+              if (contactData.found && contactData.contact?.id) {
+                contactId = contactData.contact.id;
+                // Update contact's last_called_at
+                await fetch(`/api/user/contacts/lookup`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ phoneNumber, contactId }),
+                });
+              }
+            }
+          } catch (error) {
+            console.error("Error updating contact last_called_at:", error);
+          }
+
+          // Record the call via the transactions endpoint
+          const response = await fetch("/api/user/transactions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "call",
+              toNumber: phoneNumber,
+              fromNumber: selectedCallerId,
+              country: selectedCountry.name,
+              duration: callDuration,
+              cost: cost,
+              status: "COMPLETED",
+              contactId: contactId,
+              callerIdType: callerIdOption,
+            }),
+          });
+
+          if (response.ok) {
+            console.log("Call recorded successfully");
+            // Refresh user data to update balance
+            fetchUserData();
+          } else {
+            console.error("Failed to record call");
+          }
+        } catch (error) {
+          console.error("Error recording call:", error);
+        }
+      }
+    };
+
+    recordCall();
+  }, [isCalling, callStatus, phoneNumber, selectedRate, selectedCountry, selectedCallerId, callerIdOption, callDuration, user]);
 
   const fetchRates = async () => {
     try {
@@ -614,60 +753,50 @@ export default function Dialer() {
         fromNumber = selectedCallerId;
       }
 
-      const response = await fetch("/api/calls/initiate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: phoneNumber,
-          from: fromNumber,
-          callerIdType: callerIdOption,
-          callerIdInfo: callerInfo,
-        }),
-      });
+      // Use WebRTC via Twilio Device - pass params with dialed number
+      const params = {
+        To: phoneNumber,
+        From: fromNumber,
+        callerIdType: callerIdOption,
+        callerIdInfo: JSON.stringify(callerInfo),
+        PhoneNumber: phoneNumber, // For tracking
+        Country: selectedCountry.name, // For tracking
+        Rate: selectedRate.rate, // For cost calculation
+      };
 
-      if (response.ok) {
-        setCallStatus("ringing");
-        // Simulate call progression
-        setTimeout(() => {
-          setCallStatus("answered");
-          // Start billing simulation
-          const interval = setInterval(() => {
-            if (user) {
-              const currentCost = (callDuration / 60) * selectedRate.rate;
-              if (user.balance - currentCost <= 0) {
-                showError("Call Ended", "Call ended: Insufficient balance");
-                endCall();
-                clearInterval(interval);
-              }
-            }
-          }, 10000); // Check every 10 seconds
-        }, 3000);
-      } else {
-        const errorData = await response.json();
-        showError("Call Failed", `Call failed: ${errorData.error || "Unknown error"}`);
-        setCallStatus("failed");
-        setIsCalling(false);
-      }
+      // Call the hook's handleCall method
+      await hookHandleCall(params);
+      setCallStatus("calling"); // Will sync from hook via useEffect
     } catch (error) {
       console.error("Call initiation error:", error);
-      showError("Call Failed", "Call failed: Network error. Please try again.");
+      showError("Call Failed", `Call failed: ${error instanceof Error ? error.message : 'WebRTC error'}. Please try again.`);
       setCallStatus("failed");
       setIsCalling(false);
     }
   };
 
   const endCall = async () => {
-    setIsCalling(false);
-    setCallStatus("");
-    setCallDuration(0);
+    // Use hook to hang up
+    try {
+      hookHangUp();
+      // Set status to ended (will trigger recording via useEffect)
+      setCallStatus("ended");
+    } catch (err) {
+      console.error('Hangup error', err);
+    }
+    // Don't immediately set isCalling to false - let the status sync handle it
     // Keep the number for easy redial
-    setSelectedRate(null);
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    // delegate to hook
+    try {
+      hookToggleMute();
+      // UI state will be synced from hook events; optimistic toggle for responsive feel
+      setIsMuted(!isMuted);
+    } catch (err) {
+      console.error('Toggle mute failed', err);
+    }
   };
 
   const toggleSpeaker = () => {
@@ -706,6 +835,15 @@ export default function Dialer() {
               )}
             </div>
 
+              {/* Incoming call banner */}
+              {hookIncomingRinging && (
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-white/90 px-4 py-3 rounded-xl shadow-lg border border-gray-200 flex items-center space-x-3 z-50">
+                  <div className="text-sm font-medium">Incoming call</div>
+                  <button onClick={() => acceptIncomingCall()} className="bg-green-500 text-white px-3 py-1 rounded-lg">Accept</button>
+                  <button onClick={() => rejectIncomingCall()} className="bg-red-500 text-white px-3 py-1 rounded-lg">Reject</button>
+                </div>
+              )}
+
             {/* Call Duration */}
             <div className="text-4xl sm:text-6xl font-bold mb-8 sm:mb-12 text-gray-900 bg-[#e6fbff]/60 backdrop-blur-sm rounded-2xl px-6 sm:px-8 py-3 sm:py-4 shadow-2xl">
               {callStatus === "answered" ? formatDuration(callDuration) : ""}
@@ -730,6 +868,21 @@ export default function Dialer() {
           {/* iPhone-style Call Controls with Skype blue */}
           <div className="pb-8 sm:pb-12 px-4 sm:px-8">
             <div className="flex justify-center items-center space-x-8 sm:space-x-16">
+                {/* Recording toggle */}
+                <button
+                  onClick={async () => {
+                    try {
+                      // Attempt to toggle recording via hook
+                      await hookToggleRecording(hookCall?.call_twilio_sid);
+                      setIsRecording(prev => !prev);
+                    } catch (err) {
+                      console.error('Recording toggle failed', err);
+                    }
+                  }}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-95 border-2 sm:border-4 border-white touch-manipulation ${isRecording ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700'}`}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V8a3 3 0 0 0-6 0v3a3 3 0 0 0 3 3z"></path><path d="M19 11v1a7 7 0 0 1-7 7 7 7 0 0 1-7-7v-1"></path></svg>
+                </button>
               <button
                 onClick={toggleMute}
                 className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-95 border-2 sm:border-4 border-white touch-manipulation ${
@@ -1214,92 +1367,80 @@ export default function Dialer() {
             <div className="grid grid-cols-3 gap-4">
               {/* Row 1: 1, 2, 3 */}
               <button
-                onClick={() => handleNumberInput("1")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("1") : handleNumberInput("1")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">1</span>
               </button>
               <button
-                onClick={() => handleNumberInput("2")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("2") : handleNumberInput("2")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">2</span>
               </button>
               <button
-                onClick={() => handleNumberInput("3")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("3") : handleNumberInput("3")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">3</span>
               </button>
 
               {/* Row 2: 4, 5, 6 */}
               <button
-                onClick={() => handleNumberInput("4")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("4") : handleNumberInput("4")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">4</span>
               </button>
               <button
-                onClick={() => handleNumberInput("5")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("5") : handleNumberInput("5")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">5</span>
               </button>
               <button
-                onClick={() => handleNumberInput("6")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("6") : handleNumberInput("6")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">6</span>
               </button>
 
               {/* Row 3: 7, 8, 9 */}
               <button
-                onClick={() => handleNumberInput("7")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("7") : handleNumberInput("7")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">7</span>
               </button>
               <button
-                onClick={() => handleNumberInput("8")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("8") : handleNumberInput("8")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">8</span>
               </button>
               <button
-                onClick={() => handleNumberInput("9")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("9") : handleNumberInput("9")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">9</span>
               </button>
 
               {/* Row 4: *, 0, # */}
               <button
-                onClick={() => handleNumberInput("*")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("*") : handleNumberInput("*")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">*</span>
               </button>
               <button
-                onClick={() => handleNumberInput("0")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("0") : handleNumberInput("0")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">0</span>
               </button>
               <button
-                onClick={() => handleNumberInput("#")}
-                disabled={isCalling}
-                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200 disabled:opacity-50"
+                onClick={() => isCalling ? hookSendDigits("#") : handleNumberInput("#")}
+                className="w-16 h-16 mx-auto rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 flex items-center justify-center shadow-lg border border-gray-200"
               >
                 <span className="text-2xl font-light text-gray-800">#</span>
               </button>

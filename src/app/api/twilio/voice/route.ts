@@ -11,13 +11,26 @@ export async function POST(request: NextRequest) {
     const to = formData.get("To") as string;
     const from = formData.get("From") as string;
 
-    console.log("Twilio webhook received:", {
+    console.log("🔔 [Twilio Voice Webhook] Incoming request:", {
       callSid,
       callStatus,
       callDuration,
       to,
       from
     });
+
+    // Validate required fields for Dial
+    if (!to) {
+      console.error('❌ [Twilio Voice Webhook] Missing "To" parameter - call cannot be routed');
+      const errorTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="alice">Error: Invalid call parameters. No destination provided.</Say>
+</Response>`;
+      return new NextResponse(errorTwiml, {
+        status: 400,
+        headers: { "Content-Type": "text/xml" },
+      });
+    }
 
     // Find the call record in database
     const call = await prisma.call.findFirst({
@@ -68,6 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return TwiML to handle the call
+    console.log(`✅ [Twilio Voice Webhook] Generating TwiML to dial: ${to}`);
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="alice">Hello! Your call is being connected through Yadaphone.</Say>
@@ -76,17 +90,30 @@ export async function POST(request: NextRequest) {
   </Dial>
 </Response>`;
 
+    console.log(`📤 [Twilio Voice Webhook] Returning TwiML (length: ${twiml.length} bytes)`);
     return new NextResponse(twiml, {
       headers: {
         "Content-Type": "text/xml",
       },
     });
   } catch (error) {
-    console.error("Twilio webhook error:", error);
+    console.error("❌ [Twilio Voice Webhook] Error handling request:", error);
     
     // Get form data again for error case
     const formData = await request.formData();
     const to = formData.get("To") as string;
+    
+    if (!to) {
+      console.error("❌ [Twilio Voice Webhook] No destination in error recovery");
+      const fallbackTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="alice">Service error. Please try again later.</Say>
+</Response>`;
+      return new NextResponse(fallbackTwiml, {
+        status: 500,
+        headers: { "Content-Type": "text/xml" },
+      });
+    }
     
     // Return basic TwiML even if there's an error
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -95,10 +122,39 @@ export async function POST(request: NextRequest) {
   <Dial timeout="30">${to || "unknown"}</Dial>
 </Response>`;
 
+    console.log(`📤 [Twilio Voice Webhook] Error recovery TwiML sent for: ${to}`);
     return new NextResponse(twiml, {
       headers: {
         "Content-Type": "text/xml",
       },
     });
   }
+}
+
+// GET endpoint for diagnostic purposes - verify the webhook is reachable
+export async function GET(request: NextRequest) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const twimlAppSid = process.env.TWIML_APP_SID;
+  const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+
+  console.log("🔍 [Twilio Voice Webhook] GET Diagnostic Check");
+  console.log({
+    webhookUrl: `${appUrl}/api/twilio/voice`,
+    twimlAppSid,
+    twilioAccountSid: twilioAccountSid ? `${twilioAccountSid.substring(0, 4)}...` : 'missing',
+    timestamp: new Date().toISOString(),
+  });
+
+  return NextResponse.json({
+    status: "ok",
+    message: "Twilio Voice webhook is reachable",
+    webhookUrl: `${appUrl}/api/twilio/voice`,
+    twimlAppSid,
+    configured: {
+      appUrl: !!appUrl,
+      twimlAppSid: !!twimlAppSid,
+      accountSid: !!twilioAccountSid,
+    },
+    timestamp: new Date().toISOString(),
+  });
 }
