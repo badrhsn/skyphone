@@ -69,8 +69,10 @@ export async function GET() {
     log('Generated identity', { identity });
 
     // Create token with 1 hour TTL
-    const token = new AccessToken(accountSid, apiKeySid, apiKeySecret, { ttl: 3600 });
-    token.identity = identity;
+    const token = new AccessToken(accountSid, apiKeySid, apiKeySecret, { 
+      ttl: 3600,
+      identity: identity
+    });
     log('AccessToken created');
 
     // Add VoiceGrant with outgoing and incoming capabilities
