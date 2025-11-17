@@ -82,11 +82,18 @@ export async function POST(request: NextRequest) {
 
     // Return TwiML to handle the call
     console.log(`✅ [Twilio Voice Webhook] Generating TwiML to dial: ${to}`);
+    
+    // Ensure the number has the proper format for dialing
+    let dialNumber = to;
+    if (!to.startsWith('+')) {
+      // If no + prefix, add it (assuming international format)
+      dialNumber = `+${to.replace(/\D/g, '')}`;
+    }
+    
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="alice">Hello! Your call is being connected through Yadaphone.</Say>
   <Dial timeout="30" record="record-from-answer" recordingStatusCallback="${process.env.NEXT_PUBLIC_APP_URL}/api/twilio/recording">
-    ${to}
+    <Number>${dialNumber}</Number>
   </Dial>
 </Response>`;
 
@@ -116,10 +123,16 @@ export async function POST(request: NextRequest) {
     }
     
     // Return basic TwiML even if there's an error
+    let dialNumber = to || "unknown";
+    if (dialNumber !== "unknown" && !dialNumber.startsWith('+')) {
+      dialNumber = `+${dialNumber.replace(/\D/g, '')}`;
+    }
+    
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="alice">Your call is being connected.</Say>
-  <Dial timeout="30">${to || "unknown"}</Dial>
+  <Dial timeout="30">
+    <Number>${dialNumber}</Number>
+  </Dial>
 </Response>`;
 
     console.log(`📤 [Twilio Voice Webhook] Error recovery TwiML sent for: ${to}`);

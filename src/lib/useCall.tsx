@@ -138,7 +138,7 @@ export function useCall() {
     }
   };
 
-  const handleCall = async (params?: { To?: string; From?: string }) => {
+  const handleCall = async (params?: { To?: string; From?: string; callerIdType?: string; callerIdInfo?: string; PhoneNumber?: string; Country?: string; Rate?: number }) => {
     try {
       setIsLoading(true);
       setCallStatus(CALL_STATUS.CALLING);
@@ -150,8 +150,31 @@ export function useCall() {
         throw new Error('Device not initialized');
       }
 
+      // Validate required parameters
+      if (!params?.To) {
+        throw new Error('Destination phone number (To) is required');
+      }
+
       log('Connecting to destination', params);
-      const connection = dev.connect({ params: params || {} });
+      
+      // Twilio Device.connect() expects params object
+      const callParams = {
+        To: params.To,
+        From: params.From || '+12293983710',
+        // Pass other tracking parameters
+        callerIdType: params.callerIdType,
+        PhoneNumber: params.PhoneNumber,
+        Country: params.Country,
+        Rate: params.Rate?.toString(),
+      };
+
+      log('Call parameters', callParams);
+      const connection = dev.connect(callParams);
+      
+      if (!connection) {
+        throw new Error('Failed to create connection');
+      }
+
       setCall(connection);
 
       // attach listeners if present
