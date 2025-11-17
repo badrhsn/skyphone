@@ -16,10 +16,10 @@ export async function GET() {
   log('Token endpoint called');
   
   try {
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const apiKeySid = process.env.TWILIO_API_KEY_SID;
-    const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
-    const twimlAppSid = process.env.TWIML_APP_SID;
+    const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+    const apiKeySid = process.env.TWILIO_API_KEY_SID?.trim();
+    const apiKeySecret = process.env.TWILIO_API_KEY_SECRET?.trim();
+    const twimlAppSid = process.env.TWIML_APP_SID?.trim();
 
     // Validate all required env vars
     if (!accountSid) {
