@@ -834,9 +834,9 @@ export default function Dialer() {
       <NetworkStatusBanner />
       {isCalling ? (
         // Full Screen Call Interface with iPhone shadows and Skype green  
-  <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-[#f3fbff] to-[#e6fbff] rounded-lg sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white">
+  <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-[#f3fbff] to-[#e6fbff] rounded-lg sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white overflow-hidden">
           {/* Call Status Header */}
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8">
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 overflow-y-auto">
             <div className="text-center mb-6 sm:mb-8 bg-white/20 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl border border-white/30">
               <div className="text-xs sm:text-sm text-gray-600 mb-2 uppercase tracking-wide font-bold">
                 {callStatus}
@@ -896,8 +896,8 @@ export default function Dialer() {
           </div>
 
           {/* iPhone-style Call Controls with Pill-Shaped Buttons */}
-          <div className="pb-8 sm:pb-12 px-4 sm:px-8">
-            <div className="flex justify-center items-center gap-4 sm:gap-6">
+          <div className="flex-shrink-0 pb-6 sm:pb-8 px-4 sm:px-6 bg-gradient-to-b from-transparent to-[#e6fbff]">
+            <div className="flex justify-center items-center gap-2 sm:gap-3 flex-wrap">
               {/* Recording toggle - smaller pill button */}
               <button
                 onClick={async () => {
@@ -909,54 +909,54 @@ export default function Dialer() {
                     console.error('Recording toggle failed', err);
                   }
                 }}
-                className={`px-6 sm:px-8 py-3 sm:py-4 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-xl active:scale-95 border-2 border-white touch-manipulation font-semibold text-sm sm:text-base ${isRecording ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full flex items-center justify-center gap-1 sm:gap-2 transition-all duration-300 shadow-lg active:scale-95 border border-white touch-manipulation font-semibold text-xs sm:text-sm ${isRecording ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V8a3 3 0 0 0-6 0v3a3 3 0 0 0 3 3z"></path><path d="M19 11v1a7 7 0 0 1-7 7 7 7 0 0 1-7-7v-1"></path></svg>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V8a3 3 0 0 0-6 0v3a3 3 0 0 0 3 3z"></path><path d="M19 11v1a7 7 0 0 1-7 7 7 7 0 0 1-7-7v-1"></path></svg>
                 <span className="hidden sm:inline">Record</span>
               </button>
 
               {/* Microphone toggle - pill button */}
               <button
                 onClick={toggleMute}
-                className={`px-8 sm:px-10 py-4 sm:py-5 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-xl active:scale-95 border-2 border-white touch-manipulation font-semibold text-base sm:text-lg ${
+                className={`px-6 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-1 sm:gap-2 transition-all duration-300 shadow-lg active:scale-95 border border-white touch-manipulation font-semibold text-xs sm:text-sm ${
                   isMuted 
                     ? "bg-red-500 text-white hover:bg-red-600" 
                     : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}
               >
-                {isMuted ? <MicOff className="h-6 w-6 sm:h-7 sm:w-7" /> : <Mic className="h-6 w-6 sm:h-7 sm:w-7" />}
+                {isMuted ? <MicOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Mic className="h-5 w-5 sm:h-6 sm:w-6" />}
                 <span>{isMuted ? "Muted" : "Mic"}</span>
               </button>
 
               {/* End Call - large red pill button (center) */}
               <button
                 onClick={endCall}
-                className="px-10 sm:px-14 py-4 sm:py-5 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 transition-all duration-300 shadow-2xl hover:shadow-red-500/50 active:scale-95 border-2 border-white touch-manipulation font-bold text-lg sm:text-xl"
+                className="px-8 sm:px-10 py-2 sm:py-3 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-1 sm:gap-2 transition-all duration-300 shadow-xl hover:shadow-red-500/50 active:scale-95 border border-white touch-manipulation font-bold text-sm sm:text-base"
               >
-                <PhoneOff className="h-7 w-7 sm:h-8 sm:w-8" />
+                <PhoneOff className="h-5 w-5 sm:h-6 sm:w-6" />
                 <span>End</span>
               </button>
 
               {/* Speaker toggle - pill button */}
               <button
                 onClick={toggleSpeaker}
-                className={`px-8 sm:px-10 py-4 sm:py-5 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-xl active:scale-95 border-2 border-white touch-manipulation font-semibold text-base sm:text-lg ${
+                className={`px-6 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-1 sm:gap-2 transition-all duration-300 shadow-lg active:scale-95 border border-white touch-manipulation font-semibold text-xs sm:text-sm ${
                   isSpeakerOn 
                     ? "bg-blue-500 text-white hover:bg-blue-600" 
                     : "bg-blue-400 text-white hover:bg-blue-500"
                 }`}
               >
-                {isSpeakerOn ? <Volume2 className="h-6 w-6 sm:h-7 sm:w-7" /> : <VolumeX className="h-6 w-6 sm:h-7 sm:w-7" />}
-                <span>{isSpeakerOn ? "Speaker" : "Mute"}</span>
+                {isSpeakerOn ? <Volume2 className="h-5 w-5 sm:h-6 sm:w-6" /> : <VolumeX className="h-5 w-5 sm:h-6 sm:w-6" />}
+                <span>{isSpeakerOn ? "Spk" : "Vol"}</span>
               </button>
 
               {/* Additional control - smaller pill button */}
               <button
                 type="button"
                 onClick={() => setShowCallerOptions(!showCallerOptions)}
-                className="px-6 sm:px-8 py-3 sm:py-4 rounded-full bg-white text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 transition-all duration-300 shadow-xl active:scale-95 border-2 border-white touch-manipulation font-semibold text-sm sm:text-base"
+                className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-1 transition-all duration-300 shadow-lg active:scale-95 border border-white touch-manipulation font-semibold text-xs sm:text-sm"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
               </button>
             </div>
           </div>
