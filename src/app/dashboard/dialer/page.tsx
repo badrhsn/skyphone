@@ -47,6 +47,10 @@ interface User {
 
 
 import { parsePhoneNumberFromString, getCountryCallingCode, getCountries } from 'libphonenumber-js';
+import NetworkStatusBanner from '@/components/NetworkStatusBanner';
+import RealTimeStatusIndicator from '@/components/RealTimeStatusIndicator';
+import LiveCostTracker from '@/components/LiveCostTracker';
+import LowBalanceWarning from '@/components/LowBalanceWarning';
 
 // Function to detect country from phone number using libphonenumber-js
 const detectCountryFromDialingCode = (phoneNumber: string): string | null => {
@@ -826,6 +830,8 @@ export default function Dialer() {
 
   return (
   <div className="min-h-screen bg-gradient-to-br from-[#f3fbff] to-white flex items-center justify-center p-4">
+      {/* Global network banner */}
+      <NetworkStatusBanner />
       {isCalling ? (
         // Full Screen Call Interface with iPhone shadows and Skype green  
   <div className="w-full max-w-md min-h-screen flex flex-col bg-gradient-to-br from-[#f3fbff] to-[#e6fbff] rounded-lg sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white">
@@ -844,6 +850,20 @@ export default function Dialer() {
                 </div>
               )}
             </div>
+
+              {/* Live cost tracker during active calls */}
+              <div className="px-4 w-full max-w-md">
+                <LiveCostTracker
+                  callDuration={callDuration}
+                  ratePerMinute={selectedRate ? selectedRate.rate : 0}
+                  isActive={isCalling && callStatus === 'answered'}
+                  userBalance={user?.balance ?? 0}
+                  lowBalanceThreshold={1.0}
+                  onLowBalance={(isLow) => {
+                    // optional: additional handling when low
+                  }}
+                />
+              </div>
 
               {/* Incoming call banner */}
               {hookIncomingRinging && (
@@ -947,7 +967,9 @@ export default function Dialer() {
           {/* Status and Balance */}
           <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-3 sm:pb-4">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#00aff0] rounded-full animate-pulse shadow-lg"></div>
+              <div className="flex items-center gap-3">
+                <RealTimeStatusIndicator callStatus={callStatus} isCalling={isCalling} />
+              </div>
               <button 
                 onClick={() => router.push("/dashboard/add-credits")}
                 className="bg-gradient-to-r from-[#00aff0] to-[#0099d6] hover:from-[#0099d6] hover:to-[#0086c2] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation"
@@ -963,6 +985,9 @@ export default function Dialer() {
               </div>
             </div>
           </div>
+
+          {/* Low balance warning (threshold $5) - shows inline or modal during call */}
+          <LowBalanceWarning balance={user?.balance ?? 0} threshold={5} isDuringCall={isCalling} />
 
           {/* Clean Phone Input Design (matching home page) */}
           <div className="px-4 sm:px-6 mb-6 relative">

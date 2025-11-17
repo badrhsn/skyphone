@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
-import { Phone, MessageCircle, HelpCircle, Download, Menu, X, ChevronDown, DollarSign, Globe, Settings, Sun, Moon, User } from "lucide-react";
+import { Phone, MessageCircle, HelpCircle, Download, Menu, X, ChevronDown, DollarSign, Globe, Settings, Sun, Moon, User, BarChart3 } from "lucide-react";
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -83,6 +83,22 @@ export default function Header() {
                 >
                   <Phone className="h-4 w-4" />
                   <span>Make a Call</span>
+                </Link>
+                
+                <Link 
+                  href="/dashboard/status" 
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2 cursor-pointer"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Status Monitor</span>
+                </Link>
+                
+                <Link 
+                  href="/dashboard/transactions" 
+                  className="text-gray-700 hover:text-[#00aff0] hover:underline font-medium flex items-center space-x-2 cursor-pointer"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  <span>Transactions</span>
                 </Link>
                 
                 <Link 
@@ -234,6 +250,24 @@ export default function Header() {
                 >
                   <Phone className="h-4 w-4" />
                   <span>Make a Call</span>
+                </Link>
+                
+                <Link 
+                  href="/dashboard/status" 
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Status Monitor</span>
+                </Link>
+                
+                <Link 
+                  href="/dashboard/transactions" 
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-[#f7fbff] hover:text-[#00aff0] transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <DollarSign className="h-4 w-4" />
+                  <span>Transactions</span>
                 </Link>
                 
                 <Link 
