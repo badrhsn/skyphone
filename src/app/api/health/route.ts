@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
       'NEXTAUTH_URL',
       'NEXTAUTH_SECRET',
       'TWILIO_ACCOUNT_SID',
-      'TWILIO_AUTH_TOKEN'
+      'TWILIO_API_KEY_SID',
+      'TWILIO_API_KEY_SECRET'
     ]
     
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     
     // Check provider availability
     const providers = {
-      twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN)
+      twilio: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_API_KEY_SID && process.env.TWILIO_API_KEY_SECRET)
     }
     
     return NextResponse.json({
