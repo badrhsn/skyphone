@@ -23,10 +23,11 @@ export function LowBalanceWarning({
   isDuringCall = false,
 }: LowBalanceWarningProps) {
   const [isVisible, setIsVisible] = useState(balance < threshold);
-  const [hasError, setHasError] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     setIsVisible(balance < threshold);
+    setIsClosing(false);
   }, [balance, threshold]);
 
   if (!isVisible) {
@@ -34,15 +35,19 @@ export function LowBalanceWarning({
   }
 
   const handleClose = () => {
-    setIsVisible(false);
-    onClose?.();
+    setIsClosing(true);
+    // Close immediately for snappy UX
+    setTimeout(() => {
+      setIsVisible(false);
+      onClose?.();
+    }, 150);
   };
 
   const isVeryLow = balance < 0.5;
   const isEmpty = balance <= 0;
 
   return (
-    <div className={`fixed inset-0 ${isDuringCall ? 'z-30' : 'z-50'} flex items-center justify-center p-4`}>
+    <div className={`fixed inset-0 ${isDuringCall ? 'z-30' : 'z-50'} flex items-center justify-center p-4 transition-opacity duration-150 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 transition-opacity"
@@ -50,7 +55,7 @@ export function LowBalanceWarning({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full">
+      <div className={`relative bg-white rounded-2xl shadow-2xl max-w-sm w-full transition-all duration-150 ${isClosing ? 'scale-95' : 'scale-100'}`}>
         {/* Close Button */}
         <button
           onClick={handleClose}
@@ -119,29 +124,6 @@ export function LowBalanceWarning({
                   ${(threshold - balance).toFixed(2)}+
                 </span>
               </div>
-            </div>
-          </div>
-
-          {/* Suggested Packages */}
-          <div className="mb-6">
-            <p className="text-xs font-semibold text-gray-600 mb-2">Quick Add:</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { amount: 5, savings: 0 },
-                { amount: 10, savings: 0 },
-                { amount: 25, savings: 2.50 },
-              ].map((pkg) => (
-                <div key={pkg.amount} className="text-center">
-                  <div className="bg-[#f3fbff] border-2 border-[#e6fbff] rounded-lg p-2">
-                    <div className="text-sm font-bold text-[#00aff0]">${pkg.amount}</div>
-                    {pkg.savings > 0 && (
-                      <div className="text-xs text-green-600 font-semibold">
-                        Save ${pkg.savings}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
